@@ -2,7 +2,7 @@
 
 <img src="icons/icon128.png" width="64" align="right" alt="">
 
-**Titl** (this repo: `chrome-transcriber`) is a Chrome extension that shows subtitles on any YouTube video, transcribed on your own Mac by [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It's built for Serbian and works with any language Whisper supports. Audio never leaves your machine: it only goes to `127.0.0.1`.
+**Titl** is a Chrome extension that shows subtitles on any YouTube video, transcribed on your own Mac by [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It's built for Serbian and works with any language Whisper supports. Audio never leaves your machine: it only goes to `127.0.0.1`.
 
 ## Features
 
@@ -211,7 +211,7 @@ After editing, reload the extension in `chrome://extensions`. If you changed `co
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/rawmind/chrome-transcriber/releases).
+See [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/rawmind/titl/releases).
 
 ## Privacy
 

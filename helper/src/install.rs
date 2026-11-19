@@ -238,7 +238,7 @@ fn print_extension_steps(dir: Option<&Path>, ids: &[String]) {
                 extension::reveal(dir);
             }
         }
-        None => println!("       the folder containing manifest.json from https://github.com/rawmind/chrome-transcriber"),
+        None => println!("       the folder containing manifest.json from https://github.com/rawmind/titl"),
     }
     println!("Then run `chrome-transcriber-helper status` to check.");
 }

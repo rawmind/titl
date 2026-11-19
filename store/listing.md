@@ -38,13 +38,13 @@ REQUIRES A FREE LOCAL HELPER
 Titl needs whisper.cpp and a small helper program on your computer that starts it automatically:
   macOS:   brew install rawmind/tap/chrome-transcriber
            chrome-transcriber-helper install
-  Others:  see https://github.com/rawmind/chrome-transcriber
+  Others:  see https://github.com/rawmind/titl
 The helper finds whisper.cpp, downloads a model if needed (about 550 MB) and connects it to Chrome.
 
 HOW TO USE
 Open a YouTube video, click the Titl icon, then Start subtitles. For the first few seconds the video pauses while subtitles are prepared.
 
-Open source (MIT): https://github.com/rawmind/chrome-transcriber
+Open source (MIT): https://github.com/rawmind/titl
 
 Titl is not affiliated with or endorsed by Google or YouTube. Google Chrome™ and YouTube™ are trademarks of Google LLC.
 ```
@@ -60,8 +60,8 @@ Titl is not affiliated with or endorsed by Google or YouTube. Google Chrome™ a
   5. The helper's `install` output in Terminal
 
 **Additional fields**
-- Homepage URL: https://github.com/rawmind/chrome-transcriber
-- Support URL: https://github.com/rawmind/chrome-transcriber/issues
+- Homepage URL: https://github.com/rawmind/titl
+- Support URL: https://github.com/rawmind/titl/issues
 
 ## Privacy practices
 
@@ -89,7 +89,7 @@ Titl is not affiliated with or endorsed by Google or YouTube. Google Chrome™ a
 - I do not use or transfer user data for purposes that are unrelated to my item's single purpose
 - I do not use or transfer user data to determine creditworthiness or for lending purposes
 
-**Privacy policy URL:** https://github.com/rawmind/chrome-transcriber/blob/master/PRIVACY.md
+**Privacy policy URL:** https://github.com/rawmind/titl/blob/master/PRIVACY.md
 
 ## Notes for reviewers ("Test instructions")
 

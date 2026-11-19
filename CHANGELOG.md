@@ -2,7 +2,7 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
-## [0.1.3](https://github.com/rawmind/chrome-transcriber/releases/tag/v0.1.3) - 2026-11-20
+## [0.1.3](https://github.com/rawmind/titl/releases/tag/v0.1.3) - 2026-11-20
 
 Prepares the extension for the Chrome Web Store under its new name, **Titl**.
 
@@ -23,7 +23,7 @@ brew upgrade rawmind/tap/chrome-transcriber
 ```
 Then reload the extension in `chrome://extensions`.
 
-## [0.1.2](https://github.com/rawmind/chrome-transcriber/releases/tag/v0.1.2) - 2026-11-20
+## [0.1.2](https://github.com/rawmind/titl/releases/tag/v0.1.2) - 2026-11-20
 
 Makes the last setup step obvious on a fresh machine: `chrome-transcriber-helper install` registers the helper, but Chrome only adds extensions from the Web Store automatically, so the extension still has to be loaded once by hand.
 
@@ -40,7 +40,7 @@ Makes the last setup step obvious on a fresh machine: `chrome-transcriber-helper
 brew upgrade rawmind/tap/chrome-transcriber
 ```
 
-## [0.1.1](https://github.com/rawmind/chrome-transcriber/releases/tag/v0.1.1) - 2026-11-19
+## [0.1.1](https://github.com/rawmind/titl/releases/tag/v0.1.1) - 2026-11-19
 
 ### Fixed
 - Auto-start broke after `brew upgrade whisper-cpp`. The helper saved `whisper-server` as Homebrew's versioned path (`Cellar/whisper.cpp/<version>/…`), which is deleted on upgrade. It now keeps the stable `/opt/homebrew/bin/whisper-server` link. Users on 0.1.0 should upgrade and run `chrome-transcriber-helper install` once.
@@ -51,7 +51,7 @@ brew upgrade rawmind/tap/chrome-transcriber
 chrome-transcriber-helper install
 ```
 
-## [0.1.0](https://github.com/rawmind/chrome-transcriber/releases/tag/v0.1.0) - 2026-11-19
+## [0.1.0](https://github.com/rawmind/titl/releases/tag/v0.1.0) - 2026-11-19
 
 First release. YouTube subtitles in Chrome, transcribed on your own machine by [whisper.cpp](https://github.com/ggml-org/whisper.cpp). Audio never leaves your computer. Built for Serbian, and works with any language Whisper supports.
 
