@@ -33,6 +33,10 @@ fn absolute(path: &Path) -> Result<PathBuf, String> {
     fs::canonicalize(path).map_err(|e| format!("{}: {e}", path.display()))
 }
 
+fn stable(path: &Path) -> Result<PathBuf, String> {
+    std::path::absolute(path).map_err(|e| format!("{}: {e}", path.display()))
+}
+
 fn whisper_roots() -> Vec<PathBuf> {
     let home = paths::home();
     vec![home.join("projects/whisper.cpp"), home.join("whisper.cpp"), home.join("src/whisper.cpp")]
@@ -40,7 +44,7 @@ fn whisper_roots() -> Vec<PathBuf> {
 
 pub fn find_server(explicit: Option<&Path>) -> Result<PathBuf, String> {
     if let Some(path) = explicit {
-        return if path.is_file() { absolute(path) } else { Err(format!("not a file: {}", path.display())) };
+        return if path.is_file() { stable(path) } else { Err(format!("not a file: {}", path.display())) };
     }
     let name = paths::exe_name("whisper-server");
     let mut candidates: Vec<PathBuf> = env::var_os("PATH")
@@ -56,7 +60,7 @@ pub fn find_server(explicit: Option<&Path>) -> Result<PathBuf, String> {
     candidates
         .into_iter()
         .find(|p| p.is_file())
-        .map(|p| absolute(&p))
+        .map(|p| stable(&p))
         .unwrap_or_else(|| {
             Err("whisper-server not found. Install whisper.cpp (`brew install whisper-cpp`, or build \
                  https://github.com/ggml-org/whisper.cpp) or pass --server PATH"
@@ -145,7 +149,7 @@ fn register(exe: &Path) -> Result<Vec<&'static str>, String> {
 pub fn install(opts: Options) -> Result<(), String> {
     let server = find_server(opts.server.as_deref())?;
     let model = match (opts.model, opts.download_model) {
-        (Some(path), _) => absolute(&path)?,
+        (Some(path), _) => stable(&path)?,
         (None, Some(name)) => model::download(&name)?,
         (None, None) => match find_model(&server) {
             Some(path) => path,
@@ -250,6 +254,21 @@ mod tests {
             Some(PathBuf::from("/opt/homebrew/opt/chrome-transcriber/bin/chrome-transcriber-helper"))
         );
         assert_eq!(homebrew_opt_path(Path::new("/usr/local/bin/chrome-transcriber-helper")), None);
+    }
+
+    #[test]
+    fn server_path_keeps_symlinks_so_upgrades_do_not_break_it() {
+        let dir = std::env::temp_dir().join(format!("ct-test-{}", std::process::id()));
+        let cellar = dir.join("Cellar/whisper.cpp/1.0/bin");
+        fs::create_dir_all(&cellar).unwrap();
+        fs::write(cellar.join("whisper-server"), "").unwrap();
+        fs::create_dir_all(dir.join("bin")).unwrap();
+        let link = dir.join("bin/whisper-server");
+        #[cfg(unix)]
+        std::os::unix::fs::symlink(cellar.join("whisper-server"), &link).unwrap();
+        #[cfg(unix)]
+        assert_eq!(find_server(Some(&link)).unwrap(), link);
+        fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]

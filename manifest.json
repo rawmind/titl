@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Chrome Transcriber",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Live subtitles for YouTube from a locally running whisper.cpp server.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuxFNuKKvtjl+YBWbnCl9oD//XCxoKTxakPzHfiBjWHUXv+YztRw8JlJbtUaF4GRn2hCC7DsE56X3WS4C5Ti6r9FszynVqWfOyWeZxnq8EU6lrEVL7Paw8/wgC3G5aScnISrHfIegq21rp9RBH+wm82iGpWMmeIcEQfL2aFRR0BGAVB+qe1vqBAq+r3TgOkLncHDcN3iwO9uUZk0poVdS+jasm2lWrIBrVRKKpDtZSc2ugOOKua5mNUeZKwS8cmnrbcvP7NL3R803TowgiCjT3w4LWAmGTcQuedWYSaXm3nt+yeeUasLAjzmhsVU/WEwj8LsaIHgxyjBS6u9Up+0agwIDAQAB",
   "minimum_chrome_version": "116",
