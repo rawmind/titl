@@ -134,10 +134,10 @@ mod tests {
         make_extension(&keg.join("share/chrome-transcriber/extension"));
         let exe = keg.join("bin/chrome-transcriber-helper");
         assert_eq!(find_dir(&exe), Some(keg.join("share/chrome-transcriber/extension")));
-        make_extension(&prefix.join("opt/titl/share/titl/extension"));
+        make_extension(&prefix.join("opt/chrome-transcriber/share/chrome-transcriber/extension"));
         assert_eq!(
             find_dir(&exe),
-            Some(prefix.join("opt/titl/share/titl/extension"))
+            Some(prefix.join("opt/chrome-transcriber/share/chrome-transcriber/extension"))
         );
         fs::remove_dir_all(&prefix).unwrap();
     }
