@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Local Whisper Subtitles — Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <form id="form">
+    <fieldset>
+      <legend>whisper.cpp server</legend>
+      <label>Inference URL
+        <input id="serverUrl" type="url" required placeholder="http://127.0.0.1:8080/inference">
+      </label>
+      <p class="hint">Must be on 127.0.0.1 or localhost. Any port; path is usually <code>/inference</code>.</p>
+      <label class="check"><input id="autoStartServer" type="checkbox">
+        Start whisper-server automatically if it is not running (needs <code>native-host/install.sh</code>)</label>
+      <button type="button" id="test">Test connection</button>
+      <span id="testResult"></span>
+    </fieldset>
+
+    <fieldset>
+      <legend>Timing</legend>
+      <label>Mode
+        <select id="mode">
+          <option value="lookahead">Lookahead — subtitles on time (opens a hidden muted tab)</option>
+          <option value="live">Live — transcribe what is playing (subtitles a few seconds late)</option>
+        </select>
+      </label>
+      <p class="hint">Live streams always use live mode.</p>
+      <div class="row">
+        <label>Show early by (s) <input id="showEarlySec" type="number" min="0" max="3" step="0.1" required></label>
+        <label>Pause until ready (s ahead, 0 = off) <input id="minLeadSec" type="number" min="0" max="30" step="1" required></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Transcription</legend>
+      <label>Language <input id="language" maxlength="3" required></label>
+      <label>Serbian script
+        <select id="script">
+          <option value="latin">Latin (latinica)</option>
+          <option value="cyrillic">Cyrillic (ћирилица)</option>
+          <option value="original">As returned by Whisper (may mix)</option>
+        </select>
+      </label>
+      <div class="row">
+        <label>Live window (s) <input id="windowSec" type="number" min="2" max="30" step="0.5" required></label>
+        <label>Live step (s) <input id="stepSec" type="number" min="1" max="29" step="0.5" required></label>
+        <label>Max window (s) <input id="maxWindowSec" type="number" min="2" max="60" step="1" required></label>
+      </div>
+      <label>Lag warning threshold (s)
+        <input id="lagThresholdSec" type="number" min="1" max="120" step="1" required>
+      </label>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit">Save</button>
+      <button type="button" id="reset">Reset to defaults</button>
+      <span id="message"></span>
+    </div>
+  </form>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

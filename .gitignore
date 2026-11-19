@@ -1,0 +1,8 @@
+# Generated per machine by native-host/install.sh
+native-host/config.json
+native-host/run-host.sh
+
+node_modules/
+.DS_Store
+*.pem
+*.crx

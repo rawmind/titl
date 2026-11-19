@@ -1,0 +1,69 @@
+:root {
+  color-scheme: light dark;
+  font: 13px/1.4 system-ui, sans-serif;
+}
+
+body {
+  max-width: 480px;
+  margin: 16px;
+}
+
+fieldset {
+  margin: 0 0 12px;
+  border: 1px solid #8884;
+  border-radius: 6px;
+}
+
+legend {
+  font-weight: 600;
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+}
+
+input,
+select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 2px;
+  font: inherit;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.hint {
+  margin: 4px 0 8px;
+  color: GrayText;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ok {
+  color: #1a7f37;
+}
+
+.error {
+  color: #cf222e;
+}
+
+.check {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.check input {
+  display: inline;
+  width: auto;
+}

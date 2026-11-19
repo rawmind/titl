@@ -1,0 +1,54 @@
+.lws-overlay {
+  --lws-font-size: 22px;
+  position: absolute;
+  left: 50%;
+  bottom: 64px;
+  transform: translateX(-50%);
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  /* Above the video, never intercepting clicks on YouTube controls. */
+  z-index: 45;
+  pointer-events: none;
+  transition: bottom 0.2s ease;
+}
+
+.html5-video-player.ytp-autohide .lws-overlay {
+  bottom: 24px;
+}
+
+.lws-text {
+  display: none;
+  flex-direction: column;
+  justify-content: flex-end;
+  max-width: 100%;
+  /* Two lines; the oldest text scrolls off the top. */
+  max-height: calc(2 * 1.3 * var(--lws-font-size) + 0.5em);
+  overflow: hidden;
+  padding: 0.25em 0.6em;
+  border-radius: 4px;
+  background: rgba(8, 8, 8, 0.75);
+  color: #fff;
+  font: 500 var(--lws-font-size) / 1.3 "YouTube Noto", Roboto, Arial, sans-serif;
+  text-align: center;
+  text-shadow: 0 0 2px #000, 0 1px 3px #000;
+}
+
+.lws-overlay.lws-visible .lws-text {
+  display: flex;
+}
+
+.lws-badge {
+  display: none;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(180, 90, 0, 0.85);
+  color: #fff;
+  font: 500 12px/1.4 Roboto, Arial, sans-serif;
+}
+
+.lws-badge.lws-visible {
+  display: block;
+}

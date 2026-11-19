@@ -1,0 +1,51 @@
+:root {
+  color-scheme: light dark;
+  font: 13px/1.4 system-ui, sans-serif;
+}
+
+body {
+  width: 280px;
+  margin: 12px;
+}
+
+h1 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status {
+  margin: 0 0 8px;
+  color: GrayText;
+}
+
+.status.running {
+  color: #1a7f37;
+}
+
+.error {
+  color: #cf222e;
+  margin: 4px 0 0;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 0;
+  color: GrayText;
+  font-size: 12px;
+}
+
+.footer span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
