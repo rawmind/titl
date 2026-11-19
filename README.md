@@ -202,6 +202,10 @@ cargo test --manifest-path helper/Cargo.toml     # helper
 
 After editing, reload the extension in `chrome://extensions`. If you changed `content.js`, also reload the YouTube tab.
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/rawmind/chrome-transcriber/releases).
+
 ## License
 
 MIT, see [LICENSE](LICENSE). Bundling whisper.cpp or a Whisper model (both MIT) means including their license notices.
