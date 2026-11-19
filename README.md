@@ -28,7 +28,7 @@ brew install rawmind/tap/chrome-transcriber   # also installs whisper-cpp
 chrome-transcriber-helper install
 ```
 
-Then load the extension (step 3 below) from `$(brew --prefix)/opt/chrome-transcriber/share/chrome-transcriber/extension`.
+`install` ends by showing how to add the extension to Chrome: it puts the folder path on your clipboard and reveals it in Finder. Chrome only adds extensions from the Chrome Web Store automatically, so this one is loaded once by hand (step 3 below). The folder is `$(brew --prefix)/opt/chrome-transcriber/share/chrome-transcriber/extension`.
 
 ### Any platform from source
 
@@ -57,7 +57,7 @@ The manifest fixes the extension ID at `fehpgpahkmanekioejihbpihpbacdjgb`, and t
 
 | Command | |
 |---|---|
-| `chrome-transcriber-helper status` | Show the server, model and which browsers it's registered with |
+| `chrome-transcriber-helper status` | Show the server, model, which browsers it's registered with, and whether the extension is loaded |
 | `chrome-transcriber-helper install …` | (Re)install; run again after moving whisper.cpp or a model |
 | `chrome-transcriber-helper uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
 
@@ -122,6 +122,7 @@ Automatic language detection isn't supported yet.
 
 | Symptom | Fix |
 |---|---|
+| Extension doesn't appear in Chrome after `install` | `install` doesn't add it: load it once via **Load unpacked** (Install, step 3). `chrome-transcriber-helper status` shows whether Chrome has it. |
 | "auto-start helper is not installed" | Run `chrome-transcriber-helper install`, then try again. |
 | "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `chrome-transcriber-helper status`: a path marked "(missing!)" means re-run `install`. |
 | "Cannot reach whisper-server" | The server URL or port is wrong, or auto-start is off. Use **Test connection** in Options. |
@@ -185,6 +186,7 @@ src/
   popup.*, options.* UI
 helper/              Rust: installer and native messaging host
   src/install.rs     find server/model, self-copy, browser registration
+  src/extension.rs   locate the extension folder, detect it in browser profiles
   src/host.rs        native messaging protocol, whisper-server process
   src/model.rs       model download from Hugging Face
   src/paths.rs       per-OS folders and browser registration locations

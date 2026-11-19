@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::extension;
 use crate::model;
 use crate::paths::{self, Target};
 use serde_json::json;
@@ -163,7 +164,11 @@ pub fn install(opts: Options) -> Result<(), String> {
     let data = paths::data_dir();
     fs::create_dir_all(&data).map_err(|e| format!("cannot create {}: {e}", data.display()))?;
     let args = Config::load().map(|c| c.args).unwrap_or_default();
-    Config { server: server.clone(), model: model.clone(), args }.save()?;
+    let extension_dir = env::current_exe()
+        .ok()
+        .and_then(|e| absolute(&e).ok())
+        .and_then(|e| extension::find_dir(&e));
+    Config { server: server.clone(), model: model.clone(), args, extension: extension_dir.clone() }.save()?;
     let exe = install_self()?;
     let registered = register(&exe)?;
 
@@ -176,7 +181,43 @@ pub fn install(opts: Options) -> Result<(), String> {
         println!("Registered with {}.", registered.join(", "));
     }
     println!("Extra server flags go in \"args\" in {}", paths::config_path().display());
+    println!();
+    print_extension_steps(extension_dir.as_deref());
     Ok(())
+}
+
+fn print_extension_steps(dir: Option<&Path>) {
+    let loaded = extension::loaded();
+    if let Some(first) = loaded.iter().find(|l| !l.disabled) {
+        println!("The extension is already loaded in {} ({}). You're all set.", first.browser, first.profile);
+        return;
+    }
+    if let Some(l) = loaded.first() {
+        println!("The extension is installed in {} ({}) but disabled: turn it on in chrome://extensions.", l.browser, l.profile);
+        return;
+    }
+    println!("Last step: add the extension to Chrome (one time):");
+    println!("  1. Open chrome://extensions and turn on Developer mode (top right).");
+    println!("  2. Click \"Load unpacked\" and choose this folder:");
+    match dir {
+        Some(dir) => {
+            println!("       {}", dir.display());
+            let copied = extension::copy_to_clipboard(&dir.to_string_lossy());
+            if cfg!(target_os = "macos") {
+                println!(
+                    "     In the file dialog, press Cmd+Shift+G and paste the path{}.",
+                    if copied { " (it is on your clipboard)" } else { "" }
+                );
+            } else if copied {
+                println!("     The path is on your clipboard.");
+            }
+            if std::io::IsTerminal::is_terminal(&std::io::stdout()) {
+                extension::reveal(dir);
+            }
+        }
+        None => println!("       the folder containing manifest.json from https://github.com/rawmind/chrome-transcriber"),
+    }
+    println!("Then run `chrome-transcriber-helper status` to check.");
 }
 
 pub fn uninstall(purge: bool) -> Result<(), String> {
@@ -207,6 +248,9 @@ pub fn status() -> Result<(), String> {
     println!("data dir: {}", paths::data_dir().display());
     match Config::load() {
         Ok(c) => {
+            if let Some(dir) = &c.extension {
+                println!("extension folder: {}", dir.display());
+            }
             println!("server:   {} {}", c.server.display(), if c.server.is_file() { "" } else { "(missing!)" });
             println!("model:    {} {}", c.model.display(), if c.model.is_file() { "" } else { "(missing!)" });
             if !c.args.is_empty() {
@@ -226,6 +270,19 @@ pub fn status() -> Result<(), String> {
         if registered {
             println!("registered: {}", browser.name);
         }
+    }
+    let loaded = extension::loaded();
+    if loaded.is_empty() {
+        println!("extension: not loaded in any browser (see `chrome-transcriber-helper install` output)");
+    }
+    for l in loaded {
+        println!(
+            "extension: {} in {} ({}){}",
+            if l.disabled { "disabled" } else { "loaded" },
+            l.browser,
+            l.profile,
+            l.path.map(|p| format!(" from {p}")).unwrap_or_default()
+        );
     }
     Ok(())
 }

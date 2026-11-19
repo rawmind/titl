@@ -61,20 +61,25 @@ pub enum Target {
 pub struct Browser {
     pub name: &'static str,
     pub target: Target,
+    pub user_data: PathBuf,
 }
 
 pub fn browsers() -> Vec<Browser> {
     if cfg!(windows) {
+        let local = env::var_os("LOCALAPPDATA")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| home().join("AppData/Local"));
         [
-            ("Chrome", r"Software\Google\Chrome"),
-            ("Chromium", r"Software\Chromium"),
-            ("Edge", r"Software\Microsoft\Edge"),
-            ("Brave", r"Software\BraveSoftware\Brave-Browser"),
+            ("Chrome", r"Software\Google\Chrome", r"Google\Chrome"),
+            ("Chromium", r"Software\Chromium", "Chromium"),
+            ("Edge", r"Software\Microsoft\Edge", r"Microsoft\Edge"),
+            ("Brave", r"Software\BraveSoftware\Brave-Browser", r"BraveSoftware\Brave-Browser"),
         ]
         .into_iter()
-        .map(|(name, key)| Browser {
+        .map(|(name, key, dir)| Browser {
             name,
             target: Target::Registry(format!(r"HKCU\{key}\NativeMessagingHosts\{HOST_NAME}")),
+            user_data: local.join(dir).join("User Data"),
         })
         .collect()
     } else {
@@ -108,6 +113,7 @@ pub fn browsers() -> Vec<Browser> {
             .map(|(name, dir)| Browser {
                 name,
                 target: Target::Dir(root.join(dir)),
+                user_data: root.join(dir),
             })
             .collect()
     }

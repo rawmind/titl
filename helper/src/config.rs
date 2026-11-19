@@ -7,6 +7,7 @@ pub struct Config {
     pub server: PathBuf,
     pub model: PathBuf,
     pub args: Vec<String>,
+    pub extension: Option<PathBuf>,
 }
 
 impl Config {
@@ -30,12 +31,18 @@ impl Config {
                 .and_then(Value::as_array)
                 .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
                 .unwrap_or_default(),
+            extension: value.get("extension").and_then(Value::as_str).map(PathBuf::from),
         })
     }
 
     pub fn save(&self) -> Result<(), String> {
         let path = paths::config_path();
-        let value = json!({ "server": self.server, "model": self.model, "args": self.args });
+        let value = json!({
+            "server": self.server,
+            "model": self.model,
+            "args": self.args,
+            "extension": self.extension,
+        });
         let text = serde_json::to_string_pretty(&value).map_err(|e| e.to_string())?;
         fs::write(&path, text + "\n").map_err(|e| format!("cannot write {}: {e}", path.display()))
     }
