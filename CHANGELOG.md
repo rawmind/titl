@@ -2,6 +2,21 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.5](https://github.com/rawmind/titl/releases/tag/v0.1.5) - 2026-11-20
+
+A new look for the popup and the Options page, matching the Titl icon.
+
+### Changed
+- **Popup:** dark design in Titl's colours. The status sits in a rounded box with a dot that pulses while running, and **▶ Start subtitles** is a yellow pill button. While running it becomes a dark **■ Stop subtitles** button.
+- **Options:** each section is a dark rounded card with a yellow heading. Inputs, selects and checkboxes are restyled, **Save** is the yellow pill, and the Save bar stays visible while you scroll.
+- Both pages share one stylesheet (`src/theme.css`).
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/titl
+```
+Then reload the extension in `chrome://extensions`.
+
 ## [0.1.4](https://github.com/rawmind/titl/releases/tag/v0.1.4) - 2026-11-20
 
 The Homebrew formula is now called **titl**.

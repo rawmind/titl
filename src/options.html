@@ -3,19 +3,26 @@
 <head>
   <meta charset="utf-8">
   <title>Titl — Options</title>
+  <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <form id="form">
+    <header class="brand">
+      <img src="../icons/icon48.png" width="36" height="36" alt="">
+      <h1>Titl</h1>
+      <span class="subtitle">Options</span>
+    </header>
+    <div class="bars" aria-hidden="true"></div>
+
     <fieldset>
       <legend>whisper.cpp server</legend>
       <label>Inference URL
         <input id="serverUrl" type="url" required placeholder="http://127.0.0.1:8080/inference">
       </label>
       <p class="hint">Must be on 127.0.0.1 or localhost. Any port; path is usually <code>/inference</code>.</p>
-      <label class="check"><input id="autoStartServer" type="checkbox">
-        Start whisper-server automatically if it is not running (needs <code>chrome-transcriber-helper install</code>)</label>
-      <button type="button" id="test">Test connection</button>
+      <label class="check"><input id="autoStartServer" type="checkbox"> <span>Start whisper-server automatically if it is not running (needs <code>chrome-transcriber-helper install</code>)</span></label>
+      <button type="button" id="test" class="secondary">Test connection</button>
       <span id="testResult"></span>
     </fieldset>
 
@@ -28,7 +35,7 @@
         </select>
       </label>
       <p class="hint">Live streams always use live mode.</p>
-      <label class="check"><input id="skipAds" type="checkbox"> Click "Skip ad" in the hidden lookahead tab when YouTube offers it</label>
+      <label class="check"><input id="skipAds" type="checkbox"> <span>Click "Skip ad" in the hidden lookahead tab when YouTube offers it</span></label>
       <div class="row">
         <label>Show early by (s) <input id="showEarlySec" type="number" min="0" max="3" step="0.1" required></label>
         <label>Pause until ready (s ahead, 0 = off) <input id="minLeadSec" type="number" min="0" max="30" step="1" required></label>
@@ -58,8 +65,8 @@
         </select>
       </label>
       <p class="hint">Runs on this device with Chrome's built-in translator. Serbian is translated as Croatian, which Chrome supports.</p>
-      <label class="check"><input id="showOriginal" type="checkbox"> Show the original above the translation</label>
-      <button type="button" id="prepareTranslation">Download translation model</button>
+      <label class="check"><input id="showOriginal" type="checkbox"> <span>Show the original above the translation</span></label>
+      <button type="button" id="prepareTranslation" class="secondary">Download translation model</button>
       <span id="translationResult"></span>
     </fieldset>
 
@@ -84,8 +91,8 @@
     </fieldset>
 
     <div class="actions">
-      <button type="submit">Save</button>
-      <button type="button" id="reset">Reset to defaults</button>
+      <button type="submit" class="cta">Save</button>
+      <button type="button" id="reset" class="secondary">Reset to defaults</button>
       <span id="message"></span>
     </div>
   </form>

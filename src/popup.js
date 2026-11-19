@@ -6,14 +6,23 @@ let running = false;
 
 function render(state) {
   running = state?.status === 'running';
-  $('toggle').textContent = running ? 'Stop subtitles' : 'Start subtitles';
+  $('toggleLabel').textContent = running ? 'Stop subtitles' : 'Start subtitles';
+  $('toggle').classList.toggle('is-running', running);
   const status = $('status');
   status.classList.toggle('running', running && !state.error);
-  if (state?.status === 'starting') status.textContent = 'Starting whisper-server…';
-  else if (!running) status.textContent = 'Idle';
-  else if (state.error) status.textContent = `Error: ${state.error}`;
-  else if (state.delayed) status.textContent = `Running — delayed ~${Math.round(state.lag)} s`;
-  else status.textContent = state.mode === 'lookahead' ? 'Running (lookahead)' : 'Running (live)';
+  status.classList.toggle('error', Boolean(running && state.error));
+  let text;
+  if (state?.status === 'starting') text = 'Starting whisper-server…';
+  else if (!running) text = 'Idle';
+  else if (state.error) text = `Error: ${state.error}`;
+  else if (state.delayed) text = `Running — delayed ~${Math.round(state.lag)} s`;
+  else text = state.mode === 'lookahead' ? 'Running (lookahead)' : 'Running (live)';
+  $('statusText').textContent = text;
+}
+
+function showError(text) {
+  $('status').classList.add('error');
+  $('statusText').textContent = text;
 }
 
 async function toggle() {
@@ -25,11 +34,11 @@ async function toggle() {
     }
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.url?.startsWith('https://www.youtube.com/')) {
-      $('status').textContent = 'Open a YouTube video first.';
+      showError('Open a YouTube video first.');
       return;
     }
     const res = await chrome.runtime.sendMessage({ target: 'background', type: 'start', tabId: tab.id });
-    if (!res?.ok) $('status').textContent = `Error: ${res?.error ?? 'unknown'}`;
+    if (!res?.ok) showError(`Error: ${res?.error ?? 'unknown'}`);
   } finally {
     $('toggle').disabled = false;
   }

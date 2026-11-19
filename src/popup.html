@@ -2,12 +2,22 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <h1>Titl</h1>
-  <p id="status" class="status">Idle</p>
-  <button id="toggle">Start subtitles</button>
+  <header class="brand">
+    <img src="../icons/icon48.png" width="28" height="28" alt="">
+    <h1>Titl</h1>
+    <span class="bars" aria-hidden="true"></span>
+  </header>
+
+  <p id="status" class="status"><span class="dot"></span><span id="statusText">Idle</span></p>
+
+  <button id="toggle" class="cta">
+    <span class="cta-icon" aria-hidden="true"></span>
+    <span id="toggleLabel">Start subtitles</span>
+  </button>
 
   <p class="footer">
     <span id="server"></span>
