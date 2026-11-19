@@ -1,7 +1,7 @@
-import { DEFAULTS, isLocalUrl, loadSettings, validateSettings } from './settings.js';
+import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
 
 const $ = (id) => document.getElementById(id);
-const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
+const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'showOriginal', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
 
 function fill(settings) {
   for (const f of FIELDS) {
@@ -49,6 +49,37 @@ $('test').addEventListener('click', async () => {
     say($('testResult'), `Reachable (HTTP ${res.status})`, true);
   } catch {
     say($('testResult'), 'Cannot reach server', false);
+  }
+});
+
+$('prepareTranslation').addEventListener('click', async () => {
+  const out = $('translationResult');
+  const language = $('language').value.trim();
+  const target = $('translateTo').value;
+  if (!target) return say(out, 'Choose a language to translate to first', false);
+  if (!('Translator' in self)) return say(out, 'Translator is not available here; it will download on your first click in a YouTube tab', false);
+  try {
+    let pair = null;
+    for (const source of [language, TRANSLATOR_SOURCE_FALLBACK[language]]) {
+      if (!source || source === target) continue;
+      if ((await Translator.availability({ sourceLanguage: source, targetLanguage: target })) !== 'unavailable') {
+        pair = { sourceLanguage: source, targetLanguage: target };
+        break;
+      }
+    }
+    if (!pair) return say(out, `Chrome can't translate ${language} → ${target} on this device`, false);
+    say(out, 'Preparing…', true);
+    const translator = await Translator.create({
+      ...pair,
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => say(out, `Downloading… ${Math.round(e.loaded * 100)}%`, true));
+      },
+    });
+    const sample = await translator.translate('Dobar dan, kako ste?');
+    translator.destroy();
+    say(out, `Ready (${pair.sourceLanguage} → ${pair.targetLanguage}): "Dobar dan, kako ste?" → "${sample}"`, true);
+  } catch (err) {
+    say(out, `Failed: ${err.message}`, false);
   }
 });
 

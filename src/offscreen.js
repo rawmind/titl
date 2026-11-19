@@ -1,6 +1,6 @@
 import { RingBuffer, rms } from './audio.js';
 import { SAMPLE_RATE, transcribe } from './whisper.js';
-import { Transcript, applyScript, cleanText } from './text.js';
+import { Transcript, applyScript, cleanText, translationSource } from './text.js';
 import { isLocalUrl } from './settings.js';
 
 const TICK_MS = 250;
@@ -106,7 +106,7 @@ function tick() {
       if (session !== s) return;
       const scripted = config.language === 'sr' ? applyScript(raw, config.script) : raw;
       const text = s.transcript.append(cleanText(scripted));
-      if (text) send({ type: 'caption', text });
+      if (text) send({ type: 'caption', text, src: translationSource(text, config.language) });
       const lag = (ring.total - end) / SAMPLE_RATE;
       send({ type: 'status', lag, delayed: lag > config.lagThresholdSec, error: null });
     })

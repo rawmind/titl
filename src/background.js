@@ -72,7 +72,13 @@ async function start(tabId) {
   await sendToTab(tabId, {
     type: 'overlay-start',
     mode,
-    options: { showEarlySec: config.showEarlySec, minLeadSec: config.minLeadSec },
+    options: {
+      showEarlySec: config.showEarlySec,
+      minLeadSec: config.minLeadSec,
+      language: config.language,
+      translateTo: config.translateTo,
+      showOriginal: config.showOriginal,
+    },
   });
   if (mode === 'lookahead') {
     lookahead = new LookaheadSession(tabId, config);
@@ -108,7 +114,7 @@ async function handle(msg, sender) {
 
     case 'caption': {
       const { tabId } = await getState();
-      return sendToTab(tabId, { type: 'caption', text: msg.text });
+      return sendToTab(tabId, { type: 'caption', text: msg.text, src: msg.src });
     }
     case 'status': {
       const { tabId } = await setState({ lag: msg.lag, delayed: msg.delayed, error: msg.error });
@@ -150,3 +156,14 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 getState().then((state) => {
   if (state.status === 'running' && state.mode === 'lookahead' && !lookahead) stop();
 });
+
+async function closeStrayLookaheadTabs() {
+  const groups = await chrome.tabGroups.query({ title: 'Transcriber' });
+  for (const group of groups) {
+    const tabs = await chrome.tabs.query({ groupId: group.id });
+    await chrome.tabs.remove(tabs.map((t) => t.id)).catch(() => {});
+  }
+}
+
+chrome.runtime.onInstalled.addListener(() => closeStrayLookaheadTabs().catch(() => {}));
+chrome.runtime.onStartup.addListener(() => closeStrayLookaheadTabs().catch(() => {}));

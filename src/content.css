@@ -21,10 +21,9 @@
 .ct-text {
   display: none;
   flex-direction: column;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 0.15em;
   max-width: 100%;
-  max-height: calc(2 * 1.3 * var(--ct-font-size) + 0.5em);
-  overflow: hidden;
   padding: 0.25em 0.6em;
   border-radius: 4px;
   background: rgba(8, 8, 8, 0.75);
@@ -35,6 +34,25 @@
 }
 
 .ct-overlay.ct-visible .ct-text {
+  display: flex;
+}
+
+.ct-primary,
+.ct-secondary {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  max-height: 2.6em;
+  overflow: hidden;
+}
+
+.ct-secondary {
+  display: none;
+  font-size: 0.7em;
+  color: #d8d8d8;
+}
+
+.ct-overlay.ct-dual .ct-secondary {
   display: flex;
 }
 

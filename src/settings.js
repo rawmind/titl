@@ -3,6 +3,8 @@ export const DEFAULTS = {
   autoStartServer: true,
   language: 'sr',
   script: 'latin',
+  translateTo: '',
+  showOriginal: true,
   mode: 'lookahead',
   showEarlySec: 0.3,
   minLeadSec: 3,
@@ -35,6 +37,7 @@ export function validateSettings(s) {
   if (!/^[a-z]{2,3}$/.test(s.language)) return 'Language must be a Whisper language code, e.g. "sr"';
   if (!['latin', 'cyrillic', 'original'].includes(s.script)) return 'Unknown script';
   if (!['lookahead', 'live'].includes(s.mode)) return 'Unknown mode';
+  if (!/^([a-z]{2,3}(-[A-Za-z]{2,4})?)?$/.test(s.translateTo)) return 'Unknown translation language';
   if (!(s.minLeadSec >= 0 && s.maxLeadSec > s.minLeadSec + s.lookaheadWindowSec)) {
     return 'Max lead must exceed min lead plus the lookahead window';
   }
@@ -44,3 +47,5 @@ export function validateSettings(s) {
   }
   return null;
 }
+
+export const TRANSLATOR_SOURCE_FALLBACK = { sr: 'hr', bs: 'hr' };

@@ -1,7 +1,7 @@
 import { rms } from './audio.js';
 import { Coverage } from './coverage.js';
 import { SAMPLE_RATE, transcribe } from './whisper.js';
-import { Transcript, applyScript, cleanText, splitCue } from './text.js';
+import { Transcript, applyScript, cleanText, splitCue, translationSource } from './text.js';
 
 const TAIL_SEC = 1;
 
@@ -95,7 +95,10 @@ export class LookaheadTranscriber {
     for (const seg of accepted.map(toVideo)) {
       const scripted = this.config.language === 'sr' ? applyScript(seg.text, this.config.script) : seg.text;
       const text = this.transcript.append(cleanText(scripted));
-      if (text) cues.push(...splitCue({ ...seg, text }));
+      if (!text) continue;
+      for (const cue of splitCue({ ...seg, text })) {
+        cues.push({ ...cue, src: translationSource(cue.text, this.config.language) });
+      }
     }
     this.commit(gen, ws, commitT, cues);
     return true;
@@ -172,10 +175,18 @@ export class LookaheadSession {
     return chrome.scripting.executeScript({ target: { tabId: this.scoutTabId }, files: ['src/scout.js'] });
   }
 
-  returnFocus() {
+  async returnFocus() {
     if (this.focusReturned || this.stopped) return;
     this.focusReturned = true;
-    chrome.tabs.update(this.mainTabId, { active: true }).catch(() => {});
+    try {
+      await chrome.tabs.update(this.mainTabId, { active: true });
+      await this.hideScout();
+    } catch {}
+  }
+
+  async hideScout() {
+    const groupId = await chrome.tabs.group({ tabIds: this.scoutTabId });
+    await chrome.tabGroups.update(groupId, { title: 'Transcriber', color: 'grey', collapsed: true });
   }
 
   toMain(msg) {

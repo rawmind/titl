@@ -41,7 +41,7 @@ test('cues land on the video timeline; tail segment is retried next window', asy
   }
 
   assert.deepEqual(calls.slice(0, 2), [8, 8]);
-  assert.deepEqual(emitted[0].cues, [{ start: 100, end: 103, text: 'Prva rečenica.' }]);
+  assert.deepEqual(emitted[0].cues, [{ start: 100, end: 103, text: 'Prva rečenica.', src: 'Prva rečenica.' }]);
   assert.equal(emitted[0].to, 103);
   assert.equal(emitted[1].from, 103);
   assert.equal(emitted[1].cues[0].start, 103);
@@ -76,7 +76,7 @@ test('playback rate scales whisper timestamps to video time', async () => {
   const { t, emitted } = setup([[{ start: 2, end: 4, text: 'Brže.' }]]);
   for (let i = 0; i < 8; i++) t.addAudio({ t0: 10 + i * 1.5, rate: 1.5, samples: loud(1) });
   await flush();
-  assert.deepEqual(emitted[0].cues[0], { start: 13, end: 16, text: 'Brže.' });
+  assert.deepEqual(emitted[0].cues[0], { start: 13, end: 16, text: 'Brže.', src: 'Brže.' });
 });
 
 test('finish flushes a short final window', async () => {
@@ -88,6 +88,22 @@ test('finish flushes a short final window', async () => {
   await flush();
   assert.deepEqual(calls, [3]);
   assert.equal(emitted[0].to, 53);
+});
+
+test('Cyrillic cues carry Latin source text for the translator', async () => {
+  const t = new LookaheadTranscriber(
+    { ...DEFAULTS, script: 'cyrillic' },
+    {
+      transcribe: async () => ({ segments: [{ start: 0, end: 2, text: 'Dobar dan.' }] }),
+      onCues: (cues) => {
+        assert.equal(cues[0].text, 'Добар дан.');
+        assert.equal(cues[0].src, 'Dobar dan.');
+      },
+      onError: (err) => assert.fail(err),
+    },
+  );
+  for (let i = 0; i < 8; i++) t.addAudio({ t0: i, rate: 1, samples: loud(1) });
+  await flush();
 });
 
 test('coverage merges adjacent ranges and answers lookups', () => {

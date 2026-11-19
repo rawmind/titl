@@ -9,6 +9,7 @@ Chrome extension that shows subtitles on any YouTube video, transcribed on your 
 - **Local, GPU-accelerated:** `whisper-server` with `large-v3-turbo` on Metal, about 0.8 s per 8 s of audio on Apple Silicon.
 - **Starts the server for you:** the first Start launches `whisper-server`, and it keeps running until Chrome quits.
 - **Serbian script control:** output is always Latin or always Cyrillic, never a mix.
+- **On-device translation** into English, Russian, German and more, using Chrome's built-in translator. The original can be shown above the translation.
 - Works in normal and fullscreen mode, doesn't block YouTube controls, and follows seeks, speed changes and navigation to other videos.
 
 ## Requirements
@@ -44,7 +45,7 @@ The manifest fixes the extension ID at `fehpgpahkmanekioejihbpihpbacdjgb`, and t
 1. Open a YouTube video.
 2. Click the extension icon, then **Start subtitles**.
 3. In lookahead mode:
-   - A muted tab opens next to yours for a moment (Chrome only plays media in a tab that has been shown), then focus returns to your tab.
+   - A muted tab opens next to yours for a moment (Chrome only plays media in a tab that has been shown). Then focus returns to your tab and the muted tab is tucked into a collapsed grey **Transcriber** tab group. Click the group to look at it, e.g. if it is stuck on an ad.
    - Your video pauses briefly while "Preparing subtitles…" is shown, about 12 s on first start, then plays with subtitles.
    - Press play at any time to skip the wait.
 4. To finish, click **Stop subtitles**. The extension also stops by itself when you close either tab.
@@ -64,11 +65,22 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Pause until ready | 3 s | Lookahead: pause until this much is transcribed ahead. 0 never pauses. |
 | Language | `sr` | Any Whisper language code. |
 | Serbian script | Latin | Latin, Cyrillic, or as returned (may mix). Only used for `sr`. |
+| Translate to | Off | Target language for Chrome's on-device translator. |
+| Show the original above the translation | on | Two-line display: original small on top, translation below. |
 | Live window / step | 6 s / 4 s | Live mode chunking (2 s overlap). |
 | Max window | 12 s | Largest chunk when transcription falls behind. |
 | Lag warning threshold | 10 s | Live mode: show "delayed" past this. |
 
 To pass extra flags to `whisper-server` (e.g. threads), add them to `"args"` in `native-host/config.json`.
+
+## Translation
+
+Choose **Options → Translate to**, then click **Download translation model** once. It downloads the language pack (one time, kept by Chrome) and shows a sample translation. If you skip this, the first click on the YouTube page during playback starts the download instead.
+
+- Everything runs on this device through Chrome's [Translator API](https://developer.chrome.com/docs/ai/translator-api) (Chrome 138+).
+- Chrome has no Serbian translation model, so Serbian is translated as Croatian. The text is always sent as Latin script, even when subtitles are shown in Cyrillic. Expect occasional word-choice slips where the two languages' vocabularies differ.
+- In lookahead mode, translation happens seconds before a line is shown, so it adds no delay. In live mode it adds a fraction of a second.
+- Whisper's own translation isn't used: `large-v3-turbo` was trained without translation data, and Whisper can only translate into English.
 
 ## Languages
 
@@ -87,8 +99,11 @@ Automatic language detection isn't supported yet.
 | "auto-start helper is not installed" | Run `native-host/install.sh`, then try again. |
 | "whisper-server exited…" or "did not start" | Check `~/Library/Logs/chrome-transcriber.log`. Usually a wrong model path: re-run `install.sh` with the right paths. |
 | "Cannot reach whisper-server" | The server URL or port is wrong, or auto-start is off. Use **Test connection** in Options. |
-| Stuck on "Preparing subtitles…" | Look at the hidden tab: it may be showing an ad, a consent page or a sign-in prompt. Fix it there, or switch to live mode. |
+| Stuck on "Preparing subtitles…" | Expand the **Transcriber** tab group and look at the hidden tab: it may be showing an ad, a consent page or a sign-in prompt. Fix it there, or switch to live mode. |
 | Subtitles appear in the wrong script | Options → Serbian script. |
+| Translation doesn't appear | The language pack may not be downloaded yet. Use **Download translation model** in Options, or click the YouTube page once while subtitles are on. |
+| "Click the video once to download the translation model" | Click anywhere on the YouTube page, or use **Download translation model** in Options. |
+| "Chrome can't translate … on this device" | That language pair isn't offered by Chrome's translator. Pick another target. |
 | Nothing happens after moving the folder | Re-run `native-host/install.sh`, then remove and re-load the unpacked extension. |
 
 To remove the helper, run `native-host/uninstall.sh`.
@@ -133,7 +148,7 @@ src/
   background.js      service worker: start/stop, routing, server auto-start
   lookahead.js       hidden-tab control and timeline transcription
   scout.js           runs in the hidden tab: audio capture, play/seek commands
-  content.js/.css    runs in your tab: subtitle overlay, sync, pause-until-ready
+  content.js/.css    runs in your tab: subtitle overlay, translation, sync, pause-until-ready
   offscreen.js       live mode: tab capture and chunked transcription
   capture-worklet.js live mode: PCM capture at 16 kHz
   whisper.js         whisper-server client

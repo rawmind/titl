@@ -45,6 +45,10 @@ export function toCyrillic(text) {
   });
 }
 
+export function translationSource(text, language) {
+  return language === 'sr' ? toLatin(text) : text;
+}
+
 export function applyScript(text, script) {
   if (script === 'latin') return toLatin(text);
   if (script === 'cyrillic') return toCyrillic(text);

@@ -7,16 +7,21 @@
   const CUE_HOLD_SEC = 0.6;
   const TICK_MS = 100;
   const REPORT_MS = 500;
+  const TRANSLATOR_SOURCE_FALLBACK = { sr: 'hr', bs: 'hr' };
 
   let root = null;
-  let textEl = null;
+  let primaryEl = null;
+  let secondaryEl = null;
   let badgeEl = null;
   let resizeObserver = null;
   let statusText = '';
+  let translationNotice = '';
 
-  let liveBuffer = '';
+  let liveOriginal = '';
+  let liveTranslation = '';
   let liveClearTimer = null;
 
+  let mode = null;
   let options = null;
   let timer = null;
   let cueVideoId = null;
@@ -27,6 +32,10 @@
   let waiting = false;
   let resumingByUs = false;
   let checkOnPlay = false;
+
+  let translator = null;
+  let translateChain = Promise.resolve();
+  let removeGestureListeners = null;
 
   const findPlayer = () => document.querySelector('#movie_player') ?? document.querySelector('.html5-video-player');
   const getVideo = () => findPlayer()?.querySelector('video') ?? null;
@@ -51,8 +60,15 @@
       root.className = 'ct-overlay';
       const box = document.createElement('div');
       box.className = 'ct-text';
-      textEl = document.createElement('span');
-      box.append(textEl);
+      const secondary = document.createElement('div');
+      secondary.className = 'ct-secondary';
+      secondaryEl = document.createElement('span');
+      secondary.append(secondaryEl);
+      const primary = document.createElement('div');
+      primary.className = 'ct-primary';
+      primaryEl = document.createElement('span');
+      primary.append(primaryEl);
+      box.append(secondary, primary);
       badgeEl = document.createElement('div');
       badgeEl.className = 'ct-badge';
       root.append(badgeEl, box);
@@ -69,14 +85,18 @@
     return root;
   }
 
-  function setText(text) {
-    if (!ensureOverlay() || textEl.textContent === text) return;
-    textEl.textContent = text;
-    root.classList.toggle('ct-visible', Boolean(text));
+  function setText(primary, secondary = '') {
+    if (!ensureOverlay()) return;
+    if (primaryEl.textContent !== primary) primaryEl.textContent = primary;
+    if (secondaryEl.textContent !== secondary) secondaryEl.textContent = secondary;
+    root.classList.toggle('ct-visible', Boolean(primary || secondary));
+    root.classList.toggle('ct-dual', Boolean(secondary));
   }
 
-  function setBadge(text) {
-    if (!ensureOverlay() || badgeEl.textContent === text) return;
+  function updateBadge() {
+    if (!ensureOverlay()) return;
+    const text = waiting ? 'Preparing subtitles…' : translationNotice || statusText;
+    if (badgeEl.textContent === text) return;
     badgeEl.textContent = text;
     badgeEl.classList.toggle('ct-visible', Boolean(text));
   }
@@ -85,21 +105,124 @@
     if (error) statusText = `⚠ ${error}`;
     else if (delayed) statusText = `Subtitles delayed ~${Math.round(lag)} s`;
     else statusText = '';
-    if (!waiting) setBadge(statusText);
+    updateBadge();
   }
 
-  function showLiveCaption(text) {
-    liveBuffer = `${liveBuffer} ${text}`.trim();
-    if (liveBuffer.length > LIVE_MAX_CHARS) {
-      const cut = liveBuffer.indexOf(' ', liveBuffer.length - LIVE_MAX_CHARS);
-      liveBuffer = liveBuffer.slice(cut + 1);
+  function setTranslationNotice(text) {
+    translationNotice = text;
+    updateBadge();
+  }
+
+  async function pickTranslatorPair(language, target) {
+    for (const source of [language, TRANSLATOR_SOURCE_FALLBACK[language]]) {
+      if (!source || source === target) continue;
+      const pair = { sourceLanguage: source, targetLanguage: target };
+      const availability = await Translator.availability(pair);
+      if (availability !== 'unavailable') return { ...pair, availability };
     }
-    setText(liveBuffer);
+    return null;
+  }
+
+  async function setupTranslator() {
+    const target = options.translateTo;
+    if (!target) return;
+    if (!('Translator' in self)) return setTranslationNotice('⚠ Translation needs Chrome 138 or newer');
+    const pair = await pickTranslatorPair(options.language, target);
+    if (!pair) return setTranslationNotice(`⚠ Chrome can't translate ${options.language} → ${target} on this device`);
+    if (pair.availability === 'available') return createTranslator(pair);
+
+    setTranslationNotice('Click the video once to download the translation model');
+    const onGesture = () => {
+      removeGestureListeners?.();
+      createTranslator(pair);
+    };
+    window.addEventListener('pointerdown', onGesture, true);
+    window.addEventListener('keydown', onGesture, true);
+    removeGestureListeners = () => {
+      window.removeEventListener('pointerdown', onGesture, true);
+      window.removeEventListener('keydown', onGesture, true);
+      removeGestureListeners = null;
+    };
+  }
+
+  async function createTranslator({ sourceLanguage, targetLanguage }) {
+    const opts = options;
+    try {
+      setTranslationNotice('Preparing translation…');
+      const created = await Translator.create({
+        sourceLanguage,
+        targetLanguage,
+        monitor(m) {
+          m.addEventListener('downloadprogress', (e) => {
+            setTranslationNotice(`Downloading translation model… ${Math.round(e.loaded * 100)}%`);
+          });
+        },
+      });
+      if (options !== opts) return created.destroy();
+      translator = created;
+      setTranslationNotice('');
+      const t = getVideo()?.currentTime ?? 0;
+      cues.filter((c) => c.end >= t - 5).forEach(translateCue);
+    } catch (err) {
+      if (options === opts) setTranslationNotice(`⚠ Translation unavailable: ${err.message}`);
+    }
+  }
+
+  function translate(text) {
+    const active = translator;
+    const result = translateChain.then(() => active.translate(text));
+    translateChain = result.catch(() => {});
+    return result;
+  }
+
+  function translateCue(cue) {
+    if (!translator || cue.translation != null) return;
+    cue.translation = '';
+    translate(cue.src ?? cue.text).then(
+      (t) => (cue.translation = t),
+      () => (cue.translation = null),
+    );
+  }
+
+  function trimTail(text, max) {
+    if (text.length <= max) return text;
+    return text.slice(text.indexOf(' ', text.length - max) + 1);
+  }
+
+  function renderLive() {
+    if (translator && liveTranslation) {
+      setText(liveTranslation, options.showOriginal ? liveOriginal : '');
+    } else {
+      setText(liveOriginal);
+    }
+  }
+
+  function showLiveCaption(text, src) {
+    const max = translator && options.showOriginal ? LIVE_MAX_CHARS / 2 : LIVE_MAX_CHARS;
+    liveOriginal = trimTail(`${liveOriginal} ${text}`.trim(), max);
+    renderLive();
+    if (translator) {
+      translate(src ?? text).then(
+        (t) => {
+          liveTranslation = trimTail(`${liveTranslation} ${t}`.trim(), max);
+          renderLive();
+        },
+        () => {},
+      );
+    }
     clearTimeout(liveClearTimer);
     liveClearTimer = setTimeout(() => {
-      liveBuffer = '';
+      liveOriginal = liveTranslation = '';
       setText('');
     }, LIVE_CLEAR_AFTER_MS);
+  }
+
+  function renderCue(cue) {
+    if (!cue) return setText('');
+    if (translator && cue.translation) {
+      return setText(cue.translation, options.showOriginal ? cue.text : '');
+    }
+    setText(cue.text);
   }
 
   function resetCues(videoId) {
@@ -138,6 +261,7 @@
     if (msg.cues.length) {
       cues.push(...msg.cues);
       cues.sort((a, b) => a.start - b.start);
+      msg.cues.forEach(translateCue);
     }
     coverage = msg.coverage;
     maybeResume();
@@ -148,36 +272,45 @@
     if (coveredAhead(video.currentTime) >= options.minLeadSec) return;
     waiting = true;
     video.pause();
-    setBadge('Preparing subtitles…');
+    updateBadge();
   }
 
   function maybeResume() {
     const video = getVideo();
     if (!waiting || !video || coveredAhead(video.currentTime) < options.minLeadSec) return;
     waiting = false;
-    setBadge(statusText);
+    updateBadge();
     resumingByUs = true;
     video.play().catch(() => {});
   }
 
   function attachVideo(video) {
     attachedVideo = video;
-    video.addEventListener('seeked', () => options && pauseUntilReady(video));
+    video.addEventListener('seeked', () => mode === 'lookahead' && pauseUntilReady(video));
     video.addEventListener('play', () => {
-      if (!options) return;
+      if (mode !== 'lookahead') return;
       if (resumingByUs) {
         resumingByUs = false;
       } else if (waiting) {
         waiting = false;
-        setBadge(statusText);
+        updateBadge();
       }
     });
     video.addEventListener('playing', () => {
-      if (options && checkOnPlay) {
+      if (mode === 'lookahead' && checkOnPlay) {
         checkOnPlay = false;
         pauseUntilReady(video);
       }
     });
+  }
+
+  function sendToBackground(msg) {
+    if (!chrome.runtime?.id) return stop();
+    try {
+      chrome.runtime.sendMessage({ target: 'background', ...msg }).catch(() => {});
+    } catch {
+      stop();
+    }
   }
 
   function tick() {
@@ -191,30 +324,29 @@
       pauseUntilReady(video);
     }
 
-    setText(isAd() ? '' : (cueAt(video.currentTime + options.showEarlySec)?.text ?? ''));
+    renderCue(isAd() ? null : cueAt(video.currentTime + options.showEarlySec));
 
     if (Date.now() - lastReport >= REPORT_MS) {
       lastReport = Date.now();
-      chrome.runtime
-        .sendMessage({
-          target: 'background',
-          type: 'main-state',
-          videoId,
-          time: video.currentTime,
-          paused: video.paused,
-          rate: video.playbackRate,
-          duration: video.duration,
-          ad: isAd(),
-        })
-        .catch(() => {});
+      sendToBackground({
+        type: 'main-state',
+        videoId,
+        time: video.currentTime,
+        paused: video.paused,
+        rate: video.playbackRate,
+        duration: video.duration,
+        ad: isAd(),
+      });
     }
   }
 
-  function start(mode, opts) {
+  function start(newMode, opts) {
     stop();
-    ensureOverlay();
-    if (mode !== 'lookahead') return;
+    mode = newMode;
     options = opts;
+    ensureOverlay();
+    setupTranslator().catch((err) => setTranslationNotice(`⚠ Translation unavailable: ${err.message}`));
+    if (mode !== 'lookahead') return;
     resetCues(getVideoId());
     timer = setInterval(tick, TICK_MS);
   }
@@ -222,13 +354,15 @@
   function stop() {
     clearInterval(timer);
     clearTimeout(liveClearTimer);
+    removeGestureListeners?.();
+    translator?.destroy();
     if (waiting) getVideo()?.play().catch(() => {});
-    timer = options = null;
+    timer = options = mode = translator = null;
     waiting = false;
-    liveBuffer = statusText = '';
+    liveOriginal = liveTranslation = statusText = translationNotice = '';
     resizeObserver?.disconnect();
     root?.remove();
-    root = textEl = badgeEl = resizeObserver = null;
+    root = primaryEl = secondaryEl = badgeEl = resizeObserver = null;
   }
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -248,10 +382,10 @@
         stop();
         break;
       case 'caption':
-        showLiveCaption(msg.text);
+        if (options) showLiveCaption(msg.text, msg.src);
         break;
       case 'cues':
-        if (options) onCues(msg);
+        if (mode === 'lookahead') onCues(msg);
         break;
       case 'status':
         showStatus(msg);

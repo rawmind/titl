@@ -15,14 +15,32 @@
   let pendingT0 = 0;
   let lastState = 0;
   let sendChain = Promise.resolve();
+  let stateTimer = null;
+  let orphaned = false;
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const findPlayer = () => document.querySelector('#movie_player') ?? document.querySelector('.html5-video-player');
   const isAd = () => Boolean(findPlayer()?.classList.contains('ad-showing'));
   const videoId = () => new URL(location.href).searchParams.get('v');
 
+  function shutDown() {
+    orphaned = true;
+    clearInterval(stateTimer);
+    reader?.cancel().catch(() => {});
+    video?.pause();
+  }
+
   function send(msg) {
-    return chrome.runtime.sendMessage({ target: 'background', ...msg }).catch(() => {});
+    if (!chrome.runtime?.id) {
+      shutDown();
+      return Promise.resolve();
+    }
+    try {
+      return chrome.runtime.sendMessage({ target: 'background', ...msg }).catch(() => {});
+    } catch {
+      shutDown();
+      return Promise.resolve();
+    }
   }
 
   function reportState(force = false) {
@@ -128,7 +146,7 @@
   }
 
   async function pump() {
-    for (;;) {
+    while (!orphaned) {
       const v = findPlayer()?.querySelector('video');
       if (!v) {
         await sleep(500);
@@ -146,7 +164,7 @@
         continue;
       }
       if (!reader) reader = new MediaStreamTrackProcessor({ track }).readable.getReader();
-      const { value, done } = await reader.read();
+      const { value, done } = await reader.read().catch(() => ({ done: true }));
       if (done) {
         reader = null;
         dropRun();
@@ -161,7 +179,7 @@
   }
 
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type !== 'scout-cmd' || !video) return;
+    if (msg.type !== 'scout-cmd' || !video || orphaned) return;
     if (msg.rate) video.playbackRate = msg.rate;
     if (msg.seek != null) {
       dropRun();
@@ -171,7 +189,7 @@
     if (msg.play) video.play().catch(() => {});
   });
 
-  setInterval(() => {
+  stateTimer = setInterval(() => {
     if (isAd()) skipAd();
     reportState();
   }, STATE_MS);
