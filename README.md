@@ -8,37 +8,63 @@ Chrome extension that shows subtitles on any YouTube video, transcribed on your 
 - **Live mode** for live streams, or if you prefer it: transcribes what is playing, with subtitles 3–5 s late.
 - **Local, GPU-accelerated:** `whisper-server` with `large-v3-turbo` on Metal, about 0.8 s per 8 s of audio on Apple Silicon.
 - **Starts the server for you:** the first Start launches `whisper-server`, and it keeps running until Chrome quits.
+- **Cross-platform helper:** one Rust binary installs and runs everything on macOS, Linux and Windows, and downloads a model if needed.
 - **Serbian script control:** output is always Latin or always Cyrillic, never a mix.
 - **On-device translation** into English, Russian, German and more, using Chrome's built-in translator. The original can be shown above the translation.
 - Works in normal and fullscreen mode, doesn't block YouTube controls, and follows seeks, speed changes and navigation to other videos.
 
 ## Requirements
 
-- macOS on Apple Silicon, Chrome 116+ (Chromium works too)
-- whisper.cpp built locally, plus a Whisper model (recommended: `ggml-large-v3-turbo.bin`, 1.6 GB)
-- Python 3 (used by the auto-start helper)
+- Chrome 116+, or Chromium, Edge or Brave, on macOS, Linux or Windows
+- whisper.cpp's `whisper-server` (Homebrew or your own build). GPU strongly recommended: Metal, Vulkan or CUDA
+- A Whisper model: the helper downloads one if you don't have it
 
 ## Install
 
-**1. Build whisper.cpp and download the model** (skip if you already have them):
+### macOS with Homebrew
 
 ```bash
-git clone https://github.com/ggml-org/whisper.cpp ~/projects/whisper.cpp
-cd ~/projects/whisper.cpp
-cmake -B build && cmake --build build -j --config Release   # Metal is enabled by default on macOS
-./models/download-ggml-model.sh large-v3-turbo
+brew install rawmind/tap/chrome-transcriber   # also installs whisper-cpp
+chrome-transcriber-helper install
 ```
 
-**2. Register the auto-start helper** (one time, and again if you move either folder):
+Then load the extension (step 3 below) from `$(brew --prefix)/opt/chrome-transcriber/share/chrome-transcriber/extension`.
+
+### Any platform from source
+
+**1. Get whisper.cpp:** `brew install whisper-cpp` on macOS, or build it ([instructions](https://github.com/ggml-org/whisper.cpp#quick-start)). Use Metal on macOS, and Vulkan or CUDA on Windows and Linux for GPU speed.
+
+**2. Build and run the helper** (needs [Rust](https://rustup.rs)):
 
 ```bash
-native-host/install.sh                                     # uses ~/projects/whisper.cpp
-native-host/install.sh /path/to/whisper.cpp /path/to/model.bin
+cargo build --release --manifest-path helper/Cargo.toml
+helper/target/release/chrome-transcriber-helper install
 ```
+
+`install` does the rest:
+- finds `whisper-server` on `PATH` or in common whisper.cpp build folders;
+- finds a model next to it, or downloads `large-v3-turbo-q5_0` (about 550 MB);
+- copies itself to a per-user folder;
+- registers itself with Chrome, Chromium, Edge and Brave (on Windows, through the registry).
+
+To choose explicitly, use `--server PATH`, `--model PATH` or `--download-model NAME` (e.g. `large-v3-turbo` for the full-precision 1.6 GB model).
 
 **3. Load the extension:** go to `chrome://extensions`, turn on Developer mode, click **Load unpacked** and select this folder.
 
 The manifest fixes the extension ID at `fehpgpahkmanekioejihbpihpbacdjgb`, and the helper only accepts requests from that ID.
+
+### Helper commands
+
+| Command | |
+|---|---|
+| `chrome-transcriber-helper status` | Show the server, model and which browsers it's registered with |
+| `chrome-transcriber-helper install …` | (Re)install; run again after moving whisper.cpp or a model |
+| `chrome-transcriber-helper uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
+
+Per-user files (config, downloaded models, `server.log`) live in:
+- macOS: `~/Library/Application Support/chrome-transcriber/`
+- Linux: `~/.local/share/chrome-transcriber/`
+- Windows: `%LOCALAPPDATA%\chrome-transcriber\`
 
 ## Usage
 
@@ -71,7 +97,7 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Max window | 12 s | Largest chunk when transcription falls behind. |
 | Lag warning threshold | 10 s | Live mode: show "delayed" past this. |
 
-To pass extra flags to `whisper-server` (e.g. threads), add them to `"args"` in `native-host/config.json`.
+To pass extra flags to `whisper-server` (e.g. threads), add them to `"args"` in the helper's `config.json` (see `chrome-transcriber-helper status`).
 
 ## Translation
 
@@ -96,17 +122,17 @@ Automatic language detection isn't supported yet.
 
 | Symptom | Fix |
 |---|---|
-| "auto-start helper is not installed" | Run `native-host/install.sh`, then try again. |
-| "whisper-server exited…" or "did not start" | Check `~/Library/Logs/chrome-transcriber.log`. Usually a wrong model path: re-run `install.sh` with the right paths. |
+| "auto-start helper is not installed" | Run `chrome-transcriber-helper install`, then try again. |
+| "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `chrome-transcriber-helper status`: a path marked "(missing!)" means re-run `install`. |
 | "Cannot reach whisper-server" | The server URL or port is wrong, or auto-start is off. Use **Test connection** in Options. |
 | Stuck on "Preparing subtitles…" | Expand the **Transcriber** tab group and look at the hidden tab: it may be showing an ad, a consent page or a sign-in prompt. Fix it there, or switch to live mode. |
 | Subtitles appear in the wrong script | Options → Serbian script. |
 | Translation doesn't appear | The language pack may not be downloaded yet. Use **Download translation model** in Options, or click the YouTube page once while subtitles are on. |
 | "Click the video once to download the translation model" | Click anywhere on the YouTube page, or use **Download translation model** in Options. |
 | "Chrome can't translate … on this device" | That language pair isn't offered by Chrome's translator. Pick another target. |
-| Nothing happens after moving the folder | Re-run `native-host/install.sh`, then remove and re-load the unpacked extension. |
+| Nothing happens after moving the extension folder | Remove and re-load the unpacked extension. |
 
-To remove the helper, run `native-host/uninstall.sh`.
+To remove the helper, run `chrome-transcriber-helper uninstall`.
 
 ## How it works
 
@@ -138,7 +164,7 @@ popup → background (tabCapture stream id) → offscreen document
 
 ### Auto-start helper
 
-Chrome extensions can't run native programs, so `native-host/host.py` is registered as a Chrome [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) host. On Start, the extension asks it to launch `whisper-server`. The server stops when that connection closes, which in practice means when Chrome quits.
+Chrome extensions can't run native programs, so `chrome-transcriber-helper` (Rust, in `helper/`) is registered as a Chrome [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) host. On Start, the extension asks it to launch `whisper-server`. The server stops when that connection closes, which in practice means when Chrome quits.
 
 ## Project layout
 
@@ -157,17 +183,19 @@ src/
   coverage.js        transcribed time ranges
   settings.js        defaults and validation
   popup.*, options.* UI
-native-host/
-  host.py            native messaging host that runs whisper-server
-  install.sh         registers the host (writes config.json and run-host.sh)
-  uninstall.sh
+helper/              Rust: installer and native messaging host
+  src/install.rs     find server/model, self-copy, browser registration
+  src/host.rs        native messaging protocol, whisper-server process
+  src/model.rs       model download from Hugging Face
+  src/paths.rs       per-OS folders and browser registration locations
 tests/               node:test unit tests
 ```
 
 ## Development
 
 ```bash
-npm test     # no dependencies to install; needs Node 20+
+npm test                                         # extension; no dependencies, Node 20+
+cargo test --manifest-path helper/Cargo.toml     # helper
 ```
 
 After editing, reload the extension in `chrome://extensions`. If you changed `content.js`, also reload the YouTube tab.

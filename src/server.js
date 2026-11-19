@@ -45,7 +45,7 @@ function connect() {
 function disconnectReason() {
   const err = chrome.runtime.lastError?.message ?? '';
   if (/not found/i.test(err)) {
-    return 'whisper-server is not running and the auto-start helper is not installed (run native-host/install.sh)';
+    return 'whisper-server is not running and the auto-start helper is not installed (run `chrome-transcriber-helper install`)';
   }
   return `Auto-start helper stopped: ${err || 'unknown error'}`;
 }

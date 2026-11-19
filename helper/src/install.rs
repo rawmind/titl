@@ -1,0 +1,262 @@
+use crate::config::Config;
+use crate::model;
+use crate::paths::{self, Target};
+use serde_json::json;
+use std::env;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+#[derive(Default)]
+pub struct Options {
+    pub server: Option<PathBuf>,
+    pub model: Option<PathBuf>,
+    pub download_model: Option<String>,
+}
+
+pub fn parse(args: &[String]) -> Result<Options, String> {
+    let mut opts = Options::default();
+    let mut it = args.iter();
+    while let Some(arg) = it.next() {
+        let mut value = || it.next().cloned().ok_or_else(|| format!("{arg} needs a value"));
+        match arg.as_str() {
+            "--server" => opts.server = Some(PathBuf::from(value()?)),
+            "--model" => opts.model = Some(PathBuf::from(value()?)),
+            "--download-model" => opts.download_model = Some(value()?),
+            other => return Err(format!("unknown option: {other}")),
+        }
+    }
+    Ok(opts)
+}
+
+fn absolute(path: &Path) -> Result<PathBuf, String> {
+    fs::canonicalize(path).map_err(|e| format!("{}: {e}", path.display()))
+}
+
+fn whisper_roots() -> Vec<PathBuf> {
+    let home = paths::home();
+    vec![home.join("projects/whisper.cpp"), home.join("whisper.cpp"), home.join("src/whisper.cpp")]
+}
+
+pub fn find_server(explicit: Option<&Path>) -> Result<PathBuf, String> {
+    if let Some(path) = explicit {
+        return if path.is_file() { absolute(path) } else { Err(format!("not a file: {}", path.display())) };
+    }
+    let name = paths::exe_name("whisper-server");
+    let mut candidates: Vec<PathBuf> = env::var_os("PATH")
+        .map(|p| env::split_paths(&p).map(|dir| dir.join(&name)).collect())
+        .unwrap_or_default();
+    for root in whisper_roots() {
+        candidates.push(root.join("build/bin").join(&name));
+        candidates.push(root.join("build/bin/Release").join(&name));
+    }
+    for dir in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"] {
+        candidates.push(Path::new(dir).join(&name));
+    }
+    candidates
+        .into_iter()
+        .find(|p| p.is_file())
+        .map(|p| absolute(&p))
+        .unwrap_or_else(|| {
+            Err("whisper-server not found. Install whisper.cpp (`brew install whisper-cpp`, or build \
+                 https://github.com/ggml-org/whisper.cpp) or pass --server PATH"
+                .into())
+        })
+}
+
+pub fn find_model(server: &Path) -> Option<PathBuf> {
+    let mut dirs = vec![paths::models_dir()];
+    if let Some(root) = server.parent().and_then(Path::parent).and_then(Path::parent) {
+        dirs.push(root.join("models"));
+    }
+    dirs.extend(whisper_roots().into_iter().map(|r| r.join("models")));
+    model::PREFERRED_MODELS
+        .iter()
+        .flat_map(|name| dirs.iter().map(move |d| d.join(model::file_name(name))))
+        .find(|p| p.is_file())
+}
+
+pub fn homebrew_opt_path(exe: &Path) -> Option<PathBuf> {
+    let text = exe.to_str()?;
+    let at = text.find("/Cellar/chrome-transcriber/")?;
+    let name = exe.file_name()?.to_str()?;
+    Some(PathBuf::from(format!("{}/opt/chrome-transcriber/bin/{name}", &text[..at])))
+}
+
+fn install_self() -> Result<PathBuf, String> {
+    let current = env::current_exe().map_err(|e| e.to_string())?;
+    if let Some(opt) = absolute(&current).ok().and_then(|p| homebrew_opt_path(&p)) {
+        if opt.is_file() {
+            return Ok(opt);
+        }
+    }
+    let target = paths::installed_exe();
+    if absolute(&current).ok() == absolute(&target).ok() {
+        return Ok(target);
+    }
+    let tmp = target.with_extension("new");
+    fs::copy(&current, &tmp).map_err(|e| format!("cannot copy helper to {}: {e}", tmp.display()))?;
+    fs::rename(&tmp, &target).map_err(|e| {
+        format!("cannot replace {}: {e} (quit Chrome and try again)", target.display())
+    })?;
+    Ok(target)
+}
+
+pub fn manifest(exe: &Path) -> serde_json::Value {
+    json!({
+        "name": paths::HOST_NAME,
+        "description": "Starts whisper-server for Chrome Transcriber",
+        "path": exe,
+        "type": "stdio",
+        "allowed_origins": [format!("chrome-extension://{}/", paths::EXTENSION_ID)],
+    })
+}
+
+fn reg(args: &[&str]) -> Result<(), String> {
+    let status = Command::new("reg").args(args).status().map_err(|e| format!("reg: {e}"))?;
+    if status.success() { Ok(()) } else { Err(format!("reg {} failed", args.join(" "))) }
+}
+
+fn register(exe: &Path) -> Result<Vec<&'static str>, String> {
+    let text = serde_json::to_string_pretty(&manifest(exe)).map_err(|e| e.to_string())? + "\n";
+    let mut registered = Vec::new();
+    for browser in paths::browsers() {
+        match browser.target {
+            Target::Dir(dir) => {
+                if !dir.is_dir() {
+                    continue;
+                }
+                let hosts = dir.join("NativeMessagingHosts");
+                fs::create_dir_all(&hosts).map_err(|e| format!("{}: {e}", hosts.display()))?;
+                let file = hosts.join(paths::manifest_file_name());
+                fs::write(&file, &text).map_err(|e| format!("{}: {e}", file.display()))?;
+            }
+            Target::Registry(key) => {
+                let file = paths::data_dir().join(paths::manifest_file_name());
+                fs::write(&file, &text).map_err(|e| format!("{}: {e}", file.display()))?;
+                reg(&["add", &key, "/ve", "/t", "REG_SZ", "/d", &file.to_string_lossy(), "/f"])?;
+            }
+        }
+        registered.push(browser.name);
+    }
+    Ok(registered)
+}
+
+pub fn install(opts: Options) -> Result<(), String> {
+    let server = find_server(opts.server.as_deref())?;
+    let model = match (opts.model, opts.download_model) {
+        (Some(path), _) => absolute(&path)?,
+        (None, Some(name)) => model::download(&name)?,
+        (None, None) => match find_model(&server) {
+            Some(path) => path,
+            None => {
+                println!("No Whisper model found; downloading {} (about 550 MB).", model::DEFAULT_MODEL);
+                model::download(model::DEFAULT_MODEL)?
+            }
+        },
+    };
+
+    let data = paths::data_dir();
+    fs::create_dir_all(&data).map_err(|e| format!("cannot create {}: {e}", data.display()))?;
+    let args = Config::load().map(|c| c.args).unwrap_or_default();
+    Config { server: server.clone(), model: model.clone(), args }.save()?;
+    let exe = install_self()?;
+    let registered = register(&exe)?;
+
+    println!("whisper-server: {}", server.display());
+    println!("model:          {}", model.display());
+    println!("helper:         {}", exe.display());
+    if registered.is_empty() {
+        println!("No Chromium-based browser profile found; start Chrome once, then run install again.");
+    } else {
+        println!("Registered with {}.", registered.join(", "));
+    }
+    println!("Extra server flags go in \"args\" in {}", paths::config_path().display());
+    Ok(())
+}
+
+pub fn uninstall(purge: bool) -> Result<(), String> {
+    for browser in paths::browsers() {
+        match browser.target {
+            Target::Dir(dir) => {
+                let _ = fs::remove_file(dir.join("NativeMessagingHosts").join(paths::manifest_file_name()));
+            }
+            Target::Registry(key) => {
+                let _ = Command::new("reg").args(["delete", &key, "/f"]).output();
+            }
+        }
+    }
+    let data = paths::data_dir();
+    if purge {
+        let _ = fs::remove_dir_all(&data);
+        println!("Removed {} including downloaded models.", data.display());
+    } else {
+        for path in [paths::installed_exe(), paths::config_path(), data.join(paths::manifest_file_name())] {
+            let _ = fs::remove_file(path);
+        }
+        println!("Helper removed. Downloaded models kept in {} (use --purge to delete).", paths::models_dir().display());
+    }
+    Ok(())
+}
+
+pub fn status() -> Result<(), String> {
+    println!("data dir: {}", paths::data_dir().display());
+    match Config::load() {
+        Ok(c) => {
+            println!("server:   {} {}", c.server.display(), if c.server.is_file() { "" } else { "(missing!)" });
+            println!("model:    {} {}", c.model.display(), if c.model.is_file() { "" } else { "(missing!)" });
+            if !c.args.is_empty() {
+                println!("args:     {}", c.args.join(" "));
+            }
+        }
+        Err(e) => println!("{e}"),
+    }
+    for browser in paths::browsers() {
+        let registered = match &browser.target {
+            Target::Dir(dir) => dir.join("NativeMessagingHosts").join(paths::manifest_file_name()).is_file(),
+            Target::Registry(key) => Command::new("reg")
+                .args(["query", key])
+                .output()
+                .is_ok_and(|o| o.status.success()),
+        };
+        if registered {
+            println!("registered: {}", browser.name);
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_install_options() {
+        let args: Vec<String> = ["--server", "/x/whisper-server", "--download-model", "small"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        let opts = parse(&args).unwrap();
+        assert_eq!(opts.server, Some(PathBuf::from("/x/whisper-server")));
+        assert_eq!(opts.download_model.as_deref(), Some("small"));
+        assert!(parse(&["--bogus".to_string()]).is_err());
+        assert!(parse(&["--model".to_string()]).is_err());
+    }
+
+    #[test]
+    fn homebrew_installs_register_the_stable_opt_path() {
+        assert_eq!(
+            homebrew_opt_path(Path::new("/opt/homebrew/Cellar/chrome-transcriber/0.1.0/bin/chrome-transcriber-helper")),
+            Some(PathBuf::from("/opt/homebrew/opt/chrome-transcriber/bin/chrome-transcriber-helper"))
+        );
+        assert_eq!(homebrew_opt_path(Path::new("/usr/local/bin/chrome-transcriber-helper")), None);
+    }
+
+    #[test]
+    fn manifest_allows_only_the_extension() {
+        let m = manifest(Path::new("/opt/helper"));
+        assert_eq!(m["name"], paths::HOST_NAME);
+        assert_eq!(m["allowed_origins"][0], format!("chrome-extension://{}/", paths::EXTENSION_ID));
+        assert_eq!(m["type"], "stdio");
+    }
+}
