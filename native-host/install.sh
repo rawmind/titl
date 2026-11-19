@@ -6,7 +6,7 @@
 # Defaults: ~/projects/whisper.cpp and <dir>/models/ggml-large-v3-turbo.bin
 set -eu
 
-HOST_NAME=com.local_whisper_subtitles.host
+HOST_NAME=com.chrome_transcriber.host
 EXTENSION_ID=fehpgpahkmanekioejihbpihpbacdjgb
 HERE=$(cd "$(dirname "$0")" && pwd)
 
@@ -41,7 +41,7 @@ for BROWSER_DIR in \
   cat > "$BROWSER_DIR/NativeMessagingHosts/$HOST_NAME.json" <<EOF
 {
   "name": "$HOST_NAME",
-  "description": "Starts whisper-server for Local Whisper Subtitles",
+  "description": "Starts whisper-server for Chrome Transcriber",
   "path": "$HERE/run-host.sh",
   "type": "stdio",
   "allowed_origins": ["chrome-extension://$EXTENSION_ID/"]

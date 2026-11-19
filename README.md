@@ -1,4 +1,4 @@
-# Local Whisper Subtitles
+# Chrome Transcriber
 
 Chrome extension (MV3) that shows live subtitles on YouTube using a local `whisper.cpp` server. Audio never leaves your machine.
 
@@ -14,7 +14,7 @@ Chrome extension (MV3) that shows live subtitles on YouTube using a local `whisp
    The manifest pins the extension ID (`fehpgpahkmanekioejihbpihpbacdjgb`); the helper only accepts that ID.
 4. Open a YouTube video, click the extension icon → **Start subtitles**.
 
-The first **Start** with nothing answering at the server URL launches `whisper-server` (Metal, about 4 s to load the model) through the helper. It then keeps running between sessions, so later starts are instant, and shuts down when Chrome quits. A server you started yourself is used as-is and never stopped. Server log: `~/Library/Logs/local-whisper-subtitles.log`. Extra server flags go in `"args"` in `native-host/config.json`. To remove the helper, run `native-host/uninstall.sh`.
+The first **Start** with nothing answering at the server URL launches `whisper-server` (Metal, about 4 s to load the model) through the helper. It then keeps running between sessions, so later starts are instant, and shuts down when Chrome quits. A server you started yourself is used as-is and never stopped. Server log: `~/Library/Logs/chrome-transcriber.log`. Extra server flags go in `"args"` in `native-host/config.json`. To remove the helper, run `native-host/uninstall.sh`.
 
 Server URL, language, mode and timing are on the **Options** page (popup → Settings). Only `http://127.0.0.1` / `http://localhost` URLs are accepted, on any port.
 

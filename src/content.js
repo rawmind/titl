@@ -1,7 +1,7 @@
 // Classic content script (no modules); may be injected twice, so guard.
 (() => {
-  if (window.__localWhisperSubtitles) return;
-  window.__localWhisperSubtitles = true;
+  if (window.__chromeTranscriber) return;
+  window.__chromeTranscriber = true;
 
   const LIVE_CLEAR_AFTER_MS = 6000;
   const LIVE_MAX_CHARS = 220;
@@ -51,13 +51,13 @@
     if (!player) return null;
     if (!root) {
       root = document.createElement('div');
-      root.className = 'lws-overlay';
+      root.className = 'ct-overlay';
       const box = document.createElement('div');
-      box.className = 'lws-text';
+      box.className = 'ct-text';
       textEl = document.createElement('span');
       box.append(textEl);
       badgeEl = document.createElement('div');
-      badgeEl.className = 'lws-badge';
+      badgeEl.className = 'ct-badge';
       root.append(badgeEl, box);
     }
     // YouTube is a SPA and may swap the player; reattach when needed.
@@ -66,7 +66,7 @@
       resizeObserver?.disconnect();
       resizeObserver = new ResizeObserver(() => {
         const size = Math.max(14, Math.min(44, player.clientHeight * 0.045));
-        root.style.setProperty('--lws-font-size', `${size}px`);
+        root.style.setProperty('--ct-font-size', `${size}px`);
       });
       resizeObserver.observe(player);
     }
@@ -76,13 +76,13 @@
   function setText(text) {
     if (!ensureOverlay() || textEl.textContent === text) return;
     textEl.textContent = text;
-    root.classList.toggle('lws-visible', Boolean(text));
+    root.classList.toggle('ct-visible', Boolean(text));
   }
 
   function setBadge(text) {
     if (!ensureOverlay() || badgeEl.textContent === text) return;
     badgeEl.textContent = text;
-    badgeEl.classList.toggle('lws-visible', Boolean(text));
+    badgeEl.classList.toggle('ct-visible', Boolean(text));
   }
 
   function showStatus({ lag, delayed, error }) {

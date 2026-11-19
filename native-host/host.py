@@ -17,7 +17,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(HERE, "config.json")
-LOG = os.path.expanduser("~/Library/Logs/local-whisper-subtitles.log")
+LOG = os.path.expanduser("~/Library/Logs/chrome-transcriber.log")
 START_TIMEOUT_SEC = 110
 LOCAL_HOSTS = ("127.0.0.1", "localhost")
 

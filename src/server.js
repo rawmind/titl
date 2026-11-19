@@ -1,6 +1,6 @@
 // Starts whisper-server on demand through the native messaging helper (native-host/).
 
-export const HOST_NAME = 'com.local_whisper_subtitles.host';
+export const HOST_NAME = 'com.chrome_transcriber.host';
 const START_TIMEOUT_MS = 120_000;
 
 let port = null;

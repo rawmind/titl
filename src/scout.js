@@ -1,8 +1,8 @@
 // Injected only into the hidden lookahead tab. Streams the <video> element's audio,
 // stamped with video time, to the background, and obeys play/pause/seek commands.
 (() => {
-  if (window.__localWhisperScout) return;
-  window.__localWhisperScout = true;
+  if (window.__chromeTranscriberScout) return;
+  window.__chromeTranscriberScout = true;
 
   const OUT_RATE = 16000;
   const BLOCK_SEC = 1;
