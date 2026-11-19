@@ -1,7 +1,7 @@
 import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
 
 const $ = (id) => document.getElementById(id);
-const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'showOriginal', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
+const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'showOriginal', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
 
 function fill(settings) {
   for (const f of FIELDS) {

@@ -11,7 +11,7 @@ use std::process::ExitCode;
 const HELP: &str = "chrome-transcriber-helper: installs and runs whisper-server for Chrome Transcriber
 
 USAGE:
-  chrome-transcriber-helper install [--server PATH] [--model PATH | --download-model NAME]
+  chrome-transcriber-helper install [--server PATH] [--model PATH | --download-model NAME] [--extension-id ID]
   chrome-transcriber-helper uninstall [--purge]
   chrome-transcriber-helper status
 
@@ -21,10 +21,11 @@ install         Find whisper-server and a model (downloading one if needed), cop
 --model         Path to a ggml model file.
 --download-model
                 Download a model by name, e.g. large-v3-turbo, large-v3-turbo-q5_0, small.
+--extension-id  Also accept this extension ID (e.g. a Chrome Web Store build). Remembered.
 uninstall       Unregister and remove the helper. --purge also deletes downloaded models.
 status          Show the configuration and where the helper is registered.
 
-Chrome starts this program itself (with the extension's origin as argument) to launch
+Titl (the Chrome Transcriber extension) needs this helper. Chrome starts this program itself (with the extension's origin as argument) to launch
 whisper-server on demand.";
 
 fn main() -> ExitCode {

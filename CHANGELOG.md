@@ -2,6 +2,27 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.3](https://github.com/rawmind/chrome-transcriber/releases/tag/v0.1.3) - 2026-11-20
+
+Prepares the extension for the Chrome Web Store under its new name, **Titl**.
+
+### Changed
+- The extension is now called **Titl** ("subtitle" in Serbian/Croatian). Chrome's branding rules don't allow "Chrome" in an extension's name. The repository, helper and Homebrew formula keep the name `chrome-transcriber`.
+- **Ad skipping is now opt-in** (Options → Timing, off by default). Before, the hidden lookahead tab clicked "Skip ad" automatically.
+- The hidden lookahead tab's group is now titled "Titl". Leftover "Transcriber" groups are still cleaned up.
+
+### Added
+- Icons and a Chrome Web Store promo tile.
+- `npm run package` builds the store zip (`dist/titl-<version>.zip`) without the manifest `key`.
+- `chrome-transcriber-helper install --extension-id ID` also accepts another extension ID (e.g. the Web Store build) and remembers it. `status` detects the extension under any accepted ID.
+- [PRIVACY.md](PRIVACY.md) and the store listing text in `store/listing.md`.
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/chrome-transcriber
+```
+Then reload the extension in `chrome://extensions`.
+
 ## [0.1.2](https://github.com/rawmind/chrome-transcriber/releases/tag/v0.1.2) - 2026-11-20
 
 Makes the last setup step obvious on a fresh machine: `chrome-transcriber-helper install` registers the helper, but Chrome only adds extensions from the Web Store automatically, so the extension still has to be loaded once by hand.

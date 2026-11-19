@@ -158,7 +158,10 @@ getState().then((state) => {
 });
 
 async function closeStrayLookaheadTabs() {
-  const groups = await chrome.tabGroups.query({ title: 'Transcriber' });
+  const groups = [
+    ...(await chrome.tabGroups.query({ title: 'Titl' })),
+    ...(await chrome.tabGroups.query({ title: 'Transcriber' })),
+  ];
   for (const group of groups) {
     const tabs = await chrome.tabs.query({ groupId: group.id });
     await chrome.tabs.remove(tabs.map((t) => t.id)).catch(() => {});

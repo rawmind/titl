@@ -34,8 +34,8 @@ fn homebrew_stable(dir: &Path) -> Option<PathBuf> {
     )))
 }
 
-pub fn entry(prefs: &Value) -> Option<(Option<String>, bool)> {
-    let settings = prefs.pointer(&format!("/extensions/settings/{}", paths::EXTENSION_ID))?;
+pub fn entry(prefs: &Value, ids: &[String]) -> Option<(Option<String>, bool)> {
+    let settings = ids.iter().find_map(|id| prefs.pointer(&format!("/extensions/settings/{id}")))?;
     let path = settings.get("path").and_then(Value::as_str).map(String::from);
     let disabled = match settings.get("disable_reasons") {
         Some(Value::Array(a)) => !a.is_empty(),
@@ -45,7 +45,7 @@ pub fn entry(prefs: &Value) -> Option<(Option<String>, bool)> {
     Some((path, disabled))
 }
 
-pub fn loaded() -> Vec<Loaded> {
+pub fn loaded(ids: &[String]) -> Vec<Loaded> {
     let mut found = Vec::new();
     for browser in paths::browsers() {
         let Ok(profiles) = fs::read_dir(&browser.user_data) else { continue };
@@ -56,7 +56,7 @@ pub fn loaded() -> Vec<Loaded> {
             }
             let hit = ["Secure Preferences", "Preferences"].iter().find_map(|file| {
                 let text = fs::read_to_string(profile.path().join(file)).ok()?;
-                entry(&serde_json::from_str(&text).ok()?)
+                entry(&serde_json::from_str(&text).ok()?, ids)
             });
             if let Some((path, disabled)) = hit {
                 found.push(Loaded { browser: browser.name, profile: name, path, disabled });
@@ -143,11 +143,14 @@ mod tests {
 
     #[test]
     fn reads_extension_entry_from_preferences() {
-        let id = paths::EXTENSION_ID;
+        let id = paths::UNPACKED_EXTENSION_ID;
+        let ids = vec![id.to_string()];
         let prefs = json!({ "extensions": { "settings": { id: { "location": 4, "path": "/x" } } } });
-        assert_eq!(entry(&prefs), Some((Some("/x".into()), false)));
+        assert_eq!(entry(&prefs, &ids), Some((Some("/x".into()), false)));
         let disabled = json!({ "extensions": { "settings": { id: { "disable_reasons": [1] } } } });
-        assert_eq!(entry(&disabled), Some((None, true)));
-        assert_eq!(entry(&json!({ "extensions": { "settings": {} } })), None);
+        assert_eq!(entry(&disabled, &ids), Some((None, true)));
+        assert_eq!(entry(&json!({ "extensions": { "settings": {} } }), &ids), None);
+        let store = json!({ "extensions": { "settings": { "abcdefghijklmnopabcdefghijklmnop": {} } } });
+        assert_eq!(entry(&store, &["abcdefghijklmnopabcdefghijklmnop".to_string()]), Some((None, false)));
     }
 }

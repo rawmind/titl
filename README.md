@@ -1,6 +1,8 @@
-# Chrome Transcriber
+# Titl
 
-Chrome extension that shows subtitles on any YouTube video, transcribed on your own Mac by [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It's built for Serbian and works with any language Whisper supports. Audio never leaves your machine: it only goes to `127.0.0.1`.
+<img src="icons/icon128.png" width="64" align="right" alt="">
+
+**Titl** (this repo: `chrome-transcriber`) is a Chrome extension that shows subtitles on any YouTube video, transcribed on your own Mac by [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It's built for Serbian and works with any language Whisper supports. Audio never leaves your machine: it only goes to `127.0.0.1`.
 
 ## Features
 
@@ -71,7 +73,7 @@ Per-user files (config, downloaded models, `server.log`) live in:
 1. Open a YouTube video.
 2. Click the extension icon, then **Start subtitles**.
 3. In lookahead mode:
-   - A muted tab opens next to yours for a moment (Chrome only plays media in a tab that has been shown). Then focus returns to your tab and the muted tab is tucked into a collapsed grey **Transcriber** tab group. Click the group to look at it, e.g. if it is stuck on an ad.
+   - A muted tab opens next to yours for a moment (Chrome only plays media in a tab that has been shown). Then focus returns to your tab and the muted tab is tucked into a collapsed grey **Titl** tab group. Click the group to look at it, e.g. if it is stuck on an ad.
    - Your video pauses briefly while "Preparing subtitles…" is shown, about 12 s on first start, then plays with subtitles.
    - Press play at any time to skip the wait.
 4. To finish, click **Stop subtitles**. The extension also stops by itself when you close either tab.
@@ -93,6 +95,7 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Serbian script | Latin | Latin, Cyrillic, or as returned (may mix). Only used for `sr`. |
 | Translate to | Off | Target language for Chrome's on-device translator. |
 | Show the original above the translation | on | Two-line display: original small on top, translation below. |
+| Skip ads in the hidden tab | off | Lookahead: click YouTube's "Skip ad" in the muted tab when offered. Otherwise it waits the ad out. |
 | Live window / step | 6 s / 4 s | Live mode chunking (2 s overlap). |
 | Max window | 12 s | Largest chunk when transcription falls behind. |
 | Lag warning threshold | 10 s | Live mode: show "delayed" past this. |
@@ -126,7 +129,7 @@ Automatic language detection isn't supported yet.
 | "auto-start helper is not installed" | Run `chrome-transcriber-helper install`, then try again. |
 | "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `chrome-transcriber-helper status`: a path marked "(missing!)" means re-run `install`. |
 | "Cannot reach whisper-server" | The server URL or port is wrong, or auto-start is off. Use **Test connection** in Options. |
-| Stuck on "Preparing subtitles…" | Expand the **Transcriber** tab group and look at the hidden tab: it may be showing an ad, a consent page or a sign-in prompt. Fix it there, or switch to live mode. |
+| Stuck on "Preparing subtitles…" | Expand the **Titl** tab group and look at the hidden tab: it may be showing an ad, a consent page or a sign-in prompt. Fix it there, or switch to live mode. |
 | Subtitles appear in the wrong script | Options → Serbian script. |
 | Translation doesn't appear | The language pack may not be downloaded yet. Use **Download translation model** in Options, or click the YouTube page once while subtitles are on. |
 | "Click the video once to download the translation model" | Click anywhere on the YouTube page, or use **Download translation model** in Options. |
@@ -148,7 +151,7 @@ your tab ── main-state (time, paused, rate) ──▶ background ◀── s
 - The hidden tab's audio comes from `video.captureStream()` and is stamped with video time.
 - Audio is cut into 8 s windows that don't overlap. Each window starts where the last *complete* Whisper segment ended. A segment within 1 s of the window edge may be cut mid-word, so it is redone in the next window.
 - Segment timestamps place each cue at an exact video time. Your tab shows the cue at `currentTime + showEarlySec`.
-- The hidden tab follows seeks, video changes and playback rate. It pauses once it is 45 s ahead and clicks "Skip ad" when it can.
+- The hidden tab follows seeks, video changes and playback rate. It pauses once it is 45 s ahead and, if enabled in Options, clicks "Skip ad".
 - Cost: the video streams twice.
 
 ### Live mode
@@ -190,6 +193,9 @@ helper/              Rust: installer and native messaging host
   src/host.rs        native messaging protocol, whisper-server process
   src/model.rs       model download from Hugging Face
   src/paths.rs       per-OS folders and browser registration locations
+icons/               extension icons (SVG sources and PNGs)
+store/               Chrome Web Store listing text and promo images
+scripts/package.mjs  builds the store zip
 tests/               node:test unit tests
 ```
 
@@ -198,6 +204,7 @@ tests/               node:test unit tests
 ```bash
 npm test                                         # extension; no dependencies, Node 20+
 cargo test --manifest-path helper/Cargo.toml     # helper
+npm run package                                  # Chrome Web Store zip in dist/ (manifest key removed)
 ```
 
 After editing, reload the extension in `chrome://extensions`. If you changed `content.js`, also reload the YouTube tab.
@@ -205,6 +212,10 @@ After editing, reload the extension in `chrome://extensions`. If you changed `co
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/rawmind/chrome-transcriber/releases).
+
+## Privacy
+
+Nothing leaves your computer. See [PRIVACY.md](PRIVACY.md).
 
 ## License
 

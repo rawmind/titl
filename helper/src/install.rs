@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::config::{self, Config};
 use crate::extension;
 use crate::model;
 use crate::paths::{self, Target};
@@ -13,6 +13,7 @@ pub struct Options {
     pub server: Option<PathBuf>,
     pub model: Option<PathBuf>,
     pub download_model: Option<String>,
+    pub extension_ids: Vec<String>,
 }
 
 pub fn parse(args: &[String]) -> Result<Options, String> {
@@ -24,6 +25,13 @@ pub fn parse(args: &[String]) -> Result<Options, String> {
             "--server" => opts.server = Some(PathBuf::from(value()?)),
             "--model" => opts.model = Some(PathBuf::from(value()?)),
             "--download-model" => opts.download_model = Some(value()?),
+            "--extension-id" => {
+                let id = value()?;
+                if !config::valid_extension_id(&id) {
+                    return Err(format!("not a Chrome extension ID: {id}"));
+                }
+                opts.extension_ids.push(id);
+            }
             other => return Err(format!("unknown option: {other}")),
         }
     }
@@ -107,13 +115,13 @@ fn install_self() -> Result<PathBuf, String> {
     Ok(target)
 }
 
-pub fn manifest(exe: &Path) -> serde_json::Value {
+pub fn manifest(exe: &Path, ids: &[String]) -> serde_json::Value {
     json!({
         "name": paths::HOST_NAME,
         "description": "Starts whisper-server for Chrome Transcriber",
         "path": exe,
         "type": "stdio",
-        "allowed_origins": [format!("chrome-extension://{}/", paths::EXTENSION_ID)],
+        "allowed_origins": ids.iter().map(|id| format!("chrome-extension://{id}/")).collect::<Vec<_>>(),
     })
 }
 
@@ -122,8 +130,8 @@ fn reg(args: &[&str]) -> Result<(), String> {
     if status.success() { Ok(()) } else { Err(format!("reg {} failed", args.join(" "))) }
 }
 
-fn register(exe: &Path) -> Result<Vec<&'static str>, String> {
-    let text = serde_json::to_string_pretty(&manifest(exe)).map_err(|e| e.to_string())? + "\n";
+fn register(exe: &Path, ids: &[String]) -> Result<Vec<&'static str>, String> {
+    let text = serde_json::to_string_pretty(&manifest(exe, ids)).map_err(|e| e.to_string())? + "\n";
     let mut registered = Vec::new();
     for browser in paths::browsers() {
         match browser.target {
@@ -163,14 +171,29 @@ pub fn install(opts: Options) -> Result<(), String> {
 
     let data = paths::data_dir();
     fs::create_dir_all(&data).map_err(|e| format!("cannot create {}: {e}", data.display()))?;
-    let args = Config::load().map(|c| c.args).unwrap_or_default();
+    let previous = Config::load().ok();
+    let args = previous.as_ref().map(|c| c.args.clone()).unwrap_or_default();
+    let mut extra_ids = previous.map(|c| c.extension_ids).unwrap_or_default();
+    for id in opts.extension_ids {
+        if !extra_ids.contains(&id) {
+            extra_ids.push(id);
+        }
+    }
+    let ids = config::extension_ids(&extra_ids);
     let extension_dir = env::current_exe()
         .ok()
         .and_then(|e| absolute(&e).ok())
         .and_then(|e| extension::find_dir(&e));
-    Config { server: server.clone(), model: model.clone(), args, extension: extension_dir.clone() }.save()?;
+    Config {
+        server: server.clone(),
+        model: model.clone(),
+        args,
+        extension: extension_dir.clone(),
+        extension_ids: extra_ids,
+    }
+    .save()?;
     let exe = install_self()?;
-    let registered = register(&exe)?;
+    let registered = register(&exe, &ids)?;
 
     println!("whisper-server: {}", server.display());
     println!("model:          {}", model.display());
@@ -182,12 +205,12 @@ pub fn install(opts: Options) -> Result<(), String> {
     }
     println!("Extra server flags go in \"args\" in {}", paths::config_path().display());
     println!();
-    print_extension_steps(extension_dir.as_deref());
+    print_extension_steps(extension_dir.as_deref(), &ids);
     Ok(())
 }
 
-fn print_extension_steps(dir: Option<&Path>) {
-    let loaded = extension::loaded();
+fn print_extension_steps(dir: Option<&Path>, ids: &[String]) {
+    let loaded = extension::loaded(ids);
     if let Some(first) = loaded.iter().find(|l| !l.disabled) {
         println!("The extension is already loaded in {} ({}). You're all set.", first.browser, first.profile);
         return;
@@ -271,7 +294,8 @@ pub fn status() -> Result<(), String> {
             println!("registered: {}", browser.name);
         }
     }
-    let loaded = extension::loaded();
+    let extra = Config::load().map(|c| c.extension_ids).unwrap_or_default();
+    let loaded = extension::loaded(&config::extension_ids(&extra));
     if loaded.is_empty() {
         println!("extension: not loaded in any browser (see `chrome-transcriber-helper install` output)");
     }
@@ -330,9 +354,13 @@ mod tests {
 
     #[test]
     fn manifest_allows_only_the_extension() {
-        let m = manifest(Path::new("/opt/helper"));
+        let ids = config::extension_ids(&["abcdefghijklmnopabcdefghijklmnop".to_string()]);
+        let m = manifest(Path::new("/opt/helper"), &ids);
         assert_eq!(m["name"], paths::HOST_NAME);
-        assert_eq!(m["allowed_origins"][0], format!("chrome-extension://{}/", paths::EXTENSION_ID));
+        assert_eq!(m["allowed_origins"][0], format!("chrome-extension://{}/", paths::UNPACKED_EXTENSION_ID));
+        assert_eq!(m["allowed_origins"][1], "chrome-extension://abcdefghijklmnopabcdefghijklmnop/");
+        assert!(config::valid_extension_id(paths::UNPACKED_EXTENSION_ID));
+        assert!(!config::valid_extension_id("not-an-id"));
         assert_eq!(m["type"], "stdio");
     }
 }

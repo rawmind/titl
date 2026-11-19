@@ -180,6 +180,7 @@
 
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type !== 'scout-cmd' || !video || orphaned) return;
+    if (msg.skipAd) skipAd();
     if (msg.rate) video.playbackRate = msg.rate;
     if (msg.seek != null) {
       dropRun();
@@ -189,10 +190,7 @@
     if (msg.play) video.play().catch(() => {});
   });
 
-  stateTimer = setInterval(() => {
-    if (isAd()) skipAd();
-    reportState();
-  }, STATE_MS);
+  stateTimer = setInterval(() => reportState(), STATE_MS);
 
   pump();
 })();

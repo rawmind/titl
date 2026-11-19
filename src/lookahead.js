@@ -186,7 +186,7 @@ export class LookaheadSession {
 
   async hideScout() {
     const groupId = await chrome.tabs.group({ tabIds: this.scoutTabId });
-    await chrome.tabGroups.update(groupId, { title: 'Transcriber', color: 'grey', collapsed: true });
+    await chrome.tabGroups.update(groupId, { title: 'Titl', color: 'grey', collapsed: true });
   }
 
   toMain(msg) {
@@ -248,7 +248,10 @@ export class LookaheadSession {
       }
       return;
     }
-    if (scout.ad) return;
+    if (scout.ad) {
+      if (config.skipAds) this.command({ skipAd: true });
+      return;
+    }
 
     const lead = target - main.time;
     const offset = scout.time - target;
