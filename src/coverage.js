@@ -1,4 +1,3 @@
-/** Merged, sorted list of [start, end] video-time ranges that have been transcribed. */
 export class Coverage {
   constructor() {
     this.ranges = [];
@@ -14,7 +13,6 @@ export class Coverage {
     }
   }
 
-  /** End of the covered range containing `t`, or null if `t` is not covered. */
   endAt(t, tolerance = 1) {
     return this.ranges.find(([a, b]) => t >= a - tolerance && t <= b)?.[1] ?? null;
   }

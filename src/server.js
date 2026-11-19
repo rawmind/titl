@@ -1,11 +1,8 @@
-// Starts whisper-server on demand through the native messaging helper (native-host/).
-
 export const HOST_NAME = 'com.chrome_transcriber.host';
 const START_TIMEOUT_MS = 120_000;
 
 let port = null;
 
-/** True if something answers HTTP at the inference URL (any status counts). */
 export async function isServerUp(serverUrl) {
   try {
     await fetch(serverUrl, { method: 'POST', body: new FormData(), signal: AbortSignal.timeout(2000) });
@@ -15,12 +12,6 @@ export async function isServerUp(serverUrl) {
   }
 }
 
-/**
- * Makes sure whisper-server answers at `serverUrl`, launching it via the helper if
- * needed. The helper owns the process and stops it when the connection closes. The
- * open connection also keeps this service worker alive, so in practice the server
- * runs until Chrome quits.
- */
 export async function ensureServer(serverUrl) {
   if (await isServerUp(serverUrl)) return;
 

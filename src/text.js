@@ -1,6 +1,3 @@
-// Text cleanup and overlap deduplication for consecutive overlapping windows.
-
-// Whisper may answer in either Serbian script; compare both as plain ASCII Latin.
 const CYRILLIC = {
   а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', ђ: 'dj', е: 'e', ж: 'z', з: 'z', и: 'i',
   ј: 'j', к: 'k', л: 'l', љ: 'lj', м: 'm', н: 'n', њ: 'nj', о: 'o', п: 'p', р: 'r',
@@ -17,9 +14,6 @@ export function normalizeToken(token) {
     .replace(/[^\p{L}\p{N}]/gu, '');
 }
 
-// Whisper switches between Serbian Cyrillic and Latin from window to window, so
-// output is transliterated into one script. Both alphabets map one-to-one, except
-// that Latin digraphs (lj, nj, dž) are rarely two separate letters, e.g. "injekcija".
 const TO_LATIN = {
   а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', ђ: 'đ', е: 'e', ж: 'ž', з: 'z', и: 'i',
   ј: 'j', к: 'k', л: 'l', љ: 'lj', м: 'm', н: 'n', њ: 'nj', о: 'o', п: 'p', р: 'r',
@@ -29,7 +23,6 @@ const TO_CYRILLIC = Object.fromEntries(Object.entries(TO_LATIN).map(([cyr, lat])
 
 function matchCase(source, replacement) {
   if (source === source.toLowerCase()) return replacement;
-  // "LJUDI" → "ЉУДИ" but "Ljudi" → "Људи"; single uppercase letters capitalize.
   return source === source.toUpperCase() && source.length > 1
     ? replacement.toUpperCase()
     : replacement[0].toUpperCase() + replacement.slice(1);
@@ -39,7 +32,6 @@ export function toLatin(text) {
   return text.replace(/[Ѐ-ӿ]/g, (c, i) => {
     const lat = TO_LATIN[c.toLowerCase()];
     if (!lat || c === c.toLowerCase()) return lat ?? c;
-    // Uppercase digraph: all caps if the next letter is also uppercase (ЉУДИ → LJUDI).
     const next = text[i + 1];
     const allCaps = next && next !== next.toLowerCase();
     return allCaps ? lat.toUpperCase() : lat[0].toUpperCase() + lat.slice(1);
@@ -63,7 +55,6 @@ export function tokenize(text) {
   return text.trim().split(/\s+/).filter((t) => normalizeToken(t) !== '');
 }
 
-// Phrases Whisper tends to invent on music, silence or window edges.
 const HALLUCINATIONS = [
   /^hvala (vam )?(na (pažnji|gledanju)|što ste gledali)\.?$/i,
   /^(титлови|titlovi|prevod|subtitles|субтитри)\b/i,
@@ -106,11 +97,6 @@ function tokensMatch(a, b) {
   return a === b || (a.length >= 5 && b.length >= 5 && editDistanceAtMostOne(a, b));
 }
 
-/**
- * Returns the index in `cur` where genuinely new tokens begin, by finding the longest
- * run where a suffix of `prev` equals a prefix of `cur`. A few edge tokens on either
- * side may be skipped, since words cut at a window boundary are often garbled.
- */
 export function findNewStart(prev, cur, { maxSkipPrev = 1, maxSkipCur = 2, minMatch = 2 } = {}) {
   const p = prev.map(normalizeToken);
   const c = cur.map(normalizeToken);
@@ -119,7 +105,6 @@ export function findNewStart(prev, cur, { maxSkipPrev = 1, maxSkipCur = 2, minMa
       const pStart = p.length - j - k;
       if (pStart < 0) continue;
       for (let i = 0; i <= maxSkipCur && i + k <= c.length; i++) {
-        // A single-token overlap only counts if it is long and exactly at the seam.
         if (k < minMatch && !(i === 0 && j === 0 && c[0].length >= 5)) continue;
         let ok = true;
         for (let t = 0; t < k && ok; t++) ok = tokensMatch(p[pStart + t], c[i + t]);
@@ -130,7 +115,6 @@ export function findNewStart(prev, cur, { maxSkipPrev = 1, maxSkipCur = 2, minMa
   return 0;
 }
 
-/** Splits a long cue into readable pieces, timed in proportion to their length. */
 export function splitCue({ start, end, text }, maxChars = 84) {
   const parts = [];
   let cur = '';
@@ -161,7 +145,6 @@ export class Transcript {
     this.tokens = [];
   }
 
-  /** Appends a window's text and returns only the part not already transcribed. */
   append(text) {
     const cur = tokenize(text);
     if (!cur.length) return '';

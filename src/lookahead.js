@@ -3,15 +3,8 @@ import { Coverage } from './coverage.js';
 import { SAMPLE_RATE, transcribe } from './whisper.js';
 import { Transcript, applyScript, cleanText, splitCue } from './text.js';
 
-// Segments ending this close to the window edge may be cut mid-word; they are
-// re-transcribed at the start of the next window instead of being committed.
 const TAIL_SEC = 1;
 
-/**
- * Turns timestamped audio from the lookahead tab into cues on the video timeline.
- * Each window starts where the last committed segment ended, so windows do not
- * overlap and text dedup is only a safety net at the seams.
- */
 export class LookaheadTranscriber {
   constructor(config, { transcribe, onCues, onError }) {
     this.config = config;
@@ -29,7 +22,6 @@ export class LookaheadTranscriber {
     this.gen = (this.gen ?? 0) + 1;
   }
 
-  /** `t0` is the video time of the first sample; `rate` the playback rate it was played at. */
   addAudio({ t0, rate, samples }) {
     const t1 = t0 + (samples.length / SAMPLE_RATE) * rate;
     const last = this.blocks.at(-1);
@@ -42,7 +34,6 @@ export class LookaheadTranscriber {
     this.pump();
   }
 
-  /** The lookahead tab reached the end of the video: transcribe whatever is left. */
   finish() {
     if (this.final) return;
     this.final = true;
@@ -50,7 +41,6 @@ export class LookaheadTranscriber {
   }
 
   async pump() {
-    // Audio that arrives while a step is running sets `wake` so it is not missed.
     this.wake = true;
     if (this.busy) return;
     this.busy = true;
@@ -64,7 +54,6 @@ export class LookaheadTranscriber {
     }
   }
 
-  // Processes one window if enough audio is buffered. Returns true to keep going.
   async step() {
     const last = this.blocks.at(-1);
     if (!last) return false;
@@ -74,7 +63,6 @@ export class LookaheadTranscriber {
     const needed = this.config.lookaheadWindowSec * rate;
     if (available < (this.final ? 0.3 : needed)) return false;
 
-    // Fall-behind handling: one bigger window rather than a queue of small ones.
     const we = ws + Math.min(available, this.config.maxWindowSec * rate);
     const isLast = this.final && we >= last.t1;
     const samples = this.extract(ws, we, rate);
@@ -90,7 +78,7 @@ export class LookaheadTranscriber {
       ({ segments = [] } = await this.transcribe(samples));
     } catch (err) {
       this.onError(err);
-      return false; // Retried on the next audio block.
+      return false;
     }
     if (gen !== this.gen) return true;
 
@@ -142,10 +130,6 @@ function decodeInt16Base64(data) {
   return Float32Array.from(pcm, (v) => v / 32768);
 }
 
-/**
- * Owns the hidden lookahead tab: keeps it playing ahead of the user's tab, feeds
- * its audio to the transcriber, and sends resulting cues to the user's tab.
- */
 export class LookaheadSession {
   constructor(mainTabId, config) {
     this.mainTabId = mainTabId;
@@ -168,8 +152,6 @@ export class LookaheadSession {
   async start({ videoId, time }) {
     this.videoId = videoId;
     const main = await chrome.tabs.get(this.mainTabId);
-    // Chrome defers media in tabs that were never shown, so open it in the foreground
-    // and switch back once it plays.
     const tab = await chrome.tabs.create({
       url: watchUrl(videoId, time),
       windowId: main.windowId,
@@ -236,7 +218,6 @@ export class LookaheadSession {
     if (!main || !scout || this.stopped || main.ad) return;
 
     if (main.videoId && main.videoId !== this.videoId) {
-      // User navigated to another video.
       this.videoId = main.videoId;
       this.coverage = new Coverage();
       this.transcriber.reset();
@@ -246,12 +227,10 @@ export class LookaheadSession {
     }
     if (Date.now() < this.holdUntil) return;
 
-    // Where new transcription is needed: the end of what is covered around the playhead.
     const target = this.coverage.endAt(main.time) ?? main.time;
     const done = Number.isFinite(main.duration) && target >= main.duration - 1;
 
     if (scout.videoId !== this.videoId) {
-      // YouTube autoplayed the next video in the lookahead tab, or it got lost.
       if (!done) {
         chrome.tabs.update(this.scoutTabId, { url: watchUrl(this.videoId, target) }).catch(() => {});
         this.hold(5000);

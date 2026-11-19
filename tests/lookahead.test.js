@@ -35,7 +35,6 @@ test('cues land on the video timeline; tail segment is retried next window', asy
     ],
     [{ start: 0, end: 5, text: 'Druga koja je presečena na kraju.' }],
   ]);
-  // Audio starts at video time 100 s.
   for (let i = 0; i < 16; i++) {
     t.addAudio({ t0: 100 + i, rate: 1, samples: loud(1) });
     await flush();
@@ -43,7 +42,7 @@ test('cues land on the video timeline; tail segment is retried next window', asy
 
   assert.deepEqual(calls.slice(0, 2), [8, 8]);
   assert.deepEqual(emitted[0].cues, [{ start: 100, end: 103, text: 'Prva rečenica.' }]);
-  assert.equal(emitted[0].to, 103); // Committed only up to the last complete segment.
+  assert.equal(emitted[0].to, 103);
   assert.equal(emitted[1].from, 103);
   assert.equal(emitted[1].cues[0].start, 103);
   assert.equal(emitted[1].cues[0].text, 'Druga koja je presečena na kraju.');
@@ -75,7 +74,6 @@ test('a seek (time jump) restarts the timeline at the new position', async () =>
 
 test('playback rate scales whisper timestamps to video time', async () => {
   const { t, emitted } = setup([[{ start: 2, end: 4, text: 'Brže.' }]]);
-  // At 1.5x, each second of audio covers 1.5 s of video.
   for (let i = 0; i < 8; i++) t.addAudio({ t0: 10 + i * 1.5, rate: 1.5, samples: loud(1) });
   await flush();
   assert.deepEqual(emitted[0].cues[0], { start: 13, end: 16, text: 'Brže.' });

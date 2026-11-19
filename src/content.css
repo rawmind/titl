@@ -9,7 +9,6 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  /* Above the video, never intercepting clicks on YouTube controls. */
   z-index: 45;
   pointer-events: none;
   transition: bottom 0.2s ease;
@@ -24,7 +23,6 @@
   flex-direction: column;
   justify-content: flex-end;
   max-width: 100%;
-  /* Two lines; the oldest text scrolls off the top. */
   max-height: calc(2 * 1.3 * var(--ct-font-size) + 0.5em);
   overflow: hidden;
   padding: 0.25em 0.6em;

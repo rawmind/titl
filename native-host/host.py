@@ -1,10 +1,3 @@
-"""Chrome native messaging host that starts and stops whisper-server for the extension.
-
-Chrome launches this process when the extension connects and closes stdin when the
-connection ends; the server is stopped then, so it never outlives its user.
-Protocol: each message is a 4-byte little-endian length followed by UTF-8 JSON.
-"""
-
 import json
 import os
 import signal
@@ -43,7 +36,7 @@ def reachable(host, port):
     try:
         urllib.request.urlopen(request, timeout=2)
     except urllib.error.HTTPError:
-        return True  # It answered, just not happily about an empty request.
+        return True
     except OSError:
         return False
     return True
@@ -79,7 +72,6 @@ def start(host, port):
         command,
         cwd=os.path.dirname(config["server"]),
         stdin=subprocess.DEVNULL,
-        # Never inherit stdout: it is the channel to Chrome.
         stdout=log,
         stderr=log,
     )

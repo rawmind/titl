@@ -2,7 +2,6 @@ import { encodeWav } from './audio.js';
 
 export const SAMPLE_RATE = 16000;
 
-/** POSTs 16 kHz mono samples to whisper-server and returns its parsed JSON. */
 export async function transcribe(config, samples, { verbose = false, signal } = {}) {
   const form = new FormData();
   form.append('file', new Blob([encodeWav(samples, SAMPLE_RATE)], { type: 'audio/wav' }), 'window.wav');

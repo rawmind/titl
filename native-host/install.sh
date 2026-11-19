@@ -1,9 +1,4 @@
 #!/bin/sh
-# Registers the auto-start helper with Chrome.
-#
-#   native-host/install.sh [WHISPER_CPP_DIR] [MODEL_PATH]
-#
-# Defaults: ~/projects/whisper.cpp and <dir>/models/ggml-large-v3-turbo.bin
 set -eu
 
 HOST_NAME=com.chrome_transcriber.host
@@ -18,7 +13,6 @@ SERVER=$WHISPER_DIR/build/bin/whisper-server
 [ -x "$SERVER" ] || { echo "Not found: $SERVER (build whisper.cpp first)" >&2; exit 1; }
 [ -f "$MODEL" ] || { echo "Not found: $MODEL" >&2; exit 1; }
 
-# Chrome starts hosts with a minimal environment, so pin the interpreter's real path.
 PYTHON=$(python3 -c 'import sys; print(sys.executable)')
 
 python3 - "$HERE/config.json" "$SERVER" "$MODEL" <<'EOF'

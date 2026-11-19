@@ -44,8 +44,6 @@ $('test').addEventListener('click', async () => {
   if (!isLocalUrl(url)) return say($('testResult'), 'Not a local http URL', false);
   say($('testResult'), 'Testing…', true);
   try {
-    // An empty POST is cheap and proves the endpoint exists; whisper-server answers
-    // it with a "no file" error rather than running inference.
     const res = await fetch(url, { method: 'POST', body: new FormData(), signal: AbortSignal.timeout(5000) });
     if (res.status === 404) return say($('testResult'), 'Server is up, but this path returns 404', false);
     say($('testResult'), `Reachable (HTTP ${res.status})`, true);

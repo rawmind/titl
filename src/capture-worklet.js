@@ -1,4 +1,3 @@
-// Runs in the 16 kHz capture AudioContext; input is downmixed to mono by the node config.
 const BATCH = 2048;
 
 class PcmCapture extends AudioWorkletProcessor {

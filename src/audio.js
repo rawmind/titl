@@ -1,5 +1,3 @@
-// Fixed-capacity sample store addressed by absolute sample index, so memory stays
-// bounded no matter how far inference falls behind playback.
 export class RingBuffer {
   constructor(capacity) {
     this.buf = new Float32Array(capacity);
@@ -31,7 +29,6 @@ export function rms(samples) {
   return samples.length ? Math.sqrt(sum / samples.length) : 0;
 }
 
-// 16-bit PCM mono WAV.
 export function encodeWav(samples, sampleRate) {
   const view = new DataView(new ArrayBuffer(44 + samples.length * 2));
   const ascii = (offset, s) => [...s].forEach((c, i) => view.setUint8(offset + i, c.charCodeAt(0)));
@@ -40,8 +37,8 @@ export function encodeWav(samples, sampleRate) {
   ascii(8, 'WAVE');
   ascii(12, 'fmt ');
   view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true); // PCM
-  view.setUint16(22, 1, true); // mono
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
   view.setUint32(24, sampleRate, true);
   view.setUint32(28, sampleRate * 2, true);
   view.setUint16(32, 2, true);

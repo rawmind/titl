@@ -1,4 +1,3 @@
-// Classic content script (no modules); may be injected twice, so guard.
 (() => {
   if (window.__chromeTranscriber) return;
   window.__chromeTranscriber = true;
@@ -15,11 +14,9 @@
   let resizeObserver = null;
   let statusText = '';
 
-  // Live mode: rolling text, shown as it arrives.
   let liveBuffer = '';
   let liveClearTimer = null;
 
-  // Lookahead mode: cues on the video timeline.
   let options = null;
   let timer = null;
   let cueVideoId = null;
@@ -27,7 +24,7 @@
   let coverage = [];
   let lastReport = 0;
   let attachedVideo = null;
-  let waiting = false; // Paused by us until enough is transcribed.
+  let waiting = false;
   let resumingByUs = false;
   let checkOnPlay = false;
 
@@ -60,7 +57,6 @@
       badgeEl.className = 'ct-badge';
       root.append(badgeEl, box);
     }
-    // YouTube is a SPA and may swap the player; reattach when needed.
     if (root.parentElement !== player) {
       player.append(root);
       resizeObserver?.disconnect();
@@ -92,8 +88,6 @@
     if (!waiting) setBadge(statusText);
   }
 
-  // ---- Live mode ----
-
   function showLiveCaption(text) {
     liveBuffer = `${liveBuffer} ${text}`.trim();
     if (liveBuffer.length > LIVE_MAX_CHARS) {
@@ -107,8 +101,6 @@
       setText('');
     }, LIVE_CLEAR_AFTER_MS);
   }
-
-  // ---- Lookahead mode ----
 
   function resetCues(videoId) {
     cueVideoId = videoId;
@@ -176,7 +168,6 @@
       if (resumingByUs) {
         resumingByUs = false;
       } else if (waiting) {
-        // The user pressed play while we were waiting: respect it.
         waiting = false;
         setBadge(statusText);
       }

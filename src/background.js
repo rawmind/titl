@@ -4,7 +4,6 @@ import { ensureServer } from './server.js';
 
 const OFFSCREEN_URL = 'src/offscreen.html';
 
-// Lookahead state lives in memory; the steady message flow keeps the worker alive.
 let lookahead = null;
 
 async function getState() {
@@ -27,7 +26,6 @@ async function ensureContentScript(tabId) {
   try {
     await chrome.tabs.sendMessage(tabId, { type: 'ping' });
   } catch {
-    // Tab was open before the extension was installed/reloaded.
     await chrome.scripting.insertCSS({ target: { tabId }, files: ['src/content.css'] });
     await chrome.scripting.executeScript({ target: { tabId }, files: ['src/content.js'] });
   }
@@ -69,7 +67,6 @@ async function start(tabId) {
 
   await ensureContentScript(tabId);
   const info = await chrome.tabs.sendMessage(tabId, { type: 'info' });
-  // Live streams have no future to look ahead into.
   const mode = config.mode === 'lookahead' && info?.videoId && !info.live ? 'lookahead' : 'live';
 
   await sendToTab(tabId, {
@@ -90,8 +87,6 @@ async function stop() {
   const { tabId, scoutTabId } = await getState();
   lookahead?.stop();
   lookahead = null;
-  // whisper-server is left running so the next start skips the model load.
-  // After a worker restart the session object is gone, but the tab id was persisted.
   if (scoutTabId != null) await chrome.tabs.remove(scoutTabId).catch(() => {});
 
   const contexts = await chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] });
@@ -111,7 +106,6 @@ async function handle(msg, sender) {
     case 'stop':
       return stop();
 
-    // Live mode (from the offscreen document).
     case 'caption': {
       const { tabId } = await getState();
       return sendToTab(tabId, { type: 'caption', text: msg.text });
@@ -121,7 +115,6 @@ async function handle(msg, sender) {
       return sendToTab(tabId, { type: 'status', lag: msg.lag, delayed: msg.delayed, error: msg.error });
     }
 
-    // Lookahead mode (from the user's tab and the hidden tab).
     case 'main-state':
       if (lookahead && fromTab === lookahead.mainTabId) lookahead.onMainState(msg);
       return;
@@ -154,7 +147,6 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   if (tabId === mainTabId || tabId === scoutTabId) await stop();
 });
 
-// A worker restart loses the lookahead session; clean up what it left behind.
 getState().then((state) => {
   if (state.status === 'running' && state.mode === 'lookahead' && !lookahead) stop();
 });

@@ -35,11 +35,9 @@ async function start(streamId, config) {
     video: false,
   });
 
-  // Capturing mutes the tab, so route the audio back out at full quality.
   const playback = new AudioContext();
   playback.createMediaStreamSource(stream).connect(playback.destination);
 
-  // Separate context at Whisper's rate; Chrome resamples the stream for us.
   const capture = new AudioContext({ sampleRate: SAMPLE_RATE });
   await capture.audioWorklet.addModule('capture-worklet.js');
   const worklet = new AudioWorkletNode(capture, 'pcm-capture', {
@@ -81,9 +79,6 @@ function stop() {
   s.capture.close();
 }
 
-// Only one request is ever in flight. While it runs, audio keeps accumulating in the
-// ring buffer; the next window then covers everything since the last one (up to
-// maxWindowSec), so a slow server produces fewer, longer windows instead of a backlog.
 function tick() {
   const s = session;
   if (!s || s.busy) return;
@@ -96,7 +91,7 @@ function tick() {
   const maxLen = config.maxWindowSec * SAMPLE_RATE;
   if (end - start > maxLen) {
     start = end - maxLen;
-    s.transcript.reset(); // Skipped audio: the overlap with the previous window is gone.
+    s.transcript.reset();
   }
   s.lastEnd = end;
 

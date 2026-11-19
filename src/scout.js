@@ -1,5 +1,3 @@
-// Injected only into the hidden lookahead tab. Streams the <video> element's audio,
-// stamped with video time, to the background, and obeys play/pause/seek commands.
 (() => {
   if (window.__chromeTranscriberScout) return;
   window.__chromeTranscriberScout = true;
@@ -11,7 +9,6 @@
   let video = null;
   let stream = null;
   let reader = null;
-  // Current continuous run: video time at its first sample and samples seen since.
   let run = null;
   let pending = [];
   let pendingFrames = 0;
@@ -86,7 +83,6 @@
     pending = [];
     pendingFrames = 0;
     pendingT0 = run.t0 + (run.frames / sampleRate) * run.rate;
-    // Keep blocks in order even though encoding is async.
     sendChain = sendChain.then(async () => send({ ...msg, data: await encode(chunks, frames, sampleRate) }));
   }
 
@@ -98,7 +94,6 @@
       return;
     }
     if (video.paused) {
-      // Keep the run: after resuming, the timeline continues where it stopped.
       audio.close();
       return;
     }
@@ -114,7 +109,6 @@
     const rate = video.playbackRate;
     const chunkT0 = video.currentTime - (frames / sampleRate) * rate;
     if (run) {
-      // A seek or rate change breaks the timeline: send what we have and start over.
       const expected = run.t0 + (run.frames / sampleRate) * run.rate;
       if (Math.abs(chunkT0 - expected) > 0.5 || rate !== run.rate || sampleRate !== run.sampleRate) {
         flush(run.sampleRate);
@@ -146,7 +140,6 @@
       }
       const track = stream.getAudioTracks().find((t) => t.readyState === 'live');
       if (!track) {
-        // No audio yet, or YouTube swapped the source (ads, quality change).
         stream = v.captureStream();
         reader = null;
         await sleep(300);
@@ -178,7 +171,6 @@
     if (msg.play) video.play().catch(() => {});
   });
 
-  // Fallback when no audio is flowing (paused, ad); throttled in background tabs.
   setInterval(() => {
     if (isAd()) skipAd();
     reportState();
