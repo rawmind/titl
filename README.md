@@ -59,3 +59,7 @@ popup → background (tabCapture stream id) → offscreen document
 ```bash
 npm test
 ```
+
+## License
+
+MIT, see [LICENSE](LICENSE).

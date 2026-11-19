@@ -2,6 +2,8 @@
   "name": "chrome-transcriber",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": "Andrei Kovrov",
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js"
