@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Titl",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "On-time, private subtitles and translation for YouTube, transcribed on your own computer with whisper.cpp.",
   "homepage_url": "https://github.com/rawmind/titl",
   "icons": {

@@ -36,7 +36,7 @@ Serbian output is always in the script you choose (Latin or Cyrillic), never a m
 
 REQUIRES A FREE LOCAL HELPER
 Titl needs whisper.cpp and a small helper program on your computer that starts it automatically:
-  macOS:   brew install rawmind/tap/chrome-transcriber
+  macOS:   brew install rawmind/tap/titl
            chrome-transcriber-helper install
   Others:  see https://github.com/rawmind/titl
 The helper finds whisper.cpp, downloads a model if needed (about 550 MB) and connects it to Chrome.
@@ -97,7 +97,7 @@ Titl is not affiliated with or endorsed by Google or YouTube. Google Chrome™ a
 Titl transcribes YouTube audio with whisper.cpp running on the user's own computer, so it needs a local speech server to show subtitles.
 
 To test on macOS:
-  1. brew install rawmind/tap/chrome-transcriber
+  1. brew install rawmind/tap/titl
   2. chrome-transcriber-helper install --download-model small
      (small model is ~470 MB and fast to download; the helper registers itself with Chrome)
   3. Open any YouTube video with speech, click the Titl icon, then "Start subtitles".

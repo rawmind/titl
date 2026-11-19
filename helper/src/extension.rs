@@ -18,8 +18,10 @@ fn is_extension_dir(dir: &Path) -> bool {
 
 pub fn find_dir(exe: &Path) -> Option<PathBuf> {
     let dir = exe.ancestors().skip(1).take(6).find_map(|a| {
-        [a.join("share/chrome-transcriber/extension"), a.to_path_buf()]
-            .into_iter()
+        paths::FORMULA_NAMES
+            .iter()
+            .map(|f| a.join(format!("share/{f}/extension")))
+            .chain(std::iter::once(a.to_path_buf()))
             .find(|c| is_extension_dir(c))
     })?;
     Some(homebrew_stable(&dir).filter(|p| is_extension_dir(p)).unwrap_or(dir))
@@ -27,11 +29,10 @@ pub fn find_dir(exe: &Path) -> Option<PathBuf> {
 
 fn homebrew_stable(dir: &Path) -> Option<PathBuf> {
     let text = dir.to_str()?;
-    let at = text.find("/Cellar/chrome-transcriber/")?;
-    Some(PathBuf::from(format!(
-        "{}/opt/chrome-transcriber/share/chrome-transcriber/extension",
-        &text[..at]
-    )))
+    paths::FORMULA_NAMES.iter().find_map(|formula| {
+        let at = text.find(&format!("/Cellar/{formula}/"))?;
+        Some(PathBuf::from(format!("{}/opt/{formula}/share/{formula}/extension", &text[..at])))
+    })
 }
 
 pub fn entry(prefs: &Value, ids: &[String]) -> Option<(Option<String>, bool)> {
@@ -133,11 +134,22 @@ mod tests {
         make_extension(&keg.join("share/chrome-transcriber/extension"));
         let exe = keg.join("bin/chrome-transcriber-helper");
         assert_eq!(find_dir(&exe), Some(keg.join("share/chrome-transcriber/extension")));
-        make_extension(&prefix.join("opt/chrome-transcriber/share/chrome-transcriber/extension"));
+        make_extension(&prefix.join("opt/titl/share/titl/extension"));
         assert_eq!(
             find_dir(&exe),
-            Some(prefix.join("opt/chrome-transcriber/share/chrome-transcriber/extension"))
+            Some(prefix.join("opt/titl/share/titl/extension"))
         );
+        fs::remove_dir_all(&prefix).unwrap();
+    }
+
+    #[test]
+    fn finds_extension_in_a_titl_homebrew_keg() {
+        let prefix = std::env::temp_dir().join(format!("ct-titl-{}", std::process::id()));
+        let keg = prefix.join("Cellar/titl/0.1.4");
+        make_extension(&keg.join("share/titl/extension"));
+        make_extension(&prefix.join("opt/titl/share/titl/extension"));
+        let exe = keg.join("bin/chrome-transcriber-helper");
+        assert_eq!(find_dir(&exe), Some(prefix.join("opt/titl/share/titl/extension")));
         fs::remove_dir_all(&prefix).unwrap();
     }
 

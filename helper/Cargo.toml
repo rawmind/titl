@@ -1,6 +1,6 @@
 [package]
 name = "chrome-transcriber-helper"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 license = "MIT"
 description = "Installs and runs whisper-server for the Chrome Transcriber extension"

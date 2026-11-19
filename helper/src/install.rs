@@ -91,9 +91,11 @@ pub fn find_model(server: &Path) -> Option<PathBuf> {
 
 pub fn homebrew_opt_path(exe: &Path) -> Option<PathBuf> {
     let text = exe.to_str()?;
-    let at = text.find("/Cellar/chrome-transcriber/")?;
     let name = exe.file_name()?.to_str()?;
-    Some(PathBuf::from(format!("{}/opt/chrome-transcriber/bin/{name}", &text[..at])))
+    paths::FORMULA_NAMES.iter().find_map(|formula| {
+        let at = text.find(&format!("/Cellar/{formula}/"))?;
+        Some(PathBuf::from(format!("{}/opt/{formula}/bin/{name}", &text[..at])))
+    })
 }
 
 fn install_self() -> Result<PathBuf, String> {
@@ -333,6 +335,10 @@ mod tests {
         assert_eq!(
             homebrew_opt_path(Path::new("/opt/homebrew/Cellar/chrome-transcriber/0.1.0/bin/chrome-transcriber-helper")),
             Some(PathBuf::from("/opt/homebrew/opt/chrome-transcriber/bin/chrome-transcriber-helper"))
+        );
+        assert_eq!(
+            homebrew_opt_path(Path::new("/opt/homebrew/Cellar/titl/0.1.4/bin/chrome-transcriber-helper")),
+            Some(PathBuf::from("/opt/homebrew/opt/titl/bin/chrome-transcriber-helper"))
         );
         assert_eq!(homebrew_opt_path(Path::new("/usr/local/bin/chrome-transcriber-helper")), None);
     }

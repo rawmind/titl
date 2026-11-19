@@ -2,6 +2,25 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.4](https://github.com/rawmind/titl/releases/tag/v0.1.4) - 2026-11-20
+
+The Homebrew formula is now called **titl**.
+
+### Changed
+- Install with `brew install rawmind/tap/titl`. Existing `chrome-transcriber` installs are migrated automatically by Homebrew.
+- The GitHub repository moved to [rawmind/titl](https://github.com/rawmind/titl). Old links redirect.
+- The extension folder for Homebrew installs is now `$(brew --prefix)/opt/titl/share/titl/extension`.
+
+### Fixed
+- The helper recognizes the `titl` formula's paths, so it registers Homebrew's stable `opt/titl` path and finds the extension folder. It still recognizes the old `chrome-transcriber` paths.
+
+### Upgrade
+```bash
+brew update && brew upgrade
+chrome-transcriber-helper install
+```
+If you loaded the extension from the Homebrew folder, load it again from the new path above (`install` prints it).
+
 ## [0.1.3](https://github.com/rawmind/titl/releases/tag/v0.1.3) - 2026-11-20
 
 Prepares the extension for the Chrome Web Store under its new name, **Titl**.

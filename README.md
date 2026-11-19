@@ -26,11 +26,11 @@
 ### macOS with Homebrew
 
 ```bash
-brew install rawmind/tap/chrome-transcriber   # also installs whisper-cpp
+brew install rawmind/tap/titl   # also installs whisper-cpp
 chrome-transcriber-helper install
 ```
 
-`install` ends by showing how to add the extension to Chrome: it puts the folder path on your clipboard and reveals it in Finder. Chrome only adds extensions from the Chrome Web Store automatically, so this one is loaded once by hand (step 3 below). The folder is `$(brew --prefix)/opt/chrome-transcriber/share/chrome-transcriber/extension`.
+`install` ends by showing how to add the extension to Chrome: it puts the folder path on your clipboard and reveals it in Finder. Chrome only adds extensions from the Chrome Web Store automatically, so this one is loaded once by hand (step 3 below). The folder is `$(brew --prefix)/opt/titl/share/titl/extension`.
 
 ### Any platform from source
 
