@@ -2,7 +2,9 @@
 
 <img src="icons/icon128.png" width="64" align="right" alt="">
 
-**Titl** is a Chrome extension that shows subtitles on any YouTube video, transcribed on your own Mac by [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It's built for Serbian and works with any language Whisper supports. Audio never leaves your machine: it only goes to `127.0.0.1`.
+**Titl** is a Chrome extension that shows subtitles on any YouTube video, transcribed on your own computer by [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It's built for Serbian and works with any language Whisper supports. Audio never leaves your machine: it only goes to `127.0.0.1`.
+
+![Titl showing Serbian subtitles with an English translation on a TEDx talk](store/screenshot-1-subtitles.png)
 
 ## Features
 
@@ -14,6 +16,14 @@
 - **Serbian script control:** output is always Latin or always Cyrillic, never a mix.
 - **On-device translation** into English, Russian, German and more, using Chrome's built-in translator. The original can be shown above the translation.
 - Works in normal and fullscreen mode, doesn't block YouTube controls, and follows seeks, speed changes and navigation to other videos.
+
+## Screenshots
+
+| On YouTube | The popup | Options |
+|---|---|---|
+| ![Titl subtitles on the YouTube watch page](store/screenshot-2-on-youtube.png) | ![The Titl popup while subtitles are running](store/screenshot-3-popup.png) | ![The Titl options page](store/screenshot-4-options.png) |
+
+Video: [Tatjana Vojtehovski at TEDxZemun](https://www.youtube.com/watch?v=uu_h3BTFQjA). Subtitles are Titl's own output: Serbian (small, top) and Chrome's on-device English translation.
 
 ## Requirements
 
@@ -194,7 +204,7 @@ helper/              Rust: installer and native messaging host
   src/model.rs       model download from Hugging Face
   src/paths.rs       per-OS folders and browser registration locations
 icons/               extension icons (SVG sources and PNGs)
-store/               Chrome Web Store listing text and promo images
+store/               Chrome Web Store listing text, promo tile and screenshots
 scripts/package.mjs  builds the store zip
 tests/               node:test unit tests
 ```
