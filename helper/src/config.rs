@@ -32,7 +32,7 @@ impl Config {
     pub fn load() -> Result<Self, String> {
         let path = paths::config_path();
         let text = fs::read_to_string(&path)
-            .map_err(|_| format!("not installed: run `chrome-transcriber-helper install` ({} missing)", path.display()))?;
+            .map_err(|_| format!("not installed: run `titl install` ({} missing)", path.display()))?;
         let value: Value = serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))?;
         let field = |name: &str| {
             value

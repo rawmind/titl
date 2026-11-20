@@ -8,12 +8,13 @@ mod paths;
 use std::env;
 use std::process::ExitCode;
 
-const HELP: &str = "chrome-transcriber-helper: installs and runs whisper-server for Chrome Transcriber
+const HELP: &str = "titl: installs and runs whisper-server for the Titl Chrome extension
 
 USAGE:
-  chrome-transcriber-helper install [--server PATH] [--model PATH | --download-model NAME] [--extension-id ID]
-  chrome-transcriber-helper uninstall [--purge]
-  chrome-transcriber-helper status
+  titl install [--server PATH] [--model PATH | --download-model NAME] [--extension-id ID]
+  titl uninstall [--purge]
+  titl status
+  titl --version
 
 install         Find whisper-server and a model (downloading one if needed), copy this helper
                 to a per-user folder and register it with Chrome, Chromium, Edge and Brave.
@@ -25,7 +26,7 @@ install         Find whisper-server and a model (downloading one if needed), cop
 uninstall       Unregister and remove the helper. --purge also deletes downloaded models.
 status          Show the configuration and where the helper is registered.
 
-Titl (the Chrome Transcriber extension) needs this helper. Chrome starts this program itself (with the extension's origin as argument) to launch
+The Titl extension needs this helper. Chrome starts this program itself (with the extension's origin as argument) to launch
 whisper-server on demand.";
 
 fn main() -> ExitCode {
@@ -38,6 +39,10 @@ fn main() -> ExitCode {
         Some("install") => install::parse(&args[1..]).and_then(install::install),
         Some("uninstall") => install::uninstall(args.iter().any(|a| a == "--purge")),
         Some("status") => install::status(),
+        Some("--version" | "-V" | "version") => {
+            println!("titl {}", env!("CARGO_PKG_VERSION"));
+            Ok(())
+        }
         None | Some("help" | "-h" | "--help") => {
             println!("{HELP}");
             Ok(())

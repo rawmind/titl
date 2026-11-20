@@ -122,7 +122,7 @@ mod tests {
     fn finds_extension_next_to_a_source_build() {
         let root = std::env::temp_dir().join(format!("ct-src-{}", std::process::id()));
         make_extension(&root);
-        let exe = root.join("helper/target/release/chrome-transcriber-helper");
+        let exe = root.join("helper/target/release/titl");
         assert_eq!(find_dir(&exe), Some(root.clone()));
         fs::remove_dir_all(&root).unwrap();
     }
@@ -145,10 +145,10 @@ mod tests {
     #[test]
     fn finds_extension_in_a_titl_homebrew_keg() {
         let prefix = std::env::temp_dir().join(format!("ct-titl-{}", std::process::id()));
-        let keg = prefix.join("Cellar/titl/0.1.4");
+        let keg = prefix.join("Cellar/titl/0.1.7");
         make_extension(&keg.join("share/titl/extension"));
         make_extension(&prefix.join("opt/titl/share/titl/extension"));
-        let exe = keg.join("bin/chrome-transcriber-helper");
+        let exe = keg.join("bin/titl");
         assert_eq!(find_dir(&exe), Some(prefix.join("opt/titl/share/titl/extension")));
         fs::remove_dir_all(&prefix).unwrap();
     }

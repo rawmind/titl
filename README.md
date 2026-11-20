@@ -37,7 +37,7 @@ Video: [Tatjana Vojtehovski at TEDxZemun](https://www.youtube.com/watch?v=uu_h3B
 
 ```bash
 brew install rawmind/tap/titl   # also installs whisper-cpp
-chrome-transcriber-helper install
+titl install
 ```
 
 `install` ends by showing how to add the extension to Chrome: it puts the folder path on your clipboard and reveals it in Finder. Chrome only adds extensions from the Chrome Web Store automatically, so this one is loaded once by hand (step 3 below). The folder is `$(brew --prefix)/opt/titl/share/titl/extension`.
@@ -50,7 +50,7 @@ chrome-transcriber-helper install
 
 ```bash
 cargo build --release --manifest-path helper/Cargo.toml
-helper/target/release/chrome-transcriber-helper install
+helper/target/release/titl install
 ```
 
 `install` does the rest:
@@ -69,9 +69,11 @@ The manifest fixes the extension ID at `fehpgpahkmanekioejihbpihpbacdjgb`, and t
 
 | Command | |
 |---|---|
-| `chrome-transcriber-helper status` | Show the server, model, which browsers it's registered with, and whether the extension is loaded |
-| `chrome-transcriber-helper install …` | (Re)install; run again after moving whisper.cpp or a model |
-| `chrome-transcriber-helper uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
+| `titl status` | Show the server, model, which browsers it's registered with, and whether the extension is loaded |
+| `titl install …` | (Re)install; run again after moving whisper.cpp or a model |
+| `titl uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
+
+The helper was called `chrome-transcriber-helper` before 0.1.7. Homebrew still installs that name as an alias.
 
 Per-user files (config, downloaded models, `server.log`) live in:
 - macOS: `~/Library/Application Support/chrome-transcriber/`
@@ -110,7 +112,7 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Max window | 12 s | Largest chunk when transcription falls behind. |
 | Lag warning threshold | 10 s | Live mode: show "delayed" past this. |
 
-To pass extra flags to `whisper-server` (e.g. threads), add them to `"args"` in the helper's `config.json` (see `chrome-transcriber-helper status`).
+To pass extra flags to `whisper-server` (e.g. threads), add them to `"args"` in the helper's `config.json` (see `titl status`).
 
 ## Translation
 
@@ -135,9 +137,9 @@ Automatic language detection isn't supported yet.
 
 | Symptom | Fix |
 |---|---|
-| Extension doesn't appear in Chrome after `install` | `install` doesn't add it: load it once via **Load unpacked** (Install, step 3). `chrome-transcriber-helper status` shows whether Chrome has it. |
-| "auto-start helper is not installed" | Run `chrome-transcriber-helper install`, then try again. |
-| "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `chrome-transcriber-helper status`: a path marked "(missing!)" means re-run `install`. |
+| Extension doesn't appear in Chrome after `install` | `install` doesn't add it: load it once via **Load unpacked** (Install, step 3). `titl status` shows whether Chrome has it. |
+| "auto-start helper is not installed" | Run `titl install`, then try again. |
+| "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `titl status`: a path marked "(missing!)" means re-run `install`. |
 | "Cannot reach whisper-server" | The server URL or port is wrong, or auto-start is off. Use **Test connection** in Options. |
 | Stuck on "Preparing subtitles…" | Expand the **Titl** tab group and look at the hidden tab: it may be showing an ad, a consent page or a sign-in prompt. Fix it there, or switch to live mode. |
 | Subtitles appear in the wrong script | Options → Serbian script. |
@@ -146,7 +148,7 @@ Automatic language detection isn't supported yet.
 | "Chrome can't translate … on this device" | That language pair isn't offered by Chrome's translator. Pick another target. |
 | Nothing happens after moving the extension folder | Remove and re-load the unpacked extension. |
 
-To remove the helper, run `chrome-transcriber-helper uninstall`.
+To remove the helper, run `titl uninstall`.
 
 ## How it works
 
@@ -178,7 +180,7 @@ popup → background (tabCapture stream id) → offscreen document
 
 ### Auto-start helper
 
-Chrome extensions can't run native programs, so `chrome-transcriber-helper` (Rust, in `helper/`) is registered as a Chrome [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) host. On Start, the extension asks it to launch `whisper-server`. The server stops when that connection closes, which in practice means when Chrome quits.
+Chrome extensions can't run native programs, so `titl` (Rust, in `helper/`) is registered as a Chrome [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) host. On Start, the extension asks it to launch `whisper-server`. The server stops when that connection closes, which in practice means when Chrome quits.
 
 ## Project layout
 

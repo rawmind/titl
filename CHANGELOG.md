@@ -2,6 +2,23 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.7](https://github.com/rawmind/titl/releases/tag/v0.1.7) - 2026-11-20
+
+The helper command is now simply **`titl`**.
+
+### Changed
+- `chrome-transcriber-helper` is renamed to **`titl`**: `titl install`, `titl status`, `titl uninstall`. Homebrew keeps `chrome-transcriber-helper` as an alias, so existing commands, scripts and browser registrations keep working.
+- Non-Homebrew installs replace the old `chrome-transcriber-helper` copy in the helper's folder. `uninstall` removes both names.
+- The extension's error message and Options text refer to `titl install`.
+
+Unchanged on purpose: the native messaging host name (`com.chrome_transcriber.host`) and the settings folder (`chrome-transcriber`). Changing them would break the Chrome Web Store build and existing setups.
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/titl
+titl install
+```
+
 ## [0.1.6](https://github.com/rawmind/titl/releases/tag/v0.1.6) - 2026-11-20
 
 The helper now works with Titl installed from the Chrome Web Store.

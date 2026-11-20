@@ -37,7 +37,7 @@ Serbian output is always in the script you choose (Latin or Cyrillic), never a m
 REQUIRES A FREE LOCAL HELPER
 Titl needs whisper.cpp and a small helper program on your computer that starts it automatically:
   macOS:   brew install rawmind/tap/titl
-           chrome-transcriber-helper install
+           titl install
   Others:  see https://github.com/rawmind/titl
 The helper finds whisper.cpp, downloads a model if needed (about 550 MB) and connects it to Chrome.
 
@@ -78,7 +78,7 @@ Titl is not affiliated with or endorsed by Google or YouTube. Google Chrome™ a
 | `activeTab` | Lets live mode capture the tab the user invoked the extension on, and only that tab. |
 | `scripting` | Injects the subtitle overlay into YouTube tabs that were already open before the extension was installed or updated, and injects the audio reader into the muted lookahead tab the extension opens itself. |
 | `storage` | Saves the user's settings (server address, language, script, translation, timing) and the current session state shown in the popup. |
-| `nativeMessaging` | Talks to the optional companion program (chrome-transcriber-helper) that starts the user's local whisper.cpp speech server when the user clicks Start. No other native program is contacted. |
+| `nativeMessaging` | Talks to the optional companion program (titl) that starts the user's local whisper.cpp speech server when the user clicks Start. No other native program is contacted. |
 | `tabGroups` | Puts the muted lookahead tab, which plays the same video a few seconds ahead so subtitles are ready on time, into a collapsed tab group so it doesn't clutter the user's tab strip. |
 | Host `https://www.youtube.com/*` | Shows the subtitle overlay on the YouTube player, reads the video's playback position to time subtitles, and reads the audio of the lookahead copy of the video. |
 | Host `http://127.0.0.1/*`, `http://localhost/*` | Sends audio to the speech-recognition server running on the user's own computer. The extension refuses any non-local server address. |
@@ -99,7 +99,7 @@ Titl transcribes YouTube audio with whisper.cpp running on the user's own comput
 
 To test on macOS:
   1. brew install rawmind/tap/titl
-  2. chrome-transcriber-helper install --download-model small
+  2. titl install --download-model small
      (small model is ~470 MB and fast to download; the helper registers itself with Chrome)
   3. Open any YouTube video with speech, click the Titl icon, then "Start subtitles".
 

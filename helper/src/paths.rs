@@ -36,6 +36,10 @@ pub fn exe_name(base: &str) -> String {
 }
 
 pub fn installed_exe() -> PathBuf {
+    data_dir().join(exe_name("titl"))
+}
+
+pub fn legacy_installed_exe() -> PathBuf {
     data_dir().join(exe_name("chrome-transcriber-helper"))
 }
 

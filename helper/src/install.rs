@@ -114,6 +114,7 @@ fn install_self() -> Result<PathBuf, String> {
     fs::rename(&tmp, &target).map_err(|e| {
         format!("cannot replace {}: {e} (quit Chrome and try again)", target.display())
     })?;
+    let _ = fs::remove_file(paths::legacy_installed_exe());
     Ok(target)
 }
 
@@ -242,7 +243,7 @@ fn print_extension_steps(dir: Option<&Path>, ids: &[String]) {
         }
         None => println!("       the folder containing manifest.json from https://github.com/rawmind/titl"),
     }
-    println!("Then run `chrome-transcriber-helper status` to check.");
+    println!("Then run `titl status` to check.");
 }
 
 pub fn uninstall(purge: bool) -> Result<(), String> {
@@ -261,7 +262,12 @@ pub fn uninstall(purge: bool) -> Result<(), String> {
         let _ = fs::remove_dir_all(&data);
         println!("Removed {} including downloaded models.", data.display());
     } else {
-        for path in [paths::installed_exe(), paths::config_path(), data.join(paths::manifest_file_name())] {
+        for path in [
+            paths::installed_exe(),
+            paths::legacy_installed_exe(),
+            paths::config_path(),
+            data.join(paths::manifest_file_name()),
+        ] {
             let _ = fs::remove_file(path);
         }
         println!("Helper removed. Downloaded models kept in {} (use --purge to delete).", paths::models_dir().display());
@@ -299,7 +305,7 @@ pub fn status() -> Result<(), String> {
     let extra = Config::load().map(|c| c.extension_ids).unwrap_or_default();
     let loaded = extension::loaded(&config::extension_ids(&extra));
     if loaded.is_empty() {
-        println!("extension: not loaded in any browser (see `chrome-transcriber-helper install` output)");
+        println!("extension: not loaded in any browser (see `titl install` output)");
     }
     for l in loaded {
         println!(
@@ -337,8 +343,8 @@ mod tests {
             Some(PathBuf::from("/opt/homebrew/opt/chrome-transcriber/bin/chrome-transcriber-helper"))
         );
         assert_eq!(
-            homebrew_opt_path(Path::new("/opt/homebrew/Cellar/titl/0.1.4/bin/chrome-transcriber-helper")),
-            Some(PathBuf::from("/opt/homebrew/opt/titl/bin/chrome-transcriber-helper"))
+            homebrew_opt_path(Path::new("/opt/homebrew/Cellar/titl/0.1.7/bin/titl")),
+            Some(PathBuf::from("/opt/homebrew/opt/titl/bin/titl"))
         );
         assert_eq!(homebrew_opt_path(Path::new("/usr/local/bin/chrome-transcriber-helper")), None);
     }
