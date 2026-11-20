@@ -2,6 +2,20 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.6](https://github.com/rawmind/titl/releases/tag/v0.1.6) - 2026-11-20
+
+The helper now works with Titl installed from the Chrome Web Store.
+
+### Added
+- The helper accepts the Chrome Web Store build of Titl (`bpapgchpopccpbgbkfldmdmfmddgoeme`) as well as the unpacked one. No `--extension-id` flag is needed, and `status` detects either.
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/titl
+chrome-transcriber-helper install
+```
+`install` re-registers the helper so Chrome lets the store version start whisper-server.
+
 ## [0.1.5](https://github.com/rawmind/titl/releases/tag/v0.1.5) - 2026-11-20
 
 A new look for the popup and the Options page, matching the Titl icon.

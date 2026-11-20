@@ -364,8 +364,10 @@ mod tests {
         let m = manifest(Path::new("/opt/helper"), &ids);
         assert_eq!(m["name"], paths::HOST_NAME);
         assert_eq!(m["allowed_origins"][0], format!("chrome-extension://{}/", paths::UNPACKED_EXTENSION_ID));
-        assert_eq!(m["allowed_origins"][1], "chrome-extension://abcdefghijklmnopabcdefghijklmnop/");
+        assert_eq!(m["allowed_origins"].as_array().unwrap().last().unwrap(), "chrome-extension://abcdefghijklmnopabcdefghijklmnop/");
+        assert_eq!(m["allowed_origins"][1], format!("chrome-extension://{}/", paths::STORE_EXTENSION_IDS[0]));
         assert!(config::valid_extension_id(paths::UNPACKED_EXTENSION_ID));
+        assert!(paths::STORE_EXTENSION_IDS.iter().all(|id| config::valid_extension_id(id)));
         assert!(!config::valid_extension_id("not-an-id"));
         assert_eq!(m["type"], "stdio");
     }

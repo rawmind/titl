@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 pub const HOST_NAME: &str = "com.chrome_transcriber.host";
 pub const UNPACKED_EXTENSION_ID: &str = "fehpgpahkmanekioejihbpihpbacdjgb";
-pub const STORE_EXTENSION_IDS: &[&str] = &[];
+pub const STORE_EXTENSION_IDS: &[&str] = &["bpapgchpopccpbgbkfldmdmfmddgoeme"];
 pub const FORMULA_NAMES: &[&str] = &["titl", "chrome-transcriber"];
 const APP_DIR: &str = "chrome-transcriber";
 
