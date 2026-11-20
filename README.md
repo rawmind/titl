@@ -261,6 +261,10 @@ See [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/rawmind/titl/
 
 Nothing leaves your computer. See [PRIVACY.md](PRIVACY.md).
 
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md). Please don't use public issues.
+
 ## License
 
 MIT, see [LICENSE](LICENSE). Bundling whisper.cpp or a Whisper model (both MIT) means including their license notices.
