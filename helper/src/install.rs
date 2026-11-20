@@ -336,6 +336,7 @@ mod tests {
         assert!(parse(&["--model".to_string()]).is_err());
     }
 
+    #[cfg(unix)]
     #[test]
     fn homebrew_installs_register_the_stable_opt_path() {
         assert_eq!(
@@ -349,6 +350,7 @@ mod tests {
         assert_eq!(homebrew_opt_path(Path::new("/usr/local/bin/chrome-transcriber-helper")), None);
     }
 
+    #[cfg(unix)]
     #[test]
     fn server_path_keeps_symlinks_so_upgrades_do_not_break_it() {
         let dir = std::env::temp_dir().join(format!("ct-test-{}", std::process::id()));
@@ -357,9 +359,7 @@ mod tests {
         fs::write(cellar.join("whisper-server"), "").unwrap();
         fs::create_dir_all(dir.join("bin")).unwrap();
         let link = dir.join("bin/whisper-server");
-        #[cfg(unix)]
         std::os::unix::fs::symlink(cellar.join("whisper-server"), &link).unwrap();
-        #[cfg(unix)]
         assert_eq!(find_server(Some(&link)).unwrap(), link);
         fs::remove_dir_all(&dir).unwrap();
     }

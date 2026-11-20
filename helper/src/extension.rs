@@ -127,6 +127,7 @@ mod tests {
         fs::remove_dir_all(&root).unwrap();
     }
 
+    #[cfg(unix)]
     #[test]
     fn finds_extension_in_a_homebrew_keg_and_prefers_the_opt_path() {
         let prefix = std::env::temp_dir().join(format!("ct-brew-{}", std::process::id()));
@@ -142,6 +143,7 @@ mod tests {
         fs::remove_dir_all(&prefix).unwrap();
     }
 
+    #[cfg(unix)]
     #[test]
     fn finds_extension_in_a_titl_homebrew_keg() {
         let prefix = std::env::temp_dir().join(format!("ct-titl-{}", std::process::id()));
