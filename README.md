@@ -36,7 +36,7 @@ Video: [Tatjana Vojtehovski at TEDxZemun](https://www.youtube.com/watch?v=uu_h3B
 ### macOS with Homebrew
 
 ```bash
-brew install rawmind/tap/titl   # also installs whisper-cpp
+brew install rawmind/tap/titl   # also installs whisper.cpp
 titl install
 ```
 
@@ -44,7 +44,7 @@ titl install
 
 ### Any platform from source
 
-**1. Get whisper.cpp:** `brew install whisper-cpp` on macOS, or build it ([instructions](https://github.com/ggml-org/whisper.cpp#quick-start)). Use Metal on macOS, and Vulkan or CUDA on Windows and Linux for GPU speed.
+**1. Get whisper.cpp:** `brew install whisper.cpp` on macOS, or build it ([instructions](https://github.com/ggml-org/whisper.cpp#quick-start)). Use Metal on macOS, and Vulkan or CUDA on Windows and Linux for GPU speed.
 
 **2. Build and run the helper** (needs [Rust](https://rustup.rs)):
 

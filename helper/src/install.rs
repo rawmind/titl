@@ -71,7 +71,7 @@ pub fn find_server(explicit: Option<&Path>) -> Result<PathBuf, String> {
         .find(|p| p.is_file())
         .map(|p| stable(&p))
         .unwrap_or_else(|| {
-            Err("whisper-server not found. Install whisper.cpp (`brew install whisper-cpp`, or build \
+            Err("whisper-server not found. Install whisper.cpp (`brew install whisper.cpp`, or build \
                  https://github.com/ggml-org/whisper.cpp) or pass --server PATH"
                 .into())
         })
