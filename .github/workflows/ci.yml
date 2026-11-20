@@ -185,11 +185,3 @@ jobs:
           done
           echo "upload still processing after 10 minutes" >&2
           exit 1
-      - name: Submit for review
-        env:
-          TOKEN: ${{ steps.auth.outputs.access_token }}
-        run: |
-          curl -sS --fail-with-body -X POST -H "Authorization: Bearer $TOKEN" \
-            -H "Content-Type: application/json" -d '{"publishType": "STAGED_PUBLISH"}' \
-            "$API/v2/$ITEM:publish" | tee response.json
-          jq -e '.state == "PENDING_REVIEW" or .state == "PUBLISHED" or .state == "STAGED"' response.json > /dev/null
