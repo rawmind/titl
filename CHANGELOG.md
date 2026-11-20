@@ -7,10 +7,17 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 Practise listening with a hidden translation, and settings that apply immediately.
 
 ### Added
-- **Blur the translation until you reveal it** (Options → Translation). Each new translated line starts blurred: press **V** or click the line to reveal it, and again to hide it. The original line stays readable. V does nothing while you type (e.g. in YouTube's search box) or with Ctrl/Cmd/Alt, and it isn't one of YouTube's own shortcuts. Clicking the line doesn't pause the video.
+- **Blur the translation until you reveal it** (Options → Translation). Press **V** or click the line to reveal the translation; it stays revealed for the following lines until you press V again. A small hint shows what V will do. The original line stays readable. V does nothing while you type (e.g. in YouTube's search box) or with Ctrl/Cmd/Alt, and it isn't one of YouTube's own shortcuts. Clicking the line doesn't pause the video.
 
 ### Changed
 - **Save applies settings right away.** If subtitles are running, Save restarts them with the new settings ("Saved and applied to the running subtitles"). If nothing is running, it just saves.
+
+### Fixed
+- After reloading the extension, the YouTube tab could keep running the old page script, so new features like the blur didn't work until the page was reloaded. A fresh script now replaces a stale one.
+- No readable flash of the translation when a new line appears in blur mode.
+
+### Security
+- Updated the `zip` library used to unpack the downloaded whisper.cpp on Windows to 9.x. This fixes three advisories (one critical) about malformed archives. Downloads were already verified against GitHub's checksums.
 
 ### Upgrade
 ```bash

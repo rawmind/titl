@@ -1,6 +1,6 @@
 (() => {
-  if (window.__chromeTranscriberScout) return;
-  window.__chromeTranscriberScout = true;
+  if (window.__chromeTranscriberScout?.alive()) return;
+  window.__chromeTranscriberScout = { alive: () => Boolean(chrome.runtime?.id) };
 
   const OUT_RATE = 16000;
   const BLOCK_SEC = 1;

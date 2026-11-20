@@ -79,7 +79,7 @@
   user-select: none;
 }
 
-.ct-primary span {
+.ct-overlay.ct-blurrable:not(.ct-blurred) .ct-primary span {
   transition: filter 0.15s ease;
 }
 
@@ -90,6 +90,6 @@
   letter-spacing: 0.4px;
 }
 
-.ct-overlay.ct-blurred .ct-hint {
+.ct-overlay.ct-blurrable .ct-hint {
   display: block;
 }

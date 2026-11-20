@@ -1,6 +1,6 @@
 (() => {
-  if (window.__chromeTranscriber) return;
-  window.__chromeTranscriber = true;
+  if (window.__chromeTranscriber?.alive()) return;
+  window.__chromeTranscriber = { alive: () => Boolean(chrome.runtime?.id) };
 
   const LIVE_CLEAR_AFTER_MS = 6000;
   const LIVE_MAX_CHARS = 220;
@@ -35,6 +35,7 @@
   let checkOnPlay = false;
 
   let revealed = false;
+  let hintEl = null;
 
   let translator = null;
   let translateChain = Promise.resolve();
@@ -82,10 +83,9 @@
           if (root?.classList.contains('ct-blurrable')) e.stopPropagation();
         });
       }
-      const hint = document.createElement('div');
-      hint.className = 'ct-hint';
-      hint.textContent = `${REVEAL_KEY.toUpperCase()} · reveal`;
-      box.append(secondary, primary, hint);
+      hintEl = document.createElement('div');
+      hintEl.className = 'ct-hint';
+      box.append(secondary, primary, hintEl);
       badgeEl = document.createElement('div');
       badgeEl.className = 'ct-badge';
       root.append(badgeEl, box);
@@ -104,22 +104,25 @@
 
   function setText(primary, secondary = '', isTranslation = false) {
     if (!ensureOverlay()) return;
-    if (primaryEl.textContent !== primary) {
-      primaryEl.textContent = primary;
-      revealed = false;
-    }
+    if (primaryEl.textContent !== primary) primaryEl.textContent = primary;
     if (secondaryEl.textContent !== secondary) secondaryEl.textContent = secondary;
     root.classList.toggle('ct-visible', Boolean(primary || secondary));
     root.classList.toggle('ct-dual', Boolean(secondary));
-    const blurrable = Boolean(options?.blurTranslation && isTranslation && primary);
-    root.classList.toggle('ct-blurrable', blurrable);
+    root.classList.toggle('ct-blurrable', Boolean(options?.blurTranslation && isTranslation && primary));
+    applyReveal();
+  }
+
+  function applyReveal() {
+    if (!root) return;
+    const blurrable = root.classList.contains('ct-blurrable');
     root.classList.toggle('ct-blurred', blurrable && !revealed);
+    hintEl.textContent = `${REVEAL_KEY.toUpperCase()} · ${revealed ? 'hide' : 'reveal'}`;
   }
 
   function toggleReveal() {
-    if (!root?.classList.contains('ct-blurrable')) return false;
+    if (!options?.blurTranslation) return false;
     revealed = !revealed;
-    root.classList.toggle('ct-blurred', !revealed);
+    applyReveal();
     return true;
   }
 
@@ -406,7 +409,7 @@
     liveOriginal = liveTranslation = statusText = translationNotice = '';
     resizeObserver?.disconnect();
     root?.remove();
-    root = primaryEl = secondaryEl = badgeEl = resizeObserver = null;
+    root = primaryEl = secondaryEl = badgeEl = hintEl = resizeObserver = null;
   }
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
