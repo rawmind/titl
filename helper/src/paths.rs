@@ -88,7 +88,7 @@ pub fn browsers() -> Vec<Browser> {
         .into_iter()
         .map(|(name, key, dir)| Browser {
             name,
-            target: Target::Registry(format!(r"HKCU\{key}\NativeMessagingHosts\{HOST_NAME}")),
+            target: Target::Registry(format!(r"{key}\NativeMessagingHosts\{HOST_NAME}")),
             user_data: local.join(dir).join("User Data"),
         })
         .collect()

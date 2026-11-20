@@ -2,12 +2,12 @@ use crate::config::{self, Config};
 use crate::extension;
 use crate::model;
 use crate::paths::{self, Target};
+use crate::registry;
 use crate::whisper_cpp::{self, Build};
 use serde_json::json;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 #[derive(Default)]
 pub struct Options {
@@ -134,11 +134,6 @@ pub fn manifest(exe: &Path, ids: &[String]) -> serde_json::Value {
     })
 }
 
-fn reg(args: &[&str]) -> Result<(), String> {
-    let status = Command::new("reg").args(args).status().map_err(|e| format!("reg: {e}"))?;
-    if status.success() { Ok(()) } else { Err(format!("reg {} failed", args.join(" "))) }
-}
-
 fn register(exe: &Path, ids: &[String]) -> Result<Vec<&'static str>, String> {
     let text = serde_json::to_string_pretty(&manifest(exe, ids)).map_err(|e| e.to_string())? + "\n";
     let mut registered = Vec::new();
@@ -156,7 +151,7 @@ fn register(exe: &Path, ids: &[String]) -> Result<Vec<&'static str>, String> {
             Target::Registry(key) => {
                 let file = paths::data_dir().join(paths::manifest_file_name());
                 fs::write(&file, &text).map_err(|e| format!("{}: {e}", file.display()))?;
-                reg(&["add", &key, "/ve", "/t", "REG_SZ", "/d", &file.to_string_lossy(), "/f"])?;
+                registry::set_default(&key, &file.to_string_lossy())?;
             }
         }
         registered.push(browser.name);
@@ -280,9 +275,7 @@ pub fn uninstall(purge: bool) -> Result<(), String> {
             Target::Dir(dir) => {
                 let _ = fs::remove_file(dir.join("NativeMessagingHosts").join(paths::manifest_file_name()));
             }
-            Target::Registry(key) => {
-                let _ = Command::new("reg").args(["delete", &key, "/f"]).output();
-            }
+            Target::Registry(key) => registry::delete(&key),
         }
     }
     let data = paths::data_dir();
@@ -324,10 +317,7 @@ pub fn status() -> Result<(), String> {
     for browser in paths::browsers() {
         let registered = match &browser.target {
             Target::Dir(dir) => dir.join("NativeMessagingHosts").join(paths::manifest_file_name()).is_file(),
-            Target::Registry(key) => Command::new("reg")
-                .args(["query", key])
-                .output()
-                .is_ok_and(|o| o.status.success()),
+            Target::Registry(key) => registry::exists(key),
         };
         if registered {
             println!("registered: {}", browser.name);

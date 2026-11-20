@@ -83,6 +83,14 @@ jobs:
           bin/titl* status
           bin/titl* --version
 
+      - name: Check the version resource (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $info = (Get-Item bin/titl.exe).VersionInfo
+          $info | Format-List ProductName, FileDescription, CompanyName, FileVersion, ProductVersion, LegalCopyright
+          if ($info.ProductName -ne 'Titl' -or -not $info.FileVersion) { throw 'titl.exe has no version resource' }
+
       - name: Check browser registration (Windows)
         if: runner.os == 'Windows'
         shell: pwsh

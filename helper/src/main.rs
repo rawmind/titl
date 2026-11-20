@@ -4,6 +4,7 @@ mod host;
 mod install;
 mod model;
 mod paths;
+mod registry;
 mod whisper_cpp;
 
 use std::env;
