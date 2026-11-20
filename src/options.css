@@ -111,3 +111,19 @@ fieldset .secondary + span {
 .actions .cta {
   min-width: 120px;
 }
+
+.page-footer {
+  max-width: 560px;
+  margin: 8px auto 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.page-footer a {
+  margin-left: 4px;
+}
+
+.page-footer .heart {
+  color: var(--accent);
+}
