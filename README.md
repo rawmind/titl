@@ -235,7 +235,7 @@ helper/              Rust: installer and native messaging host
   src/model.rs       model download from Hugging Face
   src/paths.rs       per-OS folders and browser registration locations
 icons/               extension icons (SVG sources and PNGs)
-store/               Chrome Web Store listing text, promo tile and screenshots
+store/               Chrome Web Store promo tile and screenshots
 scripts/package.mjs  builds the store zip
 tests/               node:test unit tests
 ```
