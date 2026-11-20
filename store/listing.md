@@ -62,6 +62,7 @@ Titl is not affiliated with or endorsed by Google or YouTube. Google Chrome™ a
 **Additional fields**
 - Homepage URL: https://github.com/rawmind/titl
 - Support URL: https://github.com/rawmind/titl/issues
+- Publisher contact email (dashboard Settings): titl@devs.team
 
 ## Privacy practices
 

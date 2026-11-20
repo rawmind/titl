@@ -27,4 +27,4 @@ Titl works on YouTube pages that you open. In its default "lookahead" mode, it o
 
 ## Contact
 
-Questions or concerns: open an issue at https://github.com/rawmind/titl/issues.
+Questions or concerns: email [titl@devs.team](mailto:titl@devs.team) or open an issue at https://github.com/rawmind/titl/issues.
