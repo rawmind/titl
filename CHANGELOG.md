@@ -2,6 +2,29 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.14](https://github.com/rawmind/titl/releases/tag/v0.1.14) - 2026-11-20
+
+### Fixed
+- **Translation works again.** Since 0.1.12, turning on translation always ended in "Translation unavailable: can't access 't' before initialization".
+
+### Added
+- **Easier setup on Windows.** Install the helper with one line in PowerShell:
+  ```powershell
+  irm https://github.com/rawmind/titl/releases/latest/download/install.ps1 | iex
+  ```
+  The script downloads the helper, checks it against the release's `SHA256SUMS` and runs `titl install`. Or download `titl-windows-x64.exe` and double-click it: it sets everything up and keeps the window open until you press Enter.
+- When the helper is downloaded on its own, `titl install` ends with a link to Titl in the Chrome Web Store instead of "Load unpacked" steps.
+
+### Changed
+- Tagged releases upload the extension to the Chrome Web Store as a draft; submitting it for review is done in the dashboard.
+
+### Upgrade
+- macOS: `brew upgrade rawmind/tap/titl`
+- Windows: run the PowerShell line above.
+- Linux: download `titl-linux-x64` from this release and run `./titl-linux-x64 install`.
+
+Then reload the extension in `chrome://extensions`, or let the Chrome Web Store update it.
+
 ## [0.1.13](https://github.com/rawmind/titl/releases/tag/v0.1.13) - 2026-11-20
 
 ### Changed
