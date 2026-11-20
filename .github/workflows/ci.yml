@@ -126,6 +126,13 @@ jobs:
       - name: Start whisper-server through the helper and transcribe
         run: python scripts/host-smoke.py "$MANIFEST" jfk.wav en "fellow Americans"
 
+      - name: Helper updates itself from a newer release (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          sed -i 's/^version = ".*"/version = "99.0.0"/' helper/Cargo.toml
+          cargo build --release --manifest-path helper/Cargo.toml
+          python scripts/update-smoke.py "$LOCALAPPDATA/chrome-transcriber/titl.exe" helper/target/release/titl.exe 99.0.0
+
       - name: Server log on failure
         if: failure()
         run: |

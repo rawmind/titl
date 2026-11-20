@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ Terjemahan tidak tersedia: $1"
+  },
+  "helperUpdateAvailable": {
+    "message": "Helper $1 tersedia"
+  },
+  "updateHelper": {
+    "message": "Perbarui"
+  },
+  "updatingHelper": {
+    "message": "Memperbarui helper…"
+  },
+  "helperUpdated": {
+    "message": "Helper diperbarui ke $1. Versi baru dipakai mulai berikutnya."
+  },
+  "helperUpdateFailed": {
+    "message": "Gagal memperbarui helper: $1"
+  },
+  "releaseNotes": {
+    "message": "Catatan rilis"
   }
 }

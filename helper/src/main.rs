@@ -5,6 +5,7 @@ mod install;
 mod model;
 mod paths;
 mod registry;
+mod update;
 mod whisper_cpp;
 
 use std::env;
@@ -17,6 +18,7 @@ USAGE:
   titl install [--server PATH | --update-server [--cpu]] [--model PATH | --download-model NAME] [--extension-id ID]
   titl uninstall [--purge]
   titl status
+  titl update
   titl --version
 
 install         Find whisper-server and a model (downloading one if needed), copy this helper
@@ -32,6 +34,8 @@ install         Find whisper-server and a model (downloading one if needed), cop
 --extension-id  Also accept this extension ID (e.g. a Chrome Web Store build). Remembered.
 uninstall       Unregister and remove the helper. --purge also deletes downloaded models.
 status          Show the configuration and where the helper is registered.
+update          (Windows) Download the newest helper from GitHub, check it against SHA256SUMS
+                and replace the installed copy. The extension's popup offers the same.
 
 The Titl extension needs this helper. Chrome starts this program itself (with the extension's origin as argument) to launch
 whisper-server on demand.";
@@ -52,6 +56,7 @@ fn main() -> ExitCode {
         Some("install") => install::parse(&args[1..]).and_then(install::install),
         Some("uninstall") => install::uninstall(args.iter().any(|a| a == "--purge")),
         Some("status") => install::status(),
+        Some("update") => update::cli(),
         Some("--version" | "-V" | "version") => {
             println!("titl {}", env!("CARGO_PKG_VERSION"));
             Ok(())

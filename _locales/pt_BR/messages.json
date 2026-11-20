@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ Tradução indisponível: $1"
+  },
+  "helperUpdateAvailable": {
+    "message": "Nova versão do assistente disponível: $1"
+  },
+  "updateHelper": {
+    "message": "Atualizar"
+  },
+  "updatingHelper": {
+    "message": "Atualizando o assistente…"
+  },
+  "helperUpdated": {
+    "message": "Assistente atualizado para $1. Ele será usado a partir da próxima ativação."
+  },
+  "helperUpdateFailed": {
+    "message": "Não foi possível atualizar o assistente: $1"
+  },
+  "releaseNotes": {
+    "message": "Novidades"
   }
 }

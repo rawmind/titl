@@ -1,5 +1,6 @@
 use crate::config::Config;
 use crate::paths;
+use crate::update;
 use serde_json::{json, Value};
 use std::fs::OpenOptions;
 use std::io::{self, Read, Write};
@@ -198,6 +199,7 @@ pub fn run() {
     let mut stdin = io::stdin().lock();
     let mut stdout = io::stdout().lock();
     let mut server = Server { child: None, port: None };
+    update::cleanup();
     while let Ok(Some(message)) = read_message(&mut stdin) {
         let reply = match message.get("cmd").and_then(Value::as_str) {
             Some("start") => {
@@ -214,6 +216,8 @@ pub fn run() {
                 server.stop();
                 json!({ "status": "stopped" })
             }
+            Some("checkUpdate") => update::status_reply(),
+            Some("update") => update::apply_reply(),
             _ => error("unknown command"),
         };
         if write_message(&mut stdout, &reply).is_err() {

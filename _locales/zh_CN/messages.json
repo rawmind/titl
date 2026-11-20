@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ 翻译不可用：$1"
+  },
+  "helperUpdateAvailable": {
+    "message": "辅助程序有新版本：$1"
+  },
+  "updateHelper": {
+    "message": "更新"
+  },
+  "updatingHelper": {
+    "message": "正在更新辅助程序…"
+  },
+  "helperUpdated": {
+    "message": "辅助程序已更新到 $1，下次开启时生效。"
+  },
+  "helperUpdateFailed": {
+    "message": "辅助程序更新失败：$1"
+  },
+  "releaseNotes": {
+    "message": "更新说明"
   }
 }

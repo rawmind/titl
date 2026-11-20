@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ अनुवाद उपलब्ध नहीं: $1"
+  },
+  "helperUpdateAvailable": {
+    "message": "हेल्पर $1 उपलब्ध है"
+  },
+  "updateHelper": {
+    "message": "अपडेट करें"
+  },
+  "updatingHelper": {
+    "message": "हेल्पर अपडेट हो रहा है…"
+  },
+  "helperUpdated": {
+    "message": "हेल्पर $1 पर अपडेट हो गया। अगली बार शुरू करने पर इस्तेमाल होगा।"
+  },
+  "helperUpdateFailed": {
+    "message": "हेल्पर अपडेट नहीं हो सका: $1"
+  },
+  "releaseNotes": {
+    "message": "नया क्या है"
   }
 }

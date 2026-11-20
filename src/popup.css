@@ -107,3 +107,44 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.update {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--accent-soft);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 12px;
+}
+
+.update[hidden] {
+  display: none;
+}
+
+.update-text {
+  margin: 0;
+  color: var(--text);
+  font-weight: 650;
+}
+
+.update-notes {
+  margin: 6px 0 0;
+  padding-left: 16px;
+  color: var(--muted);
+}
+
+.update-notes:empty {
+  display: none;
+}
+
+.update-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 0;
+}
+
+.update-actions .secondary {
+  height: 30px;
+  padding: 0 14px;
+}

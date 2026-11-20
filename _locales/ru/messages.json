@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ Перевод недоступен: $1"
+  },
+  "helperUpdateAvailable": {
+    "message": "Доступна новая версия помощника: $1"
+  },
+  "updateHelper": {
+    "message": "Обновить"
+  },
+  "updatingHelper": {
+    "message": "Обновляю помощник…"
+  },
+  "helperUpdated": {
+    "message": "Помощник обновлён до $1. Новая версия заработает при следующем запуске."
+  },
+  "helperUpdateFailed": {
+    "message": "Не удалось обновить помощник: $1"
+  },
+  "releaseNotes": {
+    "message": "Что нового"
   }
 }

@@ -1,6 +1,7 @@
 import { loadSettings } from './settings.js';
 import { languageName } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
+import { HOST_NAME } from './server.js';
 
 localizePage();
 
@@ -62,6 +63,42 @@ function renderServer(state) {
   $('server').textContent = `${where} · ${languageName(settings.language, uiLocale())}`;
   $('server').title = url ?? settings.serverUrl;
 }
+
+async function checkHelperUpdate() {
+  if (!settings.autoStartServer) return;
+  let res;
+  try {
+    res = await chrome.runtime.sendNativeMessage(HOST_NAME, { cmd: 'checkUpdate' });
+  } catch {
+    return;
+  }
+  if (res?.status !== 'update') return;
+  $('updateText').textContent = t('helperUpdateAvailable', res.latest);
+  $('updateNotes').replaceChildren(
+    ...(res.notes ?? []).map((note) => Object.assign(document.createElement('li'), { textContent: note })),
+  );
+  $('updateNotesLink').href = res.url;
+  $('update').hidden = false;
+}
+
+async function updateHelper() {
+  const button = $('updateButton');
+  button.disabled = true;
+  $('updateText').textContent = t('updatingHelper');
+  try {
+    const res = await chrome.runtime.sendNativeMessage(HOST_NAME, { cmd: 'update' });
+    if (res?.status !== 'updated') throw new Error(res?.error ?? 'unknown');
+    $('updateText').textContent = t('helperUpdated', res.version);
+    $('updateNotes').replaceChildren();
+    button.hidden = true;
+  } catch (err) {
+    $('updateText').textContent = t('helperUpdateFailed', err.message);
+    button.disabled = false;
+  }
+}
+
+$('updateButton').addEventListener('click', updateHelper);
+checkHelperUpdate();
 
 const initial = (await chrome.storage.session.get('state')).state;
 render(initial);

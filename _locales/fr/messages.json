@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ Traduction indisponible : $1"
+  },
+  "helperUpdateAvailable": {
+    "message": "Une nouvelle version de l’assistant est disponible : $1"
+  },
+  "updateHelper": {
+    "message": "Mettre à jour"
+  },
+  "updatingHelper": {
+    "message": "Mise à jour de l’assistant…"
+  },
+  "helperUpdated": {
+    "message": "Assistant mis à jour vers $1. Il sera utilisé au prochain démarrage."
+  },
+  "helperUpdateFailed": {
+    "message": "Échec de la mise à jour de l’assistant : $1"
+  },
+  "releaseNotes": {
+    "message": "Nouveautés"
   }
 }

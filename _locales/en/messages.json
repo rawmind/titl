@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ Translation unavailable: $1"
+  },
+  "helperUpdateAvailable": {
+    "message": "Helper $1 is available"
+  },
+  "updateHelper": {
+    "message": "Update"
+  },
+  "updatingHelper": {
+    "message": "Updating the helper…"
+  },
+  "helperUpdated": {
+    "message": "Helper updated to $1. It's used from the next Start."
+  },
+  "helperUpdateFailed": {
+    "message": "Helper update failed: $1"
+  },
+  "releaseNotes": {
+    "message": "Release notes"
   }
 }

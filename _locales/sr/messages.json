@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ Prevod nije dostupan: $1"
+  },
+  "helperUpdateAvailable": {
+    "message": "Dostupan je pomoćni program $1"
+  },
+  "updateHelper": {
+    "message": "Ažuriraj"
+  },
+  "updatingHelper": {
+    "message": "Ažuriranje pomoćnog programa…"
+  },
+  "helperUpdated": {
+    "message": "Pomoćni program je ažuriran na $1. Koristi se od sledećeg pokretanja."
+  },
+  "helperUpdateFailed": {
+    "message": "Ažuriranje pomoćnog programa nije uspelo: $1"
+  },
+  "releaseNotes": {
+    "message": "Šta je novo"
   }
 }

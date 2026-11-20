@@ -128,6 +128,8 @@ The script downloads `titl-windows-x64.exe` from the latest release, checks it a
 
 Or by hand: from the [latest release](https://github.com/rawmind/titl/releases/latest), download **`titl-windows-x64.exe`** and double-click it. Windows SmartScreen may warn about an unknown publisher (the file isn't code-signed): click **More info → Run anyway**. The window shows the setup and stays open until you press Enter. To pass options, run it from PowerShell instead: `.\titl-windows-x64.exe install --download-model small`.
 
+**Updates:** once a day, when you open Titl's popup, the helper checks GitHub for a newer release. If there is one, the popup shows what it fixes and an **Update** button; the new helper is downloaded, checked against `SHA256SUMS` and used from the next Start. `titl update` does the same in a terminal. Helpers older than 0.1.15 can't update themselves: install 0.1.15 once with the PowerShell line above.
+
 Either way, the helper downloads whisper.cpp (the CUDA build if you have an NVIDIA GPU, otherwise the CPU build) and a matching model, then registers with Chrome, Edge and Brave. It copies itself to `%LOCALAPPDATA%\chrome-transcriber\`, so you can delete the download afterwards.
 
 ### Linux (x64 and arm64)
@@ -183,6 +185,7 @@ Use the source code, not the `titl-x.y.z.zip` file attached to releases. That fi
 | `titl status` | Show the server, model, which browsers it's registered with, and whether the extension is loaded |
 | `titl install …` | (Re)install; run again after moving whisper.cpp or a model |
 | `titl install --update-server` | Download the newest prebuilt whisper.cpp (Windows, Linux) |
+| `titl update` | Windows: download the newest helper, check it against the release's `SHA256SUMS`, and replace the installed copy |
 | `titl uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
 
 The helper was called `chrome-transcriber-helper` before 0.1.7. Homebrew still installs that name as an alias.

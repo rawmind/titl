@@ -116,7 +116,7 @@ pub fn known_good() -> Value {
     Value::Array(releases)
 }
 
-fn sha256_of(path: &Path) -> Result<String, String> {
+pub fn sha256_of(path: &Path) -> Result<String, String> {
     let mut file = File::open(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut hasher = Sha256::new();
     io::copy(&mut file, &mut hasher).map_err(|e| format!("{}: {e}", path.display()))?;

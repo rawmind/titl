@@ -220,5 +220,23 @@
   },
   "translationUnavailable": {
     "message": "⚠ الترجمة غير متاحة: $1"
+  },
+  "helperUpdateAvailable": {
+    "message": "يتوفر إصدار جديد من المساعد: $1"
+  },
+  "updateHelper": {
+    "message": "تحديث"
+  },
+  "updatingHelper": {
+    "message": "جارٍ تحديث المساعد…"
+  },
+  "helperUpdated": {
+    "message": "تم تحديث المساعد إلى $1. سيُستخدم عند التشغيل التالي."
+  },
+  "helperUpdateFailed": {
+    "message": "تعذّر تحديث المساعد: $1"
+  },
+  "releaseNotes": {
+    "message": "ما الجديد"
   }
 }
