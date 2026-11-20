@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: npm run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: titl-extension
+          path: dist/*.zip
+
+  helper:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: helper
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup component add clippy
+      - run: cargo clippy --release -- -D warnings
+      - run: cargo test --release
+      - run: cargo build --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: titl-${{ runner.os }}
+          path: |
+            helper/target/release/titl
+            helper/target/release/titl.exe
+          if-no-files-found: error
+
+  end-to-end:
+    needs: helper
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            asset: whisper-bin-x64.zip
+          - os: ubuntu-latest
+            asset: whisper-bin-ubuntu-x64.tar.gz
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: titl-${{ runner.os }}
+          path: bin
+
+      - name: Download prebuilt whisper.cpp
+        run: |
+          tag=$(gh api repos/ggml-org/whisper.cpp/releases --jq '[.[] | select(any(.assets[]; .name == "${{ matrix.asset }}"))][0].tag_name')
+          echo "whisper.cpp build: $tag"
+          gh release download "$tag" --repo ggml-org/whisper.cpp -p "${{ matrix.asset }}" -D whisper
+          cd whisper
+          case "${{ matrix.asset }}" in
+            *.zip) unzip -q "${{ matrix.asset }}" ;;
+            *) tar xzf "${{ matrix.asset }}" ;;
+          esac
+          server=$(find "$PWD" -name 'whisper-server' -o -name 'whisper-server.exe' | head -1)
+          test -n "$server"
+          chmod +x "$server" || true
+          echo "WHISPER_SERVER=$server" >> "$GITHUB_ENV"
+
+      - name: Download test clip
+        run: curl -sfL -o jfk.wav https://raw.githubusercontent.com/ggml-org/whisper.cpp/master/samples/jfk.wav
+
+      - name: titl install
+        run: |
+          chmod +x bin/titl* || true
+          mkdir -p ~/.config/google-chrome
+          bin/titl* install --server "$WHISPER_SERVER" --download-model tiny < /dev/null
+          bin/titl* status
+          bin/titl* --version
+
+      - name: Check browser registration (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $manifest = (Get-ItemProperty 'HKCU:\Software\Google\Chrome\NativeMessagingHosts\com.chrome_transcriber.host').'(default)'
+          Write-Output "registry -> $manifest"
+          "MANIFEST=$manifest" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Check browser registration (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          manifest=~/.config/google-chrome/NativeMessagingHosts/com.chrome_transcriber.host.json
+          test -f "$manifest"
+          echo "MANIFEST=$manifest" >> "$GITHUB_ENV"
+
+      - name: Start whisper-server through the helper and transcribe
+        run: python scripts/host-smoke.py "$MANIFEST" jfk.wav en "fellow Americans"
+
+      - name: Server log on failure
+        if: failure()
+        run: |
+          cat ~/.local/share/chrome-transcriber/server.log 2>/dev/null || true
+          cat "$LOCALAPPDATA/chrome-transcriber/server.log" 2>/dev/null || true
