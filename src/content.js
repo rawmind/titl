@@ -212,8 +212,8 @@
       if (options !== opts) return created.destroy();
       translator = created;
       setTranslationNotice('');
-      const t = getVideo()?.currentTime ?? 0;
-      cues.filter((c) => c.end >= t - 5).forEach(translateCue);
+      const now = getVideo()?.currentTime ?? 0;
+      cues.filter((c) => c.end >= now - 5).forEach(translateCue);
     } catch (err) {
       if (options === opts) setTranslationNotice(t('translationUnavailable', err.message));
     }
@@ -230,7 +230,7 @@
     if (!translator || cue.translation != null) return;
     cue.translation = '';
     translate(cue.src ?? cue.text).then(
-      (t) => (cue.translation = t),
+      (translated) => (cue.translation = translated),
       () => (cue.translation = null),
     );
   }
@@ -254,8 +254,8 @@
     renderLive();
     if (translator) {
       translate(src ?? text).then(
-        (t) => {
-          liveTranslation = trimTail(`${liveTranslation} ${t}`.trim(), max);
+        (translated) => {
+          liveTranslation = trimTail(`${liveTranslation} ${translated}`.trim(), max);
           renderLive();
         },
         () => {},
