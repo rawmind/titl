@@ -1,21 +1,84 @@
+<div align="center">
+
+<img src="icons/icon128.png" width="96" alt="Titl icon">
+
 # Titl
 
-<img src="icons/icon128.png" width="64" align="right" alt="">
+**On-time, private subtitles and translation for YouTube, transcribed on your own computer.**
 
-**Titl** is a Chrome extension that shows subtitles on any YouTube video, transcribed on your own computer by [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It's built for Serbian and works with any language Whisper supports. Audio never leaves your machine: it only goes to `127.0.0.1`.
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/bpapgchpopccpbgbkfldmdmfmddgoeme?label=Chrome%20Web%20Store&logo=googlechrome&logoColor=white&color=f5c518)](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme)
+[![Release](https://img.shields.io/github/v/release/rawmind/titl?color=16181d)](https://github.com/rawmind/titl/releases/latest)
+[![CI](https://github.com/rawmind/titl/actions/workflows/ci.yml/badge.svg)](https://github.com/rawmind/titl/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-![Titl showing Serbian subtitles with an English translation on a TEDx talk](store/screenshot-1-subtitles.png)
+[**Add to Chrome**](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) · [Install the helper](#install) · [Changelog](CHANGELOG.md) · [Privacy](PRIVACY.md)
+
+<img src="store/screenshot-1-subtitles.png" alt="Titl showing Serbian subtitles with an English translation on a TEDx talk" width="820">
+
+</div>
+
+## Why Titl
+
+Most live-caption tools show each line **after** it's spoken, upload your audio to the cloud, or only work when YouTube already has captions. Titl runs [whisper.cpp](https://github.com/ggml-org/whisper.cpp) on **your** GPU, prepares subtitles **ahead** of what you're watching, and works on any video, even ones with no captions at all. It was built for Serbian and works with about 100 languages.
 
 ## Features
 
-- **Subtitles on time.** A hidden, muted copy of the video plays a few seconds ahead and gets transcribed first, so each line appears as it is spoken (or slightly before).
-- **Live mode** for live streams, or if you prefer it: transcribes what is playing, with subtitles 3–5 s late.
-- **Local, GPU-accelerated:** `whisper-server` with `large-v3-turbo` on Metal, about 0.8 s per 8 s of audio on Apple Silicon.
-- **Starts the server for you:** the first Start launches `whisper-server`, and it keeps running until Chrome quits.
-- **Cross-platform helper:** one Rust binary installs and runs everything on macOS, Linux and Windows, and downloads a model if needed.
-- **Serbian script control:** output is always Latin or always Cyrillic, never a mix.
-- **On-device translation** into English, Russian, German and more, using Chrome's built-in translator. The original can be shown above the translation.
-- Works in normal and fullscreen mode, doesn't block YouTube controls, and follows seeks, speed changes and navigation to other videos.
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### ⏱️ On time, not late
+- **Lookahead mode:** a muted copy of the video plays a few seconds ahead in a collapsed tab, so each line appears **with** the speech, or a moment before
+- **Live mode** for live streams and any other tab: subtitles 3–5 s late
+- Follows seeks, speed changes, ads and video changes, and pauses briefly until subtitles are ready
+
+</td>
+<td width="50%" valign="top">
+
+### 🔒 Private by design
+- Audio only goes to `127.0.0.1`, never to the cloud
+- No accounts, analytics or tracking
+- Signed releases, checksummed downloads, CI-built binaries ([Security](SECURITY.md))
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### 🌍 Translation, built in
+- **On-device** translation with Chrome's built-in translator into ~36 languages, ordered by popularity
+- Original and translation shown together, or just the translation
+- **Blur the translation** to practise listening: **V** (any keyboard layout) or a click reveals it
+
+</td>
+<td valign="top">
+
+### 🎯 Accurate
+- `large-v3-turbo` on Metal or CUDA (`small` on CPU)
+- ~100 spoken languages, picked from a list with native names
+- **Serbian:** always Latin or always Cyrillic, never a mix
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### ⚙️ Zero-fuss setup
+- One helper, `titl`, for macOS, Windows and Linux
+- `titl install` finds or **downloads whisper.cpp** (CUDA or CPU) and a model, then registers with Chrome, Edge and Brave
+- Starts the server on a **random free port** when you press Start
+
+</td>
+<td valign="top">
+
+### 🎨 Feels native
+- Subtitles in normal and fullscreen, never blocking YouTube's controls
+- Dark popup and Options in Titl's colours
+- **Save applies immediately** to running subtitles
+
+</td>
+</tr>
+</table>
 
 ## Screenshots
 
@@ -23,17 +86,25 @@
 |---|---|---|
 | ![Titl subtitles on the YouTube watch page](store/screenshot-2-on-youtube.png) | ![The Titl popup while subtitles are running](store/screenshot-3-popup.png) | ![The Titl options page](store/screenshot-4-options.png) |
 
-Video: [Tatjana Vojtehovski at TEDxZemun](https://www.youtube.com/watch?v=uu_h3BTFQjA). Subtitles are Titl's own output: Serbian (small, top) and Chrome's on-device English translation.
+<sub>Video: [Tatjana Vojtehovski at TEDxZemun](https://www.youtube.com/watch?v=uu_h3BTFQjA). Subtitles are Titl's own output: Serbian (small, top) and Chrome's on-device English translation.</sub>
+
+## Quick start
+
+1. **[Add Titl to Chrome](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme)** (also works in Edge and Brave).
+2. Install the helper:
+   - **macOS:** `brew install rawmind/tap/titl && titl install`
+   - **Windows / Linux:** download `titl` from the [latest release](https://github.com/rawmind/titl/releases/latest) and run `titl install` (details [below](#install))
+3. Open a YouTube video, click **Titl → Start subtitles**.
 
 ## Requirements
 
-- Chrome 116+, or Chromium, Edge or Brave, on macOS, Linux or Windows
-- whisper.cpp's `whisper-server` (Homebrew or your own build). GPU strongly recommended: Metal, Vulkan or CUDA
-- A Whisper model: the helper downloads one if you don't have it
+- Chrome 116+, or Edge or Brave, on macOS, Windows or Linux (Chrome 138+ for translation)
+- A GPU is recommended (Apple Silicon, or an NVIDIA card on Windows/Linux). CPU works with smaller models.
+- About 0.5–1.6 GB of disk for the Whisper model, which the helper downloads
 
 ## Install
 
-Titl has two parts: a small **helper** (`titl`) that runs [whisper.cpp](https://github.com/ggml-org/whisper.cpp) on your computer, and the **extension** in Chrome. Set up the helper for your system, then [load the extension](#load-the-extension).
+Titl has two parts: a small **helper** (`titl`) that runs [whisper.cpp](https://github.com/ggml-org/whisper.cpp) on your computer, and the **extension** in Chrome. Set up the helper for your system, then [install the extension](#install-the-extension) from the [Chrome Web Store](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme).
 
 ### macOS (Homebrew)
 
@@ -81,9 +152,13 @@ helper/target/release/titl install
 
 When you press **Start**, the helper launches whisper-server on a random free port above 10000 and tells the extension which one, so nothing clashes with other software. It keeps running until Chrome quits.
 
-### Load the extension
+### Install the extension
 
-Chrome only installs extensions from the Chrome Web Store by itself, so until Titl's store listing is live, load it once by hand:
+Install **[Titl from the Chrome Web Store](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme)**. It also works in Edge and Brave, which install extensions from the Chrome Web Store.
+
+#### Or load it unpacked
+
+To run a development copy or the latest code, load the extension by hand instead:
 
 1. Get the extension folder:
    - **macOS (Homebrew):** it's already installed at `$(brew --prefix)/opt/titl/share/titl/extension`. `titl install` copies this path to your clipboard.
@@ -167,8 +242,8 @@ Automatic language detection isn't supported yet.
 
 | Symptom | Fix |
 |---|---|
-| Extension doesn't appear in Chrome after `install` | `install` doesn't add it: load it once via **Load unpacked** ([Load the extension](#load-the-extension)). `titl status` shows whether Chrome has it. |
-| "Auto-start helper stopped: Access to the specified native messaging host is forbidden" | You loaded the store package (`titl-x.y.z.zip`) by hand. Load the release's **Source code (zip)** instead. |
+| Extension doesn't appear in Chrome after `install` | `install` doesn't add it: install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) ([Install the extension](#install-the-extension)). `titl status` shows whether Chrome has it. |
+| "Auto-start helper stopped: Access to the specified native messaging host is forbidden" | You loaded the store package (`titl-x.y.z.zip`) by hand. Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme), or load the release's **Source code (zip)** instead. |
 | Windows: "Windows protected your PC" | The helper isn't code-signed. Click **More info → Run anyway**. |
 | "auto-start helper is not installed" | Run `titl install`, then try again. |
 | "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `titl status`: a path marked "(missing!)" means re-run `install`. |
