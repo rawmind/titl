@@ -1,9 +1,10 @@
 use crate::paths;
 use std::fs::{self, File};
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
+pub const CPU_MODEL: &str = "small";
 pub const PREFERRED_MODELS: &[&str] = &["large-v3-turbo", "large-v3-turbo-q8_0", "large-v3-turbo-q5_0"];
 
 pub fn file_name(name: &str) -> String {
@@ -22,23 +23,33 @@ pub fn download(name: &str) -> Result<PathBuf, String> {
     if !valid_name(name) {
         return Err(format!("invalid model name: {name}"));
     }
-    let dir = paths::models_dir();
-    let dest = dir.join(file_name(name));
+    let dest = paths::models_dir().join(file_name(name));
     if dest.is_file() {
         println!("Model already downloaded: {}", dest.display());
         return Ok(dest);
     }
-    fs::create_dir_all(&dir).map_err(|e| format!("cannot create {}: {e}", dir.display()))?;
+    fetch(&url(name), &dest).map_err(|e| {
+        if e.contains("HTTP 404") {
+            format!("no such model: {name} (see https://huggingface.co/ggerganov/whisper.cpp)")
+        } else {
+            e
+        }
+    })?;
+    Ok(dest)
+}
 
-    let url = url(name);
+pub fn fetch(url: &str, dest: &Path) -> Result<(), String> {
+    if let Some(dir) = dest.parent() {
+        fs::create_dir_all(dir).map_err(|e| format!("cannot create {}: {e}", dir.display()))?;
+    }
     println!("Downloading {url}");
-    let response = ureq::get(&url).call().map_err(|e| match e {
-        ureq::Error::Status(404, _) => format!("no such model: {name} (see https://huggingface.co/ggerganov/whisper.cpp)"),
+    let response = ureq::get(url).set("User-Agent", "titl").call().map_err(|e| match e {
+        ureq::Error::Status(code, _) => format!("download failed: HTTP {code} for {url}"),
         other => format!("download failed: {other}"),
     })?;
     let total: Option<u64> = response.header("Content-Length").and_then(|v| v.parse().ok());
 
-    let part = dir.join(format!("{}.part", file_name(name)));
+    let part = dest.with_extension("part");
     let mut file = File::create(&part).map_err(|e| format!("cannot write {}: {e}", part.display()))?;
     let mut reader = response.into_reader();
     let mut buf = vec![0u8; 1 << 20];
@@ -66,8 +77,7 @@ pub fn download(name: &str) -> Result<PathBuf, String> {
         }
     }
     file.sync_all().map_err(|e| e.to_string())?;
-    fs::rename(&part, &dest).map_err(|e| format!("cannot move model into place: {e}"))?;
-    Ok(dest)
+    fs::rename(&part, dest).map_err(|e| format!("cannot move {} into place: {e}", dest.display()))
 }
 
 #[cfg(test)]

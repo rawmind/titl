@@ -2,6 +2,7 @@ use crate::config::{self, Config};
 use crate::extension;
 use crate::model;
 use crate::paths::{self, Target};
+use crate::whisper_cpp::{self, Build};
 use serde_json::json;
 use std::env;
 use std::fs;
@@ -14,6 +15,8 @@ pub struct Options {
     pub model: Option<PathBuf>,
     pub download_model: Option<String>,
     pub extension_ids: Vec<String>,
+    pub update_server: bool,
+    pub cpu_only: bool,
 }
 
 pub fn parse(args: &[String]) -> Result<Options, String> {
@@ -25,6 +28,8 @@ pub fn parse(args: &[String]) -> Result<Options, String> {
             "--server" => opts.server = Some(PathBuf::from(value()?)),
             "--model" => opts.model = Some(PathBuf::from(value()?)),
             "--download-model" => opts.download_model = Some(value()?),
+            "--update-server" => opts.update_server = true,
+            "--cpu" => opts.cpu_only = true,
             "--extension-id" => {
                 let id = value()?;
                 if !config::valid_extension_id(&id) {
@@ -66,6 +71,7 @@ pub fn find_server(explicit: Option<&Path>) -> Result<PathBuf, String> {
     for dir in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"] {
         candidates.push(Path::new(dir).join(&name));
     }
+    candidates.extend(whisper_cpp::downloaded_server());
     candidates
         .into_iter()
         .find(|p| p.is_file())
@@ -158,16 +164,38 @@ fn register(exe: &Path, ids: &[String]) -> Result<Vec<&'static str>, String> {
     Ok(registered)
 }
 
+fn resolve_server(opts: &Options) -> Result<(PathBuf, Option<Build>), String> {
+    let download = || whisper_cpp::download(opts.cpu_only).map(|i| (i.server, Some(i.build)));
+    if opts.update_server {
+        return download();
+    }
+    match find_server(opts.server.as_deref()) {
+        Ok(server) => Ok((server, None)),
+        Err(_) if opts.server.is_none() && whisper_cpp::supported() => {
+            println!("whisper-server not found; downloading a prebuilt whisper.cpp.");
+            download()
+        }
+        Err(e) => Err(e),
+    }
+}
+
+pub fn default_model(macos: bool, build: Option<Build>, nvidia: bool) -> &'static str {
+    let gpu = macos || build == Some(Build::Cuda) || (build.is_none() && nvidia);
+    if gpu { model::DEFAULT_MODEL } else { model::CPU_MODEL }
+}
+
 pub fn install(opts: Options) -> Result<(), String> {
-    let server = find_server(opts.server.as_deref())?;
+    let (server, build) = resolve_server(&opts)?;
     let model = match (opts.model, opts.download_model) {
         (Some(path), _) => stable(&path)?,
         (None, Some(name)) => model::download(&name)?,
         (None, None) => match find_model(&server) {
             Some(path) => path,
             None => {
-                println!("No Whisper model found; downloading {} (about 550 MB).", model::DEFAULT_MODEL);
-                model::download(model::DEFAULT_MODEL)?
+                let nvidia = build.is_none() && !cfg!(target_os = "macos") && whisper_cpp::nvidia_present();
+                let name = default_model(cfg!(target_os = "macos"), build, nvidia);
+                println!("No Whisper model found; downloading {name}.");
+                model::download(name)?
             }
         },
     };
@@ -270,7 +298,10 @@ pub fn uninstall(purge: bool) -> Result<(), String> {
         ] {
             let _ = fs::remove_file(path);
         }
-        println!("Helper removed. Downloaded models kept in {} (use --purge to delete).", paths::models_dir().display());
+        println!(
+            "Helper removed. Downloaded models and whisper.cpp kept in {} (use --purge to delete).",
+            data.display()
+        );
     }
     Ok(())
 }
@@ -362,6 +393,21 @@ mod tests {
         std::os::unix::fs::symlink(cellar.join("whisper-server"), &link).unwrap();
         assert_eq!(find_server(Some(&link)).unwrap(), link);
         fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn parses_server_download_flags() {
+        let opts = parse(&["--update-server".to_string(), "--cpu".to_string()]).unwrap();
+        assert!(opts.update_server && opts.cpu_only);
+    }
+
+    #[test]
+    fn default_model_depends_on_gpu() {
+        assert_eq!(default_model(true, None, false), model::DEFAULT_MODEL);
+        assert_eq!(default_model(false, Some(Build::Cuda), false), model::DEFAULT_MODEL);
+        assert_eq!(default_model(false, Some(Build::Cpu), true), model::CPU_MODEL);
+        assert_eq!(default_model(false, None, true), model::DEFAULT_MODEL);
+        assert_eq!(default_model(false, None, false), model::CPU_MODEL);
     }
 
     #[test]

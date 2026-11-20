@@ -1,13 +1,17 @@
 [package]
 name = "titl"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 license = "MIT"
 description = "Installs and runs whisper-server for the Chrome Transcriber extension"
 
 [dependencies]
+flate2 = "1"
 serde_json = "1"
+sha2 = "0.10"
+tar = "0.4"
 ureq = "2"
+zip = { version = "2", default-features = false, features = ["deflate"] }
 
 [profile.release]
 lto = true

@@ -51,11 +51,21 @@ $('options').addEventListener('click', (e) => {
   chrome.runtime.openOptionsPage();
 });
 
-const { serverUrl, language } = await loadSettings();
-$('server').textContent = `${new URL(serverUrl).host} · ${languageName(language)}`;
-$('server').title = serverUrl;
+const settings = await loadSettings();
 
-render((await chrome.storage.session.get('state')).state);
+function renderServer(state) {
+  const url = state?.status === 'running' && state.serverUrl ? state.serverUrl : null;
+  const where = url ? new URL(url).host : settings.autoStartServer ? 'auto-start' : new URL(settings.serverUrl).host;
+  $('server').textContent = `${where} · ${languageName(settings.language)}`;
+  $('server').title = url ?? settings.serverUrl;
+}
+
+const initial = (await chrome.storage.session.get('state')).state;
+render(initial);
+renderServer(initial);
 chrome.storage.session.onChanged.addListener((changes) => {
-  if (changes.state) render(changes.state.newValue);
+  if (changes.state) {
+    render(changes.state.newValue);
+    renderServer(changes.state.newValue);
+  }
 });

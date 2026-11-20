@@ -55,6 +55,10 @@ pub fn models_dir() -> PathBuf {
     data_dir().join("models")
 }
 
+pub fn whisper_dir() -> PathBuf {
+    data_dir().join("whisper")
+}
+
 pub fn manifest_file_name() -> String {
     format!("{HOST_NAME}.json")
 }

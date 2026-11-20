@@ -12,10 +12,22 @@ export async function isServerUp(serverUrl) {
   }
 }
 
-export async function ensureServer(serverUrl) {
-  if (await isServerUp(serverUrl)) return;
+const LEGACY_HELPER_PORT = 8080;
 
-  const { hostname, port: urlPort } = new URL(serverUrl);
+export async function resolveServer(config) {
+  if (config.autoStartServer) {
+    try {
+      return await startWithHelper();
+    } catch (err) {
+      if (await isServerUp(config.serverUrl)) return config.serverUrl;
+      throw err;
+    }
+  }
+  if (await isServerUp(config.serverUrl)) return config.serverUrl;
+  throw new Error(`Cannot reach whisper-server at ${config.serverUrl}`);
+}
+
+async function startWithHelper() {
   port ??= connect();
   const reply = await new Promise((resolve, reject) => {
     const timer = setTimeout(() => done(reject, new Error('whisper-server did not start in time')), START_TIMEOUT_MS);
@@ -29,9 +41,14 @@ export async function ensureServer(serverUrl) {
     }
     port.onMessage.addListener(onMessage);
     port.onDisconnect.addListener(onDisconnect);
-    port.postMessage({ cmd: 'start', host: hostname, port: Number(urlPort) || 80 });
+    port.postMessage({ cmd: 'start', host: '127.0.0.1' });
   });
   if (reply.status !== 'ready') throw new Error(reply.error ?? 'whisper-server failed to start');
+  return serverUrlFor(reply.port ?? LEGACY_HELPER_PORT);
+}
+
+export function serverUrlFor(serverPort) {
+  return `http://127.0.0.1:${serverPort}/inference`;
 }
 
 function connect() {

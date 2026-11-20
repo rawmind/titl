@@ -1,6 +1,6 @@
 import { loadSettings, validateSettings } from './settings.js';
 import { LookaheadSession } from './lookahead.js';
-import { ensureServer } from './server.js';
+import { resolveServer } from './server.js';
 
 const OFFSCREEN_URL = 'src/offscreen.html';
 
@@ -55,14 +55,12 @@ async function start(tabId) {
   const invalid = validateSettings(config);
   if (invalid) throw new Error(invalid);
 
-  if (config.autoStartServer) {
-    await setState({ status: 'starting' });
-    try {
-      await ensureServer(config.serverUrl);
-    } catch (err) {
-      await setState({ status: 'idle' });
-      throw err;
-    }
+  await setState({ status: 'starting' });
+  try {
+    config.serverUrl = await resolveServer(config);
+  } catch (err) {
+    await setState({ status: 'idle' });
+    throw err;
   }
 
   await ensureContentScript(tabId);
@@ -86,7 +84,16 @@ async function start(tabId) {
   } else {
     await startLive(tabId, config);
   }
-  await setState({ tabId, mode, scoutTabId: lookahead?.scoutTabId ?? null, status: 'running', lag: 0, delayed: false, error: null });
+  await setState({
+    tabId,
+    mode,
+    scoutTabId: lookahead?.scoutTabId ?? null,
+    serverUrl: config.serverUrl,
+    status: 'running',
+    lag: 0,
+    delayed: false,
+    error: null,
+  });
 }
 
 async function stop() {

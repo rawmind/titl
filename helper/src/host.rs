@@ -3,13 +3,15 @@ use crate::paths;
 use serde_json::{json, Value};
 use std::fs::OpenOptions;
 use std::io::{self, Read, Write};
-use std::net::{SocketAddr, TcpStream};
+use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::process::{Child, Command, Stdio};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 const START_TIMEOUT: Duration = Duration::from_secs(110);
 const MAX_MESSAGE: usize = 1 << 20;
+const PORT_RANGE: (u16, u16) = (10_000, 65_535);
+const START_ATTEMPTS: usize = 3;
 
 pub fn read_message(reader: &mut impl Read) -> io::Result<Option<Value>> {
     let mut len = [0u8; 4];
@@ -42,24 +44,85 @@ fn error(message: impl Into<String>) -> Value {
     json!({ "status": "error", "error": message.into() })
 }
 
+fn ready(port: u16) -> Value {
+    json!({ "status": "ready", "port": port })
+}
+
+pub fn pick_port() -> Option<u16> {
+    let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_nanos() as u64).unwrap_or(1);
+    let mut x = nanos ^ (u64::from(std::process::id()) << 32) | 1;
+    let span = u64::from(PORT_RANGE.1 - PORT_RANGE.0) + 1;
+    for _ in 0..500 {
+        x ^= x << 13;
+        x ^= x >> 7;
+        x ^= x << 17;
+        let port = PORT_RANGE.0 + (x % span) as u16;
+        if TcpListener::bind(("127.0.0.1", port)).is_ok() && !reachable(port) {
+            return Some(port);
+        }
+    }
+    None
+}
+
+enum Failure {
+    Exited(String),
+    Other(String),
+}
+
+impl Failure {
+    fn message(self) -> String {
+        match self {
+            Failure::Exited(m) | Failure::Other(m) => m,
+        }
+    }
+}
+
 struct Server {
     child: Option<Child>,
+    port: Option<u16>,
 }
 
 impl Server {
-    fn start(&mut self, host: &str, port: u16) -> Value {
+    fn running(&mut self) -> bool {
+        self.child.as_mut().is_some_and(|c| matches!(c.try_wait(), Ok(None)))
+    }
+
+    fn start(&mut self, host: &str, requested: Option<u16>) -> Value {
         if host != "127.0.0.1" && host != "localhost" {
             return error("Only 127.0.0.1/localhost is allowed");
         }
-        if reachable(port) {
-            return json!({ "status": "ready" });
+        if let Some(port) = requested {
+            if reachable(port) {
+                return ready(port);
+            }
+            return match self.launch(port) {
+                Ok(()) => ready(port),
+                Err(f) => error(f.message()),
+            };
         }
-        let running = self.child.as_mut().is_some_and(|c| matches!(c.try_wait(), Ok(None)));
-        if !running {
-            if let Err(e) = self.spawn(port) {
-                return error(e);
+        if let Some(port) = self.port.filter(|_| self.running()) {
+            return match self.wait_ready(port) {
+                Ok(()) => ready(port),
+                Err(f) => error(f.message()),
+            };
+        }
+        for attempt in 1..=START_ATTEMPTS {
+            let Some(port) = pick_port() else {
+                return error("no free port between 10000 and 65535");
+            };
+            match self.launch(port) {
+                Ok(()) => return ready(port),
+                Err(Failure::Exited(_)) if attempt < START_ATTEMPTS => continue,
+                Err(f) => return error(f.message()),
             }
         }
+        error("whisper-server could not start")
+    }
+
+    fn launch(&mut self, port: u16) -> Result<(), Failure> {
+        self.stop();
+        self.spawn(port).map_err(Failure::Other)?;
+        self.port = Some(port);
         self.wait_ready(port)
     }
 
@@ -98,27 +161,28 @@ impl Server {
         Ok(())
     }
 
-    fn wait_ready(&mut self, port: u16) -> Value {
+    fn wait_ready(&mut self, port: u16) -> Result<(), Failure> {
         let deadline = Instant::now() + START_TIMEOUT;
         let log = paths::log_path();
         while Instant::now() < deadline {
             if let Some(child) = self.child.as_mut() {
                 if let Ok(Some(status)) = child.try_wait() {
                     self.child = None;
-                    return error(format!("whisper-server exited ({status}); see {}", log.display()));
+                    self.port = None;
+                    return Err(Failure::Exited(format!("whisper-server exited ({status}); see {}", log.display())));
                 }
             }
             if reachable(port) {
-                return json!({ "status": "ready" });
+                return Ok(());
             }
             thread::sleep(Duration::from_millis(500));
         }
         self.stop();
-        error(format!(
+        Err(Failure::Other(format!(
             "whisper-server did not start in {} s; see {}",
             START_TIMEOUT.as_secs(),
             log.display()
-        ))
+        )))
     }
 
     fn stop(&mut self) {
@@ -126,21 +190,24 @@ impl Server {
             let _ = child.kill();
             let _ = child.wait();
         }
+        self.port = None;
     }
 }
 
 pub fn run() {
     let mut stdin = io::stdin().lock();
     let mut stdout = io::stdout().lock();
-    let mut server = Server { child: None };
+    let mut server = Server { child: None, port: None };
     while let Ok(Some(message)) = read_message(&mut stdin) {
         let reply = match message.get("cmd").and_then(Value::as_str) {
             Some("start") => {
                 let host = message.get("host").and_then(Value::as_str).unwrap_or("127.0.0.1");
-                let port = message.get("port").and_then(Value::as_u64).unwrap_or(8080);
-                match u16::try_from(port) {
-                    Ok(port) => server.start(host, port),
-                    Err(_) => error("invalid port"),
+                match message.get("port").and_then(Value::as_u64).filter(|p| *p != 0) {
+                    None => server.start(host, None),
+                    Some(port) => match u16::try_from(port) {
+                        Ok(port) => server.start(host, Some(port)),
+                        Err(_) => error("invalid port"),
+                    },
                 }
             }
             Some("stop") => {
@@ -182,7 +249,16 @@ mod tests {
 
     #[test]
     fn refuses_non_local_hosts() {
-        let mut server = Server { child: None };
-        assert_eq!(server.start("example.com", 8080)["status"], "error");
+        let mut server = Server { child: None, port: None };
+        assert_eq!(server.start("example.com", None)["status"], "error");
+    }
+
+    #[test]
+    fn picks_free_ports_above_10000() {
+        for _ in 0..20 {
+            let port = pick_port().expect("a free port");
+            assert!(port >= 10_000);
+            assert!(TcpListener::bind(("127.0.0.1", port)).is_ok());
+        }
     }
 }

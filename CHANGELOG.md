@@ -2,6 +2,26 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.9](https://github.com/rawmind/titl/releases/tag/v0.1.9) - 2026-11-20
+
+Windows and Linux setup is now one command, and the local server no longer needs a fixed port.
+
+### Added
+- **`titl install` downloads whisper.cpp** on Windows and Linux when none is found: the CUDA build with an NVIDIA GPU, otherwise the CPU build. Every download is checked against GitHub's published SHA-256 and test-run before use. If the CUDA build or the newest release doesn't work, the helper falls back to the previous release or the CPU build by itself. If GitHub can't be reached, it uses a known-good build pinned in the helper.
+- `titl install --update-server` fetches the newest whisper.cpp, and `--cpu` skips the CUDA build.
+- The default model follows the hardware: `large-v3-turbo` with a GPU, `small` on CPU.
+
+### Changed
+- **whisper-server runs on a random free port above 10000.** The helper picks it and tells the extension, so nothing clashes with other software on port 8080. Older extensions that ask for a specific port (like 8080) still get it.
+- The Options server address is now only for a whisper-server you run yourself, or as a fallback when the helper isn't installed. While running, the popup shows the actual address.
+- CI installs whisper.cpp exactly as users do, and runs weekly to catch upstream file renames early.
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/titl
+```
+Windows and Linux: download the new `titl` binary from this release and run `titl install`. Then reload the extension in `chrome://extensions`.
+
 ## [0.1.8](https://github.com/rawmind/titl/releases/tag/v0.1.8) - 2026-11-20
 
 Choose languages from a list instead of typing codes.

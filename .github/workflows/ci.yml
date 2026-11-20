@@ -6,6 +6,8 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * 1"
 
 permissions:
   contents: read
@@ -53,17 +55,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: windows-latest
-            asset: whisper-bin-x64.zip
-          - os: ubuntu-latest
-            asset: whisper-bin-ubuntu-x64.tar.gz
+        os: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash
     env:
-      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -74,21 +72,6 @@ jobs:
           name: titl-${{ runner.os }}
           path: bin
 
-      - name: Download prebuilt whisper.cpp
-        run: |
-          tag=$(gh api repos/ggml-org/whisper.cpp/releases --jq '[.[] | select(any(.assets[]; .name == "${{ matrix.asset }}"))][0].tag_name')
-          echo "whisper.cpp build: $tag"
-          gh release download "$tag" --repo ggml-org/whisper.cpp -p "${{ matrix.asset }}" -D whisper
-          cd whisper
-          case "${{ matrix.asset }}" in
-            *.zip) unzip -q "${{ matrix.asset }}" ;;
-            *) tar xzf "${{ matrix.asset }}" ;;
-          esac
-          server=$(find "$PWD" -name 'whisper-server' -o -name 'whisper-server.exe' | head -1)
-          test -n "$server"
-          chmod +x "$server" || true
-          echo "WHISPER_SERVER=$server" >> "$GITHUB_ENV"
-
       - name: Download test clip
         run: curl -sfL -o jfk.wav https://raw.githubusercontent.com/ggml-org/whisper.cpp/master/samples/jfk.wav
 
@@ -96,7 +79,7 @@ jobs:
         run: |
           chmod +x bin/titl* || true
           mkdir -p ~/.config/google-chrome
-          bin/titl* install --server "$WHISPER_SERVER" --download-model tiny < /dev/null
+          bin/titl* install --download-model tiny < /dev/null
           bin/titl* status
           bin/titl* --version
 
@@ -121,6 +104,7 @@ jobs:
       - name: Server log on failure
         if: failure()
         run: |
+          ls -R ~/.local/share/chrome-transcriber 2>/dev/null | head -50 || true
           cat ~/.local/share/chrome-transcriber/server.log 2>/dev/null || true
           cat "$LOCALAPPDATA/chrome-transcriber/server.log" 2>/dev/null || true
 
