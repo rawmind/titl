@@ -10,8 +10,9 @@
 [![Release](https://img.shields.io/github/v/release/rawmind/titl?color=16181d)](https://github.com/rawmind/titl/releases/latest)
 [![CI](https://github.com/rawmind/titl/actions/workflows/ci.yml/badge.svg)](https://github.com/rawmind/titl/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-support%20Titl-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/rwmnd)
 
-[**Add to Chrome**](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) · [Install the helper](#install) · [Changelog](CHANGELOG.md) · [Privacy](PRIVACY.md)
+[**Add to Chrome**](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) · [Install the helper](#install) · [Changelog](CHANGELOG.md) · [Privacy](PRIVACY.md) · [♥ Support](https://ko-fi.com/rwmnd)
 
 <img src="store/screenshot-1-subtitles.png" alt="Titl showing Serbian subtitles with an English translation on a TEDx talk" width="820">
 
@@ -327,6 +328,12 @@ npm run package                                  # Chrome Web Store zip in dist/
 ```
 
 After editing, reload the extension in `chrome://extensions`. If you changed `content.js`, also reload the YouTube tab.
+
+## Support Titl
+
+Titl is free and open source, with no ads or paid features. If it helps you, you can buy me a coffee on **[Ko-fi](https://ko-fi.com/rwmnd)**. It keeps the project going. Bug reports, ideas and pull requests help just as much.
+
+[![Support on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/rwmnd)
 
 ## Changelog
 
