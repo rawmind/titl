@@ -98,6 +98,23 @@ jobs:
           test -f "$manifest"
           echo "MANIFEST=$manifest" >> "$GITHUB_ENV"
 
+      - name: install.ps1 downloads, verifies and installs the helper (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path release | Out-Null
+          Copy-Item bin/titl.exe release/titl-windows-x64.exe
+          $hash = (Get-FileHash release/titl-windows-x64.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  titl-windows-x64.exe" | Out-File -FilePath release/SHA256SUMS -Encoding ascii
+          $server = Start-Process python -ArgumentList '-m', 'http.server', '8765', '--directory', 'release' -PassThru
+          Start-Sleep -Seconds 2
+          try {
+            $env:TITL_RELEASE_URL = 'http://127.0.0.1:8765'
+            ./scripts/install.ps1 --download-model tiny
+          } finally {
+            Stop-Process -Id $server.Id
+          }
+
       - name: Start whisper-server through the helper and transcribe
         run: python scripts/host-smoke.py "$MANIFEST" jfk.wav en "fellow Americans"
 
@@ -118,12 +135,18 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       TAG: ${{ github.ref_name }}
     steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/install.ps1
+          sparse-checkout-cone-mode: false
+          path: src
       - uses: actions/download-artifact@v8
         with:
           path: artifacts
       - name: Name binaries for download
         run: |
           mkdir out
+          cp src/scripts/install.ps1 out/install.ps1
           cp artifacts/titl-Windows/titl.exe out/titl-windows-x64.exe
           cp artifacts/titl-macOS/titl out/titl-macos-arm64
           cp artifacts/titl-Linux/titl out/titl-linux-x64

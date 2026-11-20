@@ -95,7 +95,8 @@ Most live-caption tools show each line **after** it's spoken, upload your audio 
 1. **[Add Titl to Chrome](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme)** (also works in Edge and Brave).
 2. Install the helper:
    - **macOS:** `brew install rawmind/tap/titl && titl install`
-   - **Windows / Linux:** download `titl` from the [latest release](https://github.com/rawmind/titl/releases/latest) and run `titl install` (details [below](#install))
+   - **Windows:** in PowerShell, `irm https://github.com/rawmind/titl/releases/latest/download/install.ps1 | iex` (or download and double-click the helper, see [below](#windows))
+   - **Linux:** download `titl` from the [latest release](https://github.com/rawmind/titl/releases/latest) and run `titl install` (details [below](#install))
 3. Open a YouTube video, click **Titl → Start subtitles**.
 
 ## Requirements
@@ -117,12 +118,17 @@ titl install
 
 ### Windows
 
-1. From the [latest release](https://github.com/rawmind/titl/releases/latest), download **`titl-windows-x64.exe`**. Windows SmartScreen may warn about an unknown publisher (the file isn't code-signed): click **More info → Run anyway**.
-2. In PowerShell, in the download folder:
-   ```powershell
-   .\titl-windows-x64.exe install
-   ```
-   This downloads whisper.cpp (the CUDA build if you have an NVIDIA GPU, otherwise the CPU build) and a matching model, then registers with Chrome, Edge and Brave. The helper copies itself to `%LOCALAPPDATA%\chrome-transcriber\`, so you can delete the download afterwards.
+In PowerShell:
+
+```powershell
+irm https://github.com/rawmind/titl/releases/latest/download/install.ps1 | iex
+```
+
+The script downloads `titl-windows-x64.exe` from the latest release, checks it against the release's `SHA256SUMS`, and runs `titl install`.
+
+Or by hand: from the [latest release](https://github.com/rawmind/titl/releases/latest), download **`titl-windows-x64.exe`** and double-click it. Windows SmartScreen may warn about an unknown publisher (the file isn't code-signed): click **More info → Run anyway**. The window shows the setup and stays open until you press Enter. To pass options, run it from PowerShell instead: `.\titl-windows-x64.exe install --download-model small`.
+
+Either way, the helper downloads whisper.cpp (the CUDA build if you have an NVIDIA GPU, otherwise the CPU build) and a matching model, then registers with Chrome, Edge and Brave. It copies itself to `%LOCALAPPDATA%\chrome-transcriber\`, so you can delete the download afterwards.
 
 ### Linux (x64 and arm64)
 

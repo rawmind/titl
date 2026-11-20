@@ -250,26 +250,26 @@ fn print_extension_steps(dir: Option<&Path>, ids: &[String]) {
         println!("The extension is installed in {} ({}) but disabled: turn it on in chrome://extensions.", l.browser, l.profile);
         return;
     }
+    let Some(dir) = dir else {
+        println!("Last step: add Titl to Chrome, Edge or Brave from the Chrome Web Store:");
+        println!("  https://chromewebstore.google.com/detail/titl/{}", paths::STORE_EXTENSION_IDS[0]);
+        return;
+    };
     println!("Last step: add the extension to Chrome (one time):");
     println!("  1. Open chrome://extensions and turn on Developer mode (top right).");
     println!("  2. Click \"Load unpacked\" and choose this folder:");
-    match dir {
-        Some(dir) => {
-            println!("       {}", dir.display());
-            let copied = extension::copy_to_clipboard(&dir.to_string_lossy());
-            if cfg!(target_os = "macos") {
-                println!(
-                    "     In the file dialog, press Cmd+Shift+G and paste the path{}.",
-                    if copied { " (it is on your clipboard)" } else { "" }
-                );
-            } else if copied {
-                println!("     The path is on your clipboard.");
-            }
-            if std::io::IsTerminal::is_terminal(&std::io::stdout()) {
-                extension::reveal(dir);
-            }
-        }
-        None => println!("       the folder containing manifest.json from https://github.com/rawmind/titl"),
+    println!("       {}", dir.display());
+    let copied = extension::copy_to_clipboard(&dir.to_string_lossy());
+    if cfg!(target_os = "macos") {
+        println!(
+            "     In the file dialog, press Cmd+Shift+G and paste the path{}.",
+            if copied { " (it is on your clipboard)" } else { "" }
+        );
+    } else if copied {
+        println!("     The path is on your clipboard.");
+    }
+    if std::io::IsTerminal::is_terminal(&std::io::stdout()) {
+        extension::reveal(dir);
     }
     println!("Then run `titl status` to check.");
 }

@@ -7,6 +7,7 @@ mod paths;
 mod whisper_cpp;
 
 use std::env;
+use std::io::{self, Write};
 use std::process::ExitCode;
 
 const HELP: &str = "titl: installs and runs whisper-server for the Titl Chrome extension
@@ -40,7 +41,13 @@ fn main() -> ExitCode {
         host::run();
         return ExitCode::SUCCESS;
     }
+    let double_clicked = args.is_empty() && started_from_explorer();
     let result = match args.first().map(String::as_str) {
+        None if double_clicked => {
+            println!("Setting up Titl's helper...");
+            println!();
+            install::parse(&[]).and_then(install::install)
+        }
         Some("install") => install::parse(&args[1..]).and_then(install::install),
         Some("uninstall") => install::uninstall(args.iter().any(|a| a == "--purge")),
         Some("status") => install::status(),
@@ -54,11 +61,32 @@ fn main() -> ExitCode {
         }
         Some(other) => Err(format!("unknown command: {other} (see --help)")),
     };
-    match result {
+    let code = match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("error: {e}");
             ExitCode::FAILURE
         }
+    };
+    if double_clicked {
+        print!("\nPress Enter to close this window.");
+        let _ = io::stdout().flush();
+        let _ = io::stdin().read_line(&mut String::new());
     }
+    code
+}
+
+#[cfg(windows)]
+fn started_from_explorer() -> bool {
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn GetConsoleProcessList(list: *mut u32, count: u32) -> u32;
+    }
+    let mut list = [0u32; 2];
+    unsafe { GetConsoleProcessList(list.as_mut_ptr(), list.len() as u32) == 1 }
+}
+
+#[cfg(not(windows))]
+fn started_from_explorer() -> bool {
+    false
 }
