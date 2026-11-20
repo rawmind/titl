@@ -1,6 +1,6 @@
 [package]
 name = "titl"
-version = "0.1.14"
+version = "0.1.15"
 edition = "2021"
 license = "MIT"
 description = "Installs and runs whisper-server for the Chrome Transcriber extension"

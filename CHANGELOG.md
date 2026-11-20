@@ -2,6 +2,24 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.15](https://github.com/rawmind/titl/releases/tag/v0.1.15) - 2026-11-20
+
+### Added
+- **The helper updates itself on Windows.** Once a day, when you open Titl's popup, the helper checks for a newer release. The popup then shows what the new version fixes and an **Update** button. The new helper is downloaded, checked against the release's `SHA256SUMS`, and used from the next Start. `titl update` does the same in a terminal.
+
+### Changed
+- **The Windows helper is easier to trust.** `titl-windows-x64.exe` now carries its name, description, publisher, version and icon, and registers with browsers through the Windows registry API instead of starting `reg.exe`. Microsoft Defender blocked the previous build during winget validation.
+
+### Upgrade
+- Windows: run the PowerShell line once more; from 0.1.15 on, updates come from the popup.
+  ```powershell
+  irm https://github.com/rawmind/titl/releases/latest/download/install.ps1 | iex
+  ```
+- macOS: `brew upgrade rawmind/tap/titl`
+- Linux: download `titl-linux-x64` from this release and run `./titl-linux-x64 install`.
+
+Then reload the extension in `chrome://extensions`, or let the Chrome Web Store update it.
+
 ## [0.1.14](https://github.com/rawmind/titl/releases/tag/v0.1.14) - 2026-11-20
 
 ### Fixed
