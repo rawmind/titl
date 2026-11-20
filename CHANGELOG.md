@@ -2,6 +2,15 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.13](https://github.com/rawmind/titl/releases/tag/v0.1.13) - 2026-11-20
+
+### Changed
+- **Chrome Web Store releases are automated.** Each tagged version is uploaded to the Chrome Web Store and submitted for review; once approved, it is published from the dashboard.
+- Clearer Russian and Ukrainian store summaries.
+
+### Upgrade
+No helper changes. Chrome Web Store installs update on their own; for an unpacked install, reload the extension in `chrome://extensions`.
+
 ## [0.1.12](https://github.com/rawmind/titl/releases/tag/v0.1.12) - 2026-11-20
 
 ### Added
