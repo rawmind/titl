@@ -1,0 +1,64 @@
+name: Chrome Web Store draft
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to upload, e.g. v0.1.13
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    environment: chrome-web-store
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      API: https://chromewebstore.googleapis.com
+      ITEM: publishers/${{ vars.CWS_PUBLISHER_ID }}/items/bpapgchpopccpbgbkfldmdmfmddgoeme
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Check the tag
+        run: |
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a release tag: $TAG" >&2; exit 1; }
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm test
+      - name: Package
+        run: |
+          npm run package
+          ZIP="dist/titl-${TAG#v}.zip"
+          test -f "$ZIP" || { ls dist; echo "$ZIP not found: manifest version does not match $TAG" >&2; exit 1; }
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+      - uses: google-github-actions/auth@v3
+        id: auth
+        with:
+          workload_identity_provider: ${{ vars.CWS_WIF_PROVIDER }}
+          service_account: ${{ vars.CWS_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+      - name: Upload a draft to the Chrome Web Store
+        env:
+          TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          state=$(curl -sS --fail-with-body -X POST -H "Authorization: Bearer $TOKEN" \
+            -T "$ZIP" "$API/upload/v2/$ITEM:upload" | tee /dev/stderr | jq -r .uploadState)
+          for _ in $(seq 40); do
+            case "$state" in
+              SUCCEEDED) exit 0 ;;
+              IN_PROGRESS|UPLOAD_IN_PROGRESS) sleep 15 ;;
+              *) echo "upload state: $state" >&2; exit 1 ;;
+            esac
+            state=$(curl -sS --fail-with-body -H "Authorization: Bearer $TOKEN" \
+              "$API/v2/$ITEM:fetchStatus" | tee /dev/stderr | jq -r .lastAsyncUploadState)
+          done
+          echo "upload still processing after 10 minutes" >&2
+          exit 1
