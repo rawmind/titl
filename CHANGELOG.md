@@ -2,6 +2,17 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.11](https://github.com/rawmind/titl/releases/tag/v0.1.11) - 2026-11-20
+
+### Fixed
+- **V works on any keyboard layout.** On Cyrillic layouts (Serbian, Russian, Ukrainian), Greek and others, the V key now toggles the translation blur even though it types another letter. On layouts where "v" sits elsewhere (Dvorak), the key that types "v" works. A physical V key that types a different Latin letter (like Dvorak's "k", YouTube's play/pause) is left alone.
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/titl
+```
+Then reload the extension in `chrome://extensions`.
+
 ## [0.1.10](https://github.com/rawmind/titl/releases/tag/v0.1.10) - 2026-11-20
 
 Practise listening with a hidden translation, and settings that apply immediately.

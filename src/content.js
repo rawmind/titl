@@ -126,8 +126,14 @@
     return true;
   }
 
+  function isRevealKey(e) {
+    const key = (e.key ?? '').toLowerCase();
+    if (key === REVEAL_KEY) return true;
+    return e.code === `Key${REVEAL_KEY.toUpperCase()}` && key.length === 1 && !/[a-z]/.test(key);
+  }
+
   function onKeyDown(e) {
-    if (!options?.blurTranslation || e.key.toLowerCase() !== REVEAL_KEY) return;
+    if (!options?.blurTranslation || !isRevealKey(e)) return;
     if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
     const target = e.target;
     if (target?.isContentEditable || /^(input|textarea|select)$/i.test(target?.tagName ?? '')) return;
