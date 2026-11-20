@@ -19,7 +19,12 @@ Titl (the "Chrome Transcriber" project) creates subtitles for YouTube videos on 
 
 ## The local helper
 
-The optional companion program `titl` runs on your computer. It starts the local whisper.cpp server when the extension asks for it. When you run its `install` command, it may download a Whisper model file from Hugging Face (`huggingface.co`). That is a plain file download with no personal data attached. The helper sends nothing else over the network.
+The optional companion program `titl` runs on your computer. It starts the local whisper.cpp server when the extension asks for it. It uses the network only to download files it needs, with no personal data attached:
+
+- When you run its `install` command, it may download a Whisper model file from Hugging Face (`huggingface.co`) and, on Windows and Linux, a prebuilt whisper.cpp from GitHub (`github.com`).
+- On Windows, at most once a day when you open Titl's popup, it asks GitHub (`api.github.com`) for Titl's latest public release. If you click **Update**, it downloads the new helper from `github.com`.
+
+As with any download, these sites see your IP address and which file is requested. The helper sends nothing else over the network.
 
 ## YouTube
 

@@ -68,6 +68,7 @@ Most live-caption tools show each line **after** it's spoken, upload your audio 
 - One helper, `titl`, for macOS, Windows and Linux
 - `titl install` finds or **downloads whisper.cpp** (CUDA or CPU) and a model, then registers with Chrome, Edge and Brave
 - Starts the server on a **random free port** when you press Start
+- Windows: install with **one PowerShell line**, or double-click the helper; it then **updates itself** from the popup
 
 </td>
 <td valign="top">
@@ -190,7 +191,7 @@ Use the source code, not the `titl-x.y.z.zip` file attached to releases. That fi
 
 The helper was called `chrome-transcriber-helper` before 0.1.7. Homebrew still installs that name as an alias.
 
-Per-user files (config, downloaded models, `server.log`) live in:
+Per-user files (config, downloaded models, `server.log`, and on Windows the daily update check in `update.json`) live in:
 - macOS: `~/Library/Application Support/chrome-transcriber/`
 - Linux: `~/.local/share/chrome-transcriber/`
 - Windows: `%LOCALAPPDATA%\chrome-transcriber\`
@@ -259,7 +260,9 @@ Automatic language detection isn't supported yet.
 |---|---|
 | Extension doesn't appear in Chrome after `install` | `install` doesn't add it: install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) ([Install the extension](#install-the-extension)). `titl status` shows whether Chrome has it. |
 | "Auto-start helper stopped: Access to the specified native messaging host is forbidden" | You loaded the store package (`titl-x.y.z.zip`) by hand. Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme), or load the release's **Source code (zip)** instead. |
-| Windows: "Windows protected your PC" | The helper isn't code-signed. Click **More info → Run anyway**. |
+| Windows: "Windows protected your PC" | The helper isn't code-signed. Click **More info → Run anyway**, or install with the [PowerShell line](#windows), which doesn't show this warning. |
+| Windows: Microsoft Defender blocks or removes `titl.exe` | A false positive on the unsigned helper. Restore it in **Windows Security → Protection history**, and report the file to Microsoft at [wdsi/filesubmission](https://www.microsoft.com/en-us/wdsi/filesubmission) ("Incorrectly detected"). |
+| Popup: "Helper update failed: …" | The download or checksum check failed, and the installed helper was left as it was. Try again later, or run `titl update` in a terminal to see more. |
 | "auto-start helper is not installed" | Run `titl install`, then try again. |
 | "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `titl status`: a path marked "(missing!)" means re-run `install`. |
 | "Cannot reach whisper-server" | The server URL or port is wrong, or auto-start is off. Use **Test connection** in Options. |
@@ -302,7 +305,7 @@ popup → background (tabCapture stream id) → offscreen document
 
 ### Auto-start helper
 
-Chrome extensions can't run native programs, so `titl` (Rust, in `helper/`) is registered as a Chrome [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) host. On Start, the extension asks it to launch `whisper-server`. The server stops when that connection closes, which in practice means when Chrome quits.
+Chrome extensions can't run native programs, so `titl` (Rust, in `helper/`) is registered as a Chrome [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) host. On Start, the extension asks it to launch `whisper-server`. The server stops when that connection closes, which in practice means when Chrome quits. On Windows the popup also asks it, once a day, whether a newer helper is out ([Updates](#windows)).
 
 ## Project layout
 
@@ -326,10 +329,18 @@ helper/              Rust: installer and native messaging host
   src/extension.rs   locate the extension folder, detect it in browser profiles
   src/host.rs        native messaging protocol, whisper-server process
   src/model.rs       model download from Hugging Face
+  src/whisper_cpp.rs prebuilt whisper.cpp download (Windows, Linux)
   src/paths.rs       per-OS folders and browser registration locations
+  src/config.rs      the helper's config.json
+  src/registry.rs    Windows registry access
+  src/update.rs      Windows self-update from GitHub releases
+  build.rs, windows/ Windows version resource, icon and manifest
 icons/               extension icons (SVG sources and PNGs)
 store/               Chrome Web Store promo tile and screenshots
 scripts/package.mjs  builds the store zip
+scripts/locales.py   generates _locales/ from one translation table
+scripts/install.ps1  Windows one-line installer, attached to each release
+scripts/*-smoke.py   end-to-end checks of the helper, run in CI
 tests/               node:test unit tests
 ```
 
@@ -339,6 +350,7 @@ tests/               node:test unit tests
 npm test                                         # extension; no dependencies, Node 20+
 cargo test --manifest-path helper/Cargo.toml     # helper
 npm run package                                  # Chrome Web Store zip in dist/ (manifest key removed)
+python3 scripts/locales.py                       # regenerate _locales/ after editing the translations
 ```
 
 After editing, reload the extension in `chrome://extensions`. If you changed `content.js`, also reload the YouTube tab.
