@@ -2,6 +2,22 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.8](https://github.com/rawmind/titl/releases/tag/v0.1.8) - 2026-11-20
+
+Choose languages from a list instead of typing codes.
+
+### Changed
+- **Spoken language** in Options is now a dropdown of all ~100 languages Whisper supports, sorted by name and shown with their native name (e.g. "Serbian · српски"). No more typing `sr` or `ru`.
+- **Translate to** is ordered by number of speakers worldwide (English, Chinese, Hindi, Spanish, Arabic, French, …) and now includes Hindi, Arabic, Bengali, Indonesian, Marathi, Telugu, Tamil, Vietnamese, Thai and other major languages. If Chrome's on-device translator doesn't support a pair, Titl says so.
+- The popup shows the language name ("Serbian") instead of its code.
+- **Serbian script** only appears in Options when the spoken language is Serbian, the only language it applies to.
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/titl
+```
+Then reload the extension in `chrome://extensions`.
+
 ## [0.1.7](https://github.com/rawmind/titl/releases/tag/v0.1.7) - 2026-11-20
 
 The helper command is now simply **`titl`**.

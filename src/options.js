@@ -1,4 +1,5 @@
 import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
+import { languageOptions, translationOptions } from './languages.js';
 
 const $ = (id) => document.getElementById(id);
 const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'showOriginal', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
@@ -8,6 +9,10 @@ function fill(settings) {
     if ($(f).type === 'checkbox') $(f).checked = settings[f];
     else $(f).value = settings[f];
   }
+}
+
+function syncScriptRow() {
+  $('scriptRow').hidden = $('language').value !== 'sr';
 }
 
 function read() {
@@ -36,6 +41,7 @@ $('form').addEventListener('submit', async (e) => {
 $('reset').addEventListener('click', async () => {
   await chrome.storage.local.remove('settings');
   fill(DEFAULTS);
+  syncScriptRow();
   say($('message'), 'Defaults restored.', true);
 });
 
@@ -83,4 +89,8 @@ $('prepareTranslation').addEventListener('click', async () => {
   }
 });
 
+for (const { code, label } of languageOptions()) $('language').add(new Option(label, code));
+for (const { code, label } of translationOptions()) $('translateTo').add(new Option(label, code));
 fill(await loadSettings());
+syncScriptRow();
+$('language').addEventListener('change', syncScriptRow);

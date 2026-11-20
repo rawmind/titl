@@ -1,4 +1,5 @@
 import { loadSettings } from './settings.js';
+import { languageName } from './languages.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -51,7 +52,7 @@ $('options').addEventListener('click', (e) => {
 });
 
 const { serverUrl, language } = await loadSettings();
-$('server').textContent = `${new URL(serverUrl).host} · ${language}`;
+$('server').textContent = `${new URL(serverUrl).host} · ${languageName(language)}`;
 $('server').title = serverUrl;
 
 render((await chrome.storage.session.get('state')).state);

@@ -15,6 +15,10 @@
   font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--bg);
