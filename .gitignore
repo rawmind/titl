@@ -7,4 +7,5 @@ node_modules/
 helper/target/
 dist/
 store/listing.md
+store/description/
 __pycache__/
