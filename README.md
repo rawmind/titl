@@ -33,37 +33,64 @@ Video: [Tatjana Vojtehovski at TEDxZemun](https://www.youtube.com/watch?v=uu_h3B
 
 ## Install
 
-### macOS with Homebrew
+Titl has two parts: a small **helper** (`titl`) that runs [whisper.cpp](https://github.com/ggml-org/whisper.cpp) on your computer, and the **extension** in Chrome. Set up the helper for your system, then [load the extension](#load-the-extension).
+
+### macOS (Homebrew)
 
 ```bash
 brew install rawmind/tap/titl   # also installs whisper.cpp
 titl install
 ```
 
-`install` ends by showing how to add the extension to Chrome: it puts the folder path on your clipboard and reveals it in Finder. Chrome only adds extensions from the Chrome Web Store automatically, so this one is loaded once by hand (step 3 below). The folder is `$(brew --prefix)/opt/titl/share/titl/extension`.
+### Windows
 
-### Any platform from source
+1. From the [latest release](https://github.com/rawmind/titl/releases/latest), download **`titl-windows-x64.exe`**. Windows SmartScreen may warn about an unknown publisher (the file isn't code-signed): click **More info → Run anyway**.
+2. From [whisper.cpp's releases](https://github.com/ggml-org/whisper.cpp/releases), open the newest build that has Windows files and download **`whisper-bin-x64.zip`** (CPU). With an NVIDIA GPU, the `whisper-bin-win-cuda-…-x64.zip` build is much faster. Unzip it, e.g. to `C:\whisper`.
+3. In PowerShell, in the folder where you downloaded the helper:
+   ```powershell
+   .\titl-windows-x64.exe install --server C:\whisper\Release\whisper-server.exe --download-model small
+   ```
+   Point `--server` at wherever `whisper-server.exe` ended up. `install` copies the helper to `%LOCALAPPDATA%\chrome-transcriber\` and registers it with Chrome, Edge and Brave, so you can delete the download afterwards. Run it as `titl` from there, or download it again for later commands.
 
-**1. Get whisper.cpp:** `brew install whisper.cpp` on macOS, or build it ([instructions](https://github.com/ggml-org/whisper.cpp#quick-start)). Use Metal on macOS, and Vulkan or CUDA on Windows and Linux for GPU speed.
+### Linux (x64)
 
-**2. Build and run the helper** (needs [Rust](https://rustup.rs)):
+1. From the [latest release](https://github.com/rawmind/titl/releases/latest), download **`titl-linux-x64`** and make it executable: `chmod +x titl-linux-x64`.
+2. From [whisper.cpp's releases](https://github.com/ggml-org/whisper.cpp/releases), download **`whisper-bin-ubuntu-x64.tar.gz`** (CPU) and unpack it. For GPU speed, [build whisper.cpp](https://github.com/ggml-org/whisper.cpp#quick-start) with CUDA or Vulkan instead.
+3. Start Chrome once (so its profile folder exists), then:
+   ```bash
+   ./titl-linux-x64 install --server ~/whisper-bin-ubuntu-x64/whisper-server --download-model small
+   ```
+   The helper copies itself to `~/.local/share/chrome-transcriber/` and registers with Chrome, Chromium, Edge and Brave.
+
+**Choosing a model on Windows and Linux:** the CPU builds are fine for `small` (~470 MB) or `base` (~140 MB). The default `large-v3-turbo` is the most accurate but needs a GPU to keep up with the video. Lookahead mode gives transcription a head start, so a slower model still works, just with longer "Preparing subtitles…" pauses. Both systems are tested in CI with the CPU builds; the GPU builds are not tested yet.
+
+### From source (any system)
+
+Needs [Rust](https://rustup.rs) and a `whisper-server` (Homebrew, a whisper.cpp release, or your own build):
 
 ```bash
 cargo build --release --manifest-path helper/Cargo.toml
 helper/target/release/titl install
 ```
 
-`install` does the rest:
-- finds `whisper-server` on `PATH` or in common whisper.cpp build folders;
-- finds a model next to it, or downloads `large-v3-turbo-q5_0` (about 550 MB);
-- copies itself to a per-user folder;
-- registers itself with Chrome, Chromium, Edge and Brave (on Windows, through the registry).
+### What `titl install` does
 
-To choose explicitly, use `--server PATH`, `--model PATH` or `--download-model NAME` (e.g. `large-v3-turbo` for the full-precision 1.6 GB model).
+- finds `whisper-server` on `PATH` or in common whisper.cpp folders (or uses `--server PATH`);
+- finds a model next to it, or downloads one: `large-v3-turbo-q5_0` (about 550 MB) by default, or any `--download-model NAME` (`small`, `base`, `large-v3-turbo`, …);
+- copies itself to a per-user folder and registers with Chrome, Chromium, Edge and Brave (on Windows, through the registry);
+- ends with the steps to load the extension, if it isn't loaded yet.
 
-**3. Load the extension:** go to `chrome://extensions`, turn on Developer mode, click **Load unpacked** and select this folder.
+### Load the extension
 
-The manifest fixes the extension ID at `fehpgpahkmanekioejihbpihpbacdjgb`, and the helper only accepts requests from that ID.
+Chrome only installs extensions from the Chrome Web Store by itself, so until Titl's store listing is live, load it once by hand:
+
+1. Get the extension folder:
+   - **macOS (Homebrew):** it's already installed at `$(brew --prefix)/opt/titl/share/titl/extension`. `titl install` copies this path to your clipboard.
+   - **Windows / Linux:** from the [latest release](https://github.com/rawmind/titl/releases/latest), download **Source code (zip)** and unzip it.
+   - **From source:** this repository's folder.
+2. Open `chrome://extensions`, turn on **Developer mode** (top right), click **Load unpacked** and choose that folder.
+
+Use the source code, not the `titl-x.y.z.zip` file attached to releases. That file is the Chrome Web Store package: loaded by hand, it gets a random ID and the helper refuses to talk to it. The source code's manifest fixes the ID at `fehpgpahkmanekioejihbpihpbacdjgb`, which the helper accepts, as well as the store version's ID.
 
 ### Helper commands
 
@@ -137,7 +164,9 @@ Automatic language detection isn't supported yet.
 
 | Symptom | Fix |
 |---|---|
-| Extension doesn't appear in Chrome after `install` | `install` doesn't add it: load it once via **Load unpacked** (Install, step 3). `titl status` shows whether Chrome has it. |
+| Extension doesn't appear in Chrome after `install` | `install` doesn't add it: load it once via **Load unpacked** ([Load the extension](#load-the-extension)). `titl status` shows whether Chrome has it. |
+| "Auto-start helper stopped: Access to the specified native messaging host is forbidden" | You loaded the store package (`titl-x.y.z.zip`) by hand. Load the release's **Source code (zip)** instead. |
+| Windows: "Windows protected your PC" | The helper isn't code-signed. Click **More info → Run anyway**. |
 | "auto-start helper is not installed" | Run `titl install`, then try again. |
 | "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `titl status`: a path marked "(missing!)" means re-run `install`. |
 | "Cannot reach whisper-server" | The server URL or port is wrong, or auto-start is off. Use **Test connection** in Options. |
