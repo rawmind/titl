@@ -2,6 +2,20 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.12](https://github.com/rawmind/titl/releases/tag/v0.1.12) - 2026-11-20
+
+### Added
+- A small **"♥ Support on Ko-fi"** link at the bottom of the Options page. Titl stays free, with no paid features. The [README](https://github.com/rawmind/titl#support-titl) and the repository's Sponsor button link to the same page.
+
+### Changed
+- CI runs on the Node 24 versions of GitHub's actions.
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/titl
+```
+Then reload the extension in `chrome://extensions`.
+
 ## [0.1.11](https://github.com/rawmind/titl/releases/tag/v0.1.11) - 2026-11-20
 
 ### Fixed
