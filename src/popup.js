@@ -1,5 +1,8 @@
 import { loadSettings } from './settings.js';
 import { languageName } from './languages.js';
+import { localizePage, t, uiLocale } from './i18n.js';
+
+localizePage();
 
 const $ = (id) => document.getElementById(id);
 
@@ -7,17 +10,17 @@ let running = false;
 
 function render(state) {
   running = state?.status === 'running';
-  $('toggleLabel').textContent = running ? 'Stop subtitles' : 'Start subtitles';
+  $('toggleLabel').textContent = t(running ? 'stopSubtitles' : 'startSubtitles');
   $('toggle').classList.toggle('is-running', running);
   const status = $('status');
   status.classList.toggle('running', running && !state.error);
   status.classList.toggle('error', Boolean(running && state.error));
   let text;
-  if (state?.status === 'starting') text = 'Starting whisper-server…';
-  else if (!running) text = 'Idle';
-  else if (state.error) text = `Error: ${state.error}`;
-  else if (state.delayed) text = `Running — delayed ~${Math.round(state.lag)} s`;
-  else text = state.mode === 'lookahead' ? 'Running (lookahead)' : 'Running (live)';
+  if (state?.status === 'starting') text = t('starting');
+  else if (!running) text = t('idle');
+  else if (state.error) text = t('errorPrefix', state.error);
+  else if (state.delayed) text = t('runningDelayed', Math.round(state.lag));
+  else text = t(state.mode === 'lookahead' ? 'runningLookahead' : 'runningLive');
   $('statusText').textContent = text;
 }
 
@@ -35,11 +38,11 @@ async function toggle() {
     }
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.url?.startsWith('https://www.youtube.com/')) {
-      showError('Open a YouTube video first.');
+      showError(t('openYouTubeFirst'));
       return;
     }
     const res = await chrome.runtime.sendMessage({ target: 'background', type: 'start', tabId: tab.id });
-    if (!res?.ok) showError(`Error: ${res?.error ?? 'unknown'}`);
+    if (!res?.ok) showError(t('errorPrefix', res?.error ?? 'unknown'));
   } finally {
     $('toggle').disabled = false;
   }
@@ -55,8 +58,8 @@ const settings = await loadSettings();
 
 function renderServer(state) {
   const url = state?.status === 'running' && state.serverUrl ? state.serverUrl : null;
-  const where = url ? new URL(url).host : settings.autoStartServer ? 'auto-start' : new URL(settings.serverUrl).host;
-  $('server').textContent = `${where} · ${languageName(settings.language)}`;
+  const where = url ? new URL(url).host : settings.autoStartServer ? t('autoStartLabel') : new URL(settings.serverUrl).host;
+  $('server').textContent = `${where} · ${languageName(settings.language, uiLocale())}`;
   $('server').title = url ?? settings.serverUrl;
 }
 

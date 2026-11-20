@@ -1,0 +1,224 @@
+{
+  "extName": {
+    "message": "Titl"
+  },
+  "extDescription": {
+    "message": "Legendas e tradução para o YouTube na hora certa e privadas, transcritas no seu próprio computador com whisper.cpp."
+  },
+  "optionsTitle": {
+    "message": "Opções"
+  },
+  "sectionServer": {
+    "message": "Servidor whisper.cpp"
+  },
+  "serverUrl": {
+    "message": "URL do servidor"
+  },
+  "serverUrlHint": {
+    "message": "Usada apenas para um whisper-server que você mesmo inicia, ou quando o assistente não está instalado. Com o início automático, o Titl roda seu próprio servidor em uma porta livre. Deve ser 127.0.0.1 ou localhost."
+  },
+  "autoStart": {
+    "message": "Iniciar o whisper-server automaticamente se não estiver rodando (requer <code>titl install</code>)"
+  },
+  "testConnection": {
+    "message": "Testar conexão"
+  },
+  "sectionTiming": {
+    "message": "Tempo"
+  },
+  "mode": {
+    "message": "Modo"
+  },
+  "modeLookahead": {
+    "message": "Antecipado — legendas na hora (abre uma aba oculta e sem som)"
+  },
+  "modeLive": {
+    "message": "Ao vivo — transcreve o que está tocando (legendas alguns segundos atrasadas)"
+  },
+  "modeHint": {
+    "message": "Transmissões ao vivo sempre usam o modo ao vivo."
+  },
+  "skipAds": {
+    "message": "Clicar em \"Pular anúncio\" na aba oculta quando o YouTube oferecer"
+  },
+  "showEarly": {
+    "message": "Mostrar antes (s)"
+  },
+  "minLead": {
+    "message": "Pausar até ficar pronto (s de antecedência, 0 = não)"
+  },
+  "sectionTranslation": {
+    "message": "Tradução"
+  },
+  "translateTo": {
+    "message": "Traduzir para"
+  },
+  "off": {
+    "message": "Desligado"
+  },
+  "translationHint": {
+    "message": "Funciona neste dispositivo com o tradutor integrado do Chrome. O sérvio é traduzido como croata, que o Chrome suporta."
+  },
+  "showOriginal": {
+    "message": "Mostrar o original acima da tradução"
+  },
+  "blurTranslation": {
+    "message": "Desfocar a tradução até você revelá-la: pressione <kbd>V</kbd> ou clique na linha"
+  },
+  "downloadModel": {
+    "message": "Baixar modelo de tradução"
+  },
+  "sectionTranscription": {
+    "message": "Transcrição"
+  },
+  "spokenLanguage": {
+    "message": "Idioma falado"
+  },
+  "serbianScript": {
+    "message": "Alfabeto sérvio"
+  },
+  "scriptLatin": {
+    "message": "Latino (latinica)"
+  },
+  "scriptCyrillic": {
+    "message": "Cirílico (ћирилица)"
+  },
+  "scriptOriginal": {
+    "message": "Como o Whisper retornar (pode misturar)"
+  },
+  "liveWindow": {
+    "message": "Janela ao vivo (s)"
+  },
+  "liveStep": {
+    "message": "Passo ao vivo (s)"
+  },
+  "maxWindow": {
+    "message": "Janela máxima (s)"
+  },
+  "lagThreshold": {
+    "message": "Limite de aviso de atraso (s)"
+  },
+  "save": {
+    "message": "Salvar"
+  },
+  "reset": {
+    "message": "Restaurar padrões"
+  },
+  "footerFree": {
+    "message": "O Titl é gratuito e de código aberto."
+  },
+  "support": {
+    "message": "Apoiar no Ko-fi"
+  },
+  "saved": {
+    "message": "Salvo."
+  },
+  "savedApplied": {
+    "message": "Salvo e aplicado às legendas em execução."
+  },
+  "savedRestartFailed": {
+    "message": "Salvo, mas o reinício falhou: $1"
+  },
+  "defaultsRestored": {
+    "message": "Padrões restaurados."
+  },
+  "testing": {
+    "message": "Testando…"
+  },
+  "reachable": {
+    "message": "Acessível (HTTP $1)"
+  },
+  "notLocalUrl": {
+    "message": "Não é uma URL http local"
+  },
+  "pathNotFound": {
+    "message": "O servidor responde, mas este caminho retorna 404"
+  },
+  "cannotReach": {
+    "message": "Não foi possível acessar o servidor"
+  },
+  "chooseTarget": {
+    "message": "Escolha primeiro um idioma de tradução"
+  },
+  "translatorUnavailableHere": {
+    "message": "O tradutor não está disponível aqui; ele será baixado no seu primeiro clique em uma aba do YouTube"
+  },
+  "cannotTranslatePair": {
+    "message": "O Chrome não consegue traduzir $1 → $2 neste dispositivo"
+  },
+  "preparing": {
+    "message": "Preparando…"
+  },
+  "downloading": {
+    "message": "Baixando… $1%"
+  },
+  "ready": {
+    "message": "Pronto ($1 → $2): \"$3\" → \"$4\""
+  },
+  "failed": {
+    "message": "Falhou: $1"
+  },
+  "idle": {
+    "message": "Inativo"
+  },
+  "starting": {
+    "message": "Iniciando o whisper-server…"
+  },
+  "runningLookahead": {
+    "message": "Ativo (antecipado)"
+  },
+  "runningLive": {
+    "message": "Ativo (ao vivo)"
+  },
+  "runningDelayed": {
+    "message": "Ativo — atraso ~$1 s"
+  },
+  "errorPrefix": {
+    "message": "Erro: $1"
+  },
+  "openYouTubeFirst": {
+    "message": "Abra primeiro um vídeo do YouTube."
+  },
+  "startSubtitles": {
+    "message": "Ativar legendas"
+  },
+  "stopSubtitles": {
+    "message": "Parar legendas"
+  },
+  "settings": {
+    "message": "Opções"
+  },
+  "autoStartLabel": {
+    "message": "início automático"
+  },
+  "preparingSubtitles": {
+    "message": "Preparando legendas…"
+  },
+  "reveal": {
+    "message": "revelar"
+  },
+  "hide": {
+    "message": "ocultar"
+  },
+  "delayed": {
+    "message": "Legendas atrasadas ~$1 s"
+  },
+  "translationNeedsChrome": {
+    "message": "⚠ A tradução requer o Chrome 138 ou mais recente"
+  },
+  "cannotTranslateDevice": {
+    "message": "⚠ O Chrome não consegue traduzir $1 → $2 neste dispositivo"
+  },
+  "clickToDownload": {
+    "message": "Clique uma vez no vídeo para baixar o modelo de tradução"
+  },
+  "preparingTranslation": {
+    "message": "Preparando a tradução…"
+  },
+  "downloadingTranslation": {
+    "message": "Baixando o modelo de tradução… $1%"
+  },
+  "translationUnavailable": {
+    "message": "⚠ Tradução indisponível: $1"
+  }
+}

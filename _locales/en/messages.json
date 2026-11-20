@@ -1,0 +1,224 @@
+{
+  "extName": {
+    "message": "Titl"
+  },
+  "extDescription": {
+    "message": "On-time, private subtitles and translation for YouTube, transcribed on your own computer with whisper.cpp."
+  },
+  "optionsTitle": {
+    "message": "Options"
+  },
+  "sectionServer": {
+    "message": "whisper.cpp server"
+  },
+  "serverUrl": {
+    "message": "Inference URL"
+  },
+  "serverUrlHint": {
+    "message": "Only used for a whisper-server you start yourself, or when the helper isn't installed. With auto-start, Titl runs its own server on a free port. Must be on 127.0.0.1 or localhost."
+  },
+  "autoStart": {
+    "message": "Start whisper-server automatically if it is not running (needs <code>titl install</code>)"
+  },
+  "testConnection": {
+    "message": "Test connection"
+  },
+  "sectionTiming": {
+    "message": "Timing"
+  },
+  "mode": {
+    "message": "Mode"
+  },
+  "modeLookahead": {
+    "message": "Lookahead — subtitles on time (opens a hidden muted tab)"
+  },
+  "modeLive": {
+    "message": "Live — transcribe what is playing (subtitles a few seconds late)"
+  },
+  "modeHint": {
+    "message": "Live streams always use live mode."
+  },
+  "skipAds": {
+    "message": "Click \"Skip ad\" in the hidden lookahead tab when YouTube offers it"
+  },
+  "showEarly": {
+    "message": "Show early by (s)"
+  },
+  "minLead": {
+    "message": "Pause until ready (s ahead, 0 = off)"
+  },
+  "sectionTranslation": {
+    "message": "Translation"
+  },
+  "translateTo": {
+    "message": "Translate to"
+  },
+  "off": {
+    "message": "Off"
+  },
+  "translationHint": {
+    "message": "Runs on this device with Chrome's built-in translator. Serbian is translated as Croatian, which Chrome supports."
+  },
+  "showOriginal": {
+    "message": "Show the original above the translation"
+  },
+  "blurTranslation": {
+    "message": "Blur the translation until you reveal it: press <kbd>V</kbd> or click the line"
+  },
+  "downloadModel": {
+    "message": "Download translation model"
+  },
+  "sectionTranscription": {
+    "message": "Transcription"
+  },
+  "spokenLanguage": {
+    "message": "Spoken language"
+  },
+  "serbianScript": {
+    "message": "Serbian script"
+  },
+  "scriptLatin": {
+    "message": "Latin (latinica)"
+  },
+  "scriptCyrillic": {
+    "message": "Cyrillic (ћирилица)"
+  },
+  "scriptOriginal": {
+    "message": "As returned by Whisper (may mix)"
+  },
+  "liveWindow": {
+    "message": "Live window (s)"
+  },
+  "liveStep": {
+    "message": "Live step (s)"
+  },
+  "maxWindow": {
+    "message": "Max window (s)"
+  },
+  "lagThreshold": {
+    "message": "Lag warning threshold (s)"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "reset": {
+    "message": "Reset to defaults"
+  },
+  "footerFree": {
+    "message": "Titl is free and open source."
+  },
+  "support": {
+    "message": "Support on Ko-fi"
+  },
+  "saved": {
+    "message": "Saved."
+  },
+  "savedApplied": {
+    "message": "Saved and applied to the running subtitles."
+  },
+  "savedRestartFailed": {
+    "message": "Saved, but restarting failed: $1"
+  },
+  "defaultsRestored": {
+    "message": "Defaults restored."
+  },
+  "testing": {
+    "message": "Testing…"
+  },
+  "reachable": {
+    "message": "Reachable (HTTP $1)"
+  },
+  "notLocalUrl": {
+    "message": "Not a local http URL"
+  },
+  "pathNotFound": {
+    "message": "Server is up, but this path returns 404"
+  },
+  "cannotReach": {
+    "message": "Cannot reach server"
+  },
+  "chooseTarget": {
+    "message": "Choose a language to translate to first"
+  },
+  "translatorUnavailableHere": {
+    "message": "Translator is not available here; it will download on your first click in a YouTube tab"
+  },
+  "cannotTranslatePair": {
+    "message": "Chrome can't translate $1 → $2 on this device"
+  },
+  "preparing": {
+    "message": "Preparing…"
+  },
+  "downloading": {
+    "message": "Downloading… $1%"
+  },
+  "ready": {
+    "message": "Ready ($1 → $2): \"$3\" → \"$4\""
+  },
+  "failed": {
+    "message": "Failed: $1"
+  },
+  "idle": {
+    "message": "Idle"
+  },
+  "starting": {
+    "message": "Starting whisper-server…"
+  },
+  "runningLookahead": {
+    "message": "Running (lookahead)"
+  },
+  "runningLive": {
+    "message": "Running (live)"
+  },
+  "runningDelayed": {
+    "message": "Running — delayed ~$1 s"
+  },
+  "errorPrefix": {
+    "message": "Error: $1"
+  },
+  "openYouTubeFirst": {
+    "message": "Open a YouTube video first."
+  },
+  "startSubtitles": {
+    "message": "Start subtitles"
+  },
+  "stopSubtitles": {
+    "message": "Stop subtitles"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "autoStartLabel": {
+    "message": "auto-start"
+  },
+  "preparingSubtitles": {
+    "message": "Preparing subtitles…"
+  },
+  "reveal": {
+    "message": "reveal"
+  },
+  "hide": {
+    "message": "hide"
+  },
+  "delayed": {
+    "message": "Subtitles delayed ~$1 s"
+  },
+  "translationNeedsChrome": {
+    "message": "⚠ Translation needs Chrome 138 or newer"
+  },
+  "cannotTranslateDevice": {
+    "message": "⚠ Chrome can't translate $1 → $2 on this device"
+  },
+  "clickToDownload": {
+    "message": "Click the video once to download the translation model"
+  },
+  "preparingTranslation": {
+    "message": "Preparing translation…"
+  },
+  "downloadingTranslation": {
+    "message": "Downloading translation model… $1%"
+  },
+  "translationUnavailable": {
+    "message": "⚠ Translation unavailable: $1"
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "extName": {
+    "message": "Titl"
+  },
+  "extDescription": {
+    "message": "Subtitel dan terjemahan YouTube yang tepat waktu dan privat, ditranskripsi di komputer Anda sendiri dengan whisper.cpp."
+  },
+  "optionsTitle": {
+    "message": "Opsi"
+  },
+  "sectionServer": {
+    "message": "Server whisper.cpp"
+  },
+  "serverUrl": {
+    "message": "URL server"
+  },
+  "serverUrlHint": {
+    "message": "Hanya dipakai untuk whisper-server yang Anda jalankan sendiri, atau jika helper belum terpasang. Dengan mulai otomatis, Titl menjalankan servernya sendiri di port yang bebas. Harus 127.0.0.1 atau localhost."
+  },
+  "autoStart": {
+    "message": "Jalankan whisper-server otomatis jika belum berjalan (perlu <code>titl install</code>)"
+  },
+  "testConnection": {
+    "message": "Uji koneksi"
+  },
+  "sectionTiming": {
+    "message": "Waktu"
+  },
+  "mode": {
+    "message": "Mode"
+  },
+  "modeLookahead": {
+    "message": "Lebih awal — subtitel tepat waktu (membuka tab tersembunyi tanpa suara)"
+  },
+  "modeLive": {
+    "message": "Langsung — mentranskripsi yang sedang diputar (subtitel terlambat beberapa detik)"
+  },
+  "modeHint": {
+    "message": "Siaran langsung selalu memakai mode langsung."
+  },
+  "skipAds": {
+    "message": "Klik \"Lewati iklan\" di tab tersembunyi saat YouTube menawarkannya"
+  },
+  "showEarly": {
+    "message": "Tampilkan lebih awal (dtk)"
+  },
+  "minLead": {
+    "message": "Jeda sampai siap (dtk ke depan, 0 = mati)"
+  },
+  "sectionTranslation": {
+    "message": "Terjemahan"
+  },
+  "translateTo": {
+    "message": "Terjemahkan ke"
+  },
+  "off": {
+    "message": "Mati"
+  },
+  "translationHint": {
+    "message": "Berjalan di perangkat ini dengan penerjemah bawaan Chrome. Bahasa Serbia diterjemahkan sebagai bahasa Kroasia, yang didukung Chrome."
+  },
+  "showOriginal": {
+    "message": "Tampilkan teks asli di atas terjemahan"
+  },
+  "blurTranslation": {
+    "message": "Buramkan terjemahan sampai Anda membukanya: tekan <kbd>V</kbd> atau klik barisnya"
+  },
+  "downloadModel": {
+    "message": "Unduh model terjemahan"
+  },
+  "sectionTranscription": {
+    "message": "Transkripsi"
+  },
+  "spokenLanguage": {
+    "message": "Bahasa lisan"
+  },
+  "serbianScript": {
+    "message": "Aksara Serbia"
+  },
+  "scriptLatin": {
+    "message": "Latin (latinica)"
+  },
+  "scriptCyrillic": {
+    "message": "Sirilik (ћирилица)"
+  },
+  "scriptOriginal": {
+    "message": "Sesuai hasil Whisper (bisa campur)"
+  },
+  "liveWindow": {
+    "message": "Jendela langsung (dtk)"
+  },
+  "liveStep": {
+    "message": "Langkah langsung (dtk)"
+  },
+  "maxWindow": {
+    "message": "Jendela maksimum (dtk)"
+  },
+  "lagThreshold": {
+    "message": "Ambang peringatan keterlambatan (dtk)"
+  },
+  "save": {
+    "message": "Simpan"
+  },
+  "reset": {
+    "message": "Atur ulang"
+  },
+  "footerFree": {
+    "message": "Titl gratis dan sumber terbuka."
+  },
+  "support": {
+    "message": "Dukung di Ko-fi"
+  },
+  "saved": {
+    "message": "Tersimpan."
+  },
+  "savedApplied": {
+    "message": "Tersimpan dan diterapkan ke subtitel yang berjalan."
+  },
+  "savedRestartFailed": {
+    "message": "Tersimpan, tetapi gagal memulai ulang: $1"
+  },
+  "defaultsRestored": {
+    "message": "Pengaturan bawaan dipulihkan."
+  },
+  "testing": {
+    "message": "Menguji…"
+  },
+  "reachable": {
+    "message": "Dapat dijangkau (HTTP $1)"
+  },
+  "notLocalUrl": {
+    "message": "Bukan URL http lokal"
+  },
+  "pathNotFound": {
+    "message": "Server berjalan, tetapi jalur ini mengembalikan 404"
+  },
+  "cannotReach": {
+    "message": "Server tidak dapat dijangkau"
+  },
+  "chooseTarget": {
+    "message": "Pilih bahasa terjemahan terlebih dahulu"
+  },
+  "translatorUnavailableHere": {
+    "message": "Penerjemah tidak tersedia di sini; akan diunduh saat klik pertama Anda di tab YouTube"
+  },
+  "cannotTranslatePair": {
+    "message": "Chrome tidak dapat menerjemahkan $1 → $2 di perangkat ini"
+  },
+  "preparing": {
+    "message": "Menyiapkan…"
+  },
+  "downloading": {
+    "message": "Mengunduh… $1%"
+  },
+  "ready": {
+    "message": "Siap ($1 → $2): \"$3\" → \"$4\""
+  },
+  "failed": {
+    "message": "Gagal: $1"
+  },
+  "idle": {
+    "message": "Tidak aktif"
+  },
+  "starting": {
+    "message": "Menjalankan whisper-server…"
+  },
+  "runningLookahead": {
+    "message": "Berjalan (lebih awal)"
+  },
+  "runningLive": {
+    "message": "Berjalan (langsung)"
+  },
+  "runningDelayed": {
+    "message": "Berjalan — terlambat ~$1 dtk"
+  },
+  "errorPrefix": {
+    "message": "Kesalahan: $1"
+  },
+  "openYouTubeFirst": {
+    "message": "Buka video YouTube terlebih dahulu."
+  },
+  "startSubtitles": {
+    "message": "Mulai subtitel"
+  },
+  "stopSubtitles": {
+    "message": "Hentikan subtitel"
+  },
+  "settings": {
+    "message": "Pengaturan"
+  },
+  "autoStartLabel": {
+    "message": "mulai otomatis"
+  },
+  "preparingSubtitles": {
+    "message": "Menyiapkan subtitel…"
+  },
+  "reveal": {
+    "message": "tampilkan"
+  },
+  "hide": {
+    "message": "sembunyikan"
+  },
+  "delayed": {
+    "message": "Subtitel terlambat ~$1 dtk"
+  },
+  "translationNeedsChrome": {
+    "message": "⚠ Terjemahan memerlukan Chrome 138 atau lebih baru"
+  },
+  "cannotTranslateDevice": {
+    "message": "⚠ Chrome tidak dapat menerjemahkan $1 → $2 di perangkat ini"
+  },
+  "clickToDownload": {
+    "message": "Klik video sekali untuk mengunduh model terjemahan"
+  },
+  "preparingTranslation": {
+    "message": "Menyiapkan terjemahan…"
+  },
+  "downloadingTranslation": {
+    "message": "Mengunduh model terjemahan… $1%"
+  },
+  "translationUnavailable": {
+    "message": "⚠ Terjemahan tidak tersedia: $1"
+  }
+}

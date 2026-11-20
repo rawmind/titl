@@ -1,5 +1,6 @@
 import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
 import { languageOptions, translationOptions } from './languages.js';
+import { localizePage, t, uiLocale } from './i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'showOriginal', 'blurTranslation', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
@@ -35,29 +36,29 @@ $('form').addEventListener('submit', async (e) => {
   const error = validateSettings(settings);
   if (error) return say($('message'), error, false);
   await chrome.storage.local.set({ settings });
-  say($('message'), 'Saved.', true);
+  say($('message'), t('saved'), true);
   const res = await chrome.runtime.sendMessage({ target: 'background', type: 'restart' }).catch(() => null);
-  if (res?.restarted) say($('message'), 'Saved and applied to the running subtitles.', true);
-  else if (res && !res.ok) say($('message'), `Saved, but restarting failed: ${res.error}`, false);
+  if (res?.restarted) say($('message'), t('savedApplied'), true);
+  else if (res && !res.ok) say($('message'), t('savedRestartFailed', res.error), false);
 });
 
 $('reset').addEventListener('click', async () => {
   await chrome.storage.local.remove('settings');
   fill(DEFAULTS);
   syncScriptRow();
-  say($('message'), 'Defaults restored.', true);
+  say($('message'), t('defaultsRestored'), true);
 });
 
 $('test').addEventListener('click', async () => {
   const url = $('serverUrl').value.trim();
-  if (!isLocalUrl(url)) return say($('testResult'), 'Not a local http URL', false);
-  say($('testResult'), 'Testing…', true);
+  if (!isLocalUrl(url)) return say($('testResult'), t('notLocalUrl'), false);
+  say($('testResult'), t('testing'), true);
   try {
     const res = await fetch(url, { method: 'POST', body: new FormData(), signal: AbortSignal.timeout(5000) });
-    if (res.status === 404) return say($('testResult'), 'Server is up, but this path returns 404', false);
-    say($('testResult'), `Reachable (HTTP ${res.status})`, true);
+    if (res.status === 404) return say($('testResult'), t('pathNotFound'), false);
+    say($('testResult'), t('reachable', res.status), true);
   } catch {
-    say($('testResult'), 'Cannot reach server', false);
+    say($('testResult'), t('cannotReach'), false);
   }
 });
 
@@ -65,8 +66,8 @@ $('prepareTranslation').addEventListener('click', async () => {
   const out = $('translationResult');
   const language = $('language').value.trim();
   const target = $('translateTo').value;
-  if (!target) return say(out, 'Choose a language to translate to first', false);
-  if (!('Translator' in self)) return say(out, 'Translator is not available here; it will download on your first click in a YouTube tab', false);
+  if (!target) return say(out, t('chooseTarget'), false);
+  if (!('Translator' in self)) return say(out, t('translatorUnavailableHere'), false);
   try {
     let pair = null;
     for (const source of [language, TRANSLATOR_SOURCE_FALLBACK[language]]) {
@@ -76,24 +77,25 @@ $('prepareTranslation').addEventListener('click', async () => {
         break;
       }
     }
-    if (!pair) return say(out, `Chrome can't translate ${language} → ${target} on this device`, false);
-    say(out, 'Preparing…', true);
+    if (!pair) return say(out, t('cannotTranslatePair', language, target), false);
+    say(out, t('preparing'), true);
     const translator = await Translator.create({
       ...pair,
       monitor(m) {
-        m.addEventListener('downloadprogress', (e) => say(out, `Downloading… ${Math.round(e.loaded * 100)}%`, true));
+        m.addEventListener('downloadprogress', (e) => say(out, t('downloading', Math.round(e.loaded * 100)), true));
       },
     });
     const sample = await translator.translate('Dobar dan, kako ste?');
     translator.destroy();
-    say(out, `Ready (${pair.sourceLanguage} → ${pair.targetLanguage}): "Dobar dan, kako ste?" → "${sample}"`, true);
+    say(out, t('ready', pair.sourceLanguage, pair.targetLanguage, 'Dobar dan, kako ste?', sample), true);
   } catch (err) {
-    say(out, `Failed: ${err.message}`, false);
+    say(out, t('failed', err.message), false);
   }
 });
 
-for (const { code, label } of languageOptions()) $('language').add(new Option(label, code));
-for (const { code, label } of translationOptions()) $('translateTo').add(new Option(label, code));
+localizePage();
+for (const { code, label } of languageOptions(uiLocale())) $('language').add(new Option(label, code));
+for (const { code, label } of translationOptions(uiLocale())) $('translateTo').add(new Option(label, code));
 fill(await loadSettings());
 syncScriptRow();
 $('language').addEventListener('change', syncScriptRow);

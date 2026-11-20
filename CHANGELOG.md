@@ -5,7 +5,8 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 ## [0.1.12](https://github.com/rawmind/titl/releases/tag/v0.1.12) - 2026-11-20
 
 ### Added
-- A small **"♥ Support on Ko-fi"** link at the bottom of the Options page. Titl stays free, with no paid features. The [README](https://github.com/rawmind/titl#support-titl) and the repository's Sponsor button link to the same page.
+- **Titl speaks your language.** The popup, Options page and on-screen messages are translated into 12 languages: English, Chinese, Hindi, Spanish, Arabic, French, Bengali, Portuguese, Russian, Indonesian, Ukrainian and Serbian. Chrome picks the language from your browser settings, and Arabic is shown right to left. Everything else falls back to English. Language names in the dropdowns appear in your language too.
+- A small **"♥ Support on Ko-fi"** link at the bottom of the Options page. Titl stays free, with no paid features.
 
 ### Changed
 - CI runs on the Node 24 versions of GitHub's actions.

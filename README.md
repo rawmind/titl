@@ -76,6 +76,7 @@ Most live-caption tools show each line **after** it's spoken, upload your audio 
 - Subtitles in normal and fullscreen, never blocking YouTube's controls
 - Dark popup and Options in Titl's colours
 - **Save applies immediately** to running subtitles
+- Interface in **12 languages**, chosen from your browser's language
 
 </td>
 </tr>
@@ -219,6 +220,10 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Lag warning threshold | 10 s | Live mode: show "delayed" past this. |
 
 To pass extra flags to `whisper-server` (e.g. threads), add them to `"args"` in the helper's `config.json` (see `titl status`).
+
+## Interface languages
+
+Titl's popup, Options page and on-screen messages are available in English, Chinese, Hindi, Spanish, Arabic, French, Bengali, Portuguese, Russian, Indonesian, Ukrainian and Serbian. Chrome picks the language from your browser settings and falls back to English. Language names in the dropdowns also appear in your language. Translations live in [`_locales/`](_locales); corrections from native speakers are very welcome.
 
 ## Translation
 

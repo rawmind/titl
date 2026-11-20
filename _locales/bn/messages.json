@@ -1,0 +1,224 @@
+{
+  "extName": {
+    "message": "Titl"
+  },
+  "extDescription": {
+    "message": "YouTube-এর জন্য সময়মতো, ব্যক্তিগত সাবটাইটেল ও অনুবাদ, whisper.cpp দিয়ে আপনার নিজের কম্পিউটারে ট্রান্সক্রাইব করা।"
+  },
+  "optionsTitle": {
+    "message": "বিকল্প"
+  },
+  "sectionServer": {
+    "message": "whisper.cpp সার্ভার"
+  },
+  "serverUrl": {
+    "message": "সার্ভার URL"
+  },
+  "serverUrlHint": {
+    "message": "শুধু আপনার নিজে চালানো whisper-server-এর জন্য, অথবা হেল্পার ইনস্টল না থাকলে। অটো-স্টার্ট চালু থাকলে Titl একটি খালি পোর্টে নিজের সার্ভার চালায়। অবশ্যই 127.0.0.1 বা localhost হতে হবে।"
+  },
+  "autoStart": {
+    "message": "whisper-server না চললে স্বয়ংক্রিয়ভাবে চালু করুন (<code>titl install</code> প্রয়োজন)"
+  },
+  "testConnection": {
+    "message": "সংযোগ পরীক্ষা করুন"
+  },
+  "sectionTiming": {
+    "message": "সময়"
+  },
+  "mode": {
+    "message": "মোড"
+  },
+  "modeLookahead": {
+    "message": "আগাম — সময়মতো সাবটাইটেল (একটি লুকানো, নিঃশব্দ ট্যাব খোলে)"
+  },
+  "modeLive": {
+    "message": "লাইভ — যা চলছে তা ট্রান্সক্রাইব করে (সাবটাইটেল কয়েক সেকেন্ড দেরিতে)"
+  },
+  "modeHint": {
+    "message": "লাইভ স্ট্রিম সবসময় লাইভ মোড ব্যবহার করে।"
+  },
+  "skipAds": {
+    "message": "YouTube দিলে লুকানো ট্যাবে \"বিজ্ঞাপন এড়িয়ে যান\" ক্লিক করুন"
+  },
+  "showEarly": {
+    "message": "এত আগে দেখান (সে.)"
+  },
+  "minLead": {
+    "message": "প্রস্তুত না হওয়া পর্যন্ত থামান (সে. আগে, 0 = বন্ধ)"
+  },
+  "sectionTranslation": {
+    "message": "অনুবাদ"
+  },
+  "translateTo": {
+    "message": "যে ভাষায় অনুবাদ"
+  },
+  "off": {
+    "message": "বন্ধ"
+  },
+  "translationHint": {
+    "message": "Chrome-এর বিল্ট-ইন অনুবাদক দিয়ে এই ডিভাইসেই চলে। সার্বিয়ানকে ক্রোয়েশিয়ান হিসেবে অনুবাদ করা হয়, যা Chrome সমর্থন করে।"
+  },
+  "showOriginal": {
+    "message": "অনুবাদের উপরে মূল লেখা দেখান"
+  },
+  "blurTranslation": {
+    "message": "আপনি না খোলা পর্যন্ত অনুবাদ ঝাপসা রাখুন: <kbd>V</kbd> চাপুন বা লাইনে ক্লিক করুন"
+  },
+  "downloadModel": {
+    "message": "অনুবাদ মডেল ডাউনলোড করুন"
+  },
+  "sectionTranscription": {
+    "message": "ট্রান্সক্রিপশন"
+  },
+  "spokenLanguage": {
+    "message": "কথ্য ভাষা"
+  },
+  "serbianScript": {
+    "message": "সার্বিয়ান লিপি"
+  },
+  "scriptLatin": {
+    "message": "ল্যাটিন (latinica)"
+  },
+  "scriptCyrillic": {
+    "message": "সিরিলিক (ћирилица)"
+  },
+  "scriptOriginal": {
+    "message": "Whisper যেমন দেয় (মিশ্র হতে পারে)"
+  },
+  "liveWindow": {
+    "message": "লাইভ উইন্ডো (সে.)"
+  },
+  "liveStep": {
+    "message": "লাইভ ধাপ (সে.)"
+  },
+  "maxWindow": {
+    "message": "সর্বোচ্চ উইন্ডো (সে.)"
+  },
+  "lagThreshold": {
+    "message": "দেরির সতর্কতার সীমা (সে.)"
+  },
+  "save": {
+    "message": "সংরক্ষণ"
+  },
+  "reset": {
+    "message": "ডিফল্টে ফিরুন"
+  },
+  "footerFree": {
+    "message": "Titl বিনামূল্যে এবং ওপেন সোর্স।"
+  },
+  "support": {
+    "message": "Ko-fi-তে সমর্থন করুন"
+  },
+  "saved": {
+    "message": "সংরক্ষিত।"
+  },
+  "savedApplied": {
+    "message": "সংরক্ষিত এবং চলমান সাবটাইটেলে প্রয়োগ করা হয়েছে।"
+  },
+  "savedRestartFailed": {
+    "message": "সংরক্ষিত, কিন্তু আবার চালু করা যায়নি: $1"
+  },
+  "defaultsRestored": {
+    "message": "ডিফল্ট ফিরিয়ে আনা হয়েছে।"
+  },
+  "testing": {
+    "message": "পরীক্ষা চলছে…"
+  },
+  "reachable": {
+    "message": "পৌঁছানো যায় (HTTP $1)"
+  },
+  "notLocalUrl": {
+    "message": "এটি স্থানীয় http URL নয়"
+  },
+  "pathNotFound": {
+    "message": "সার্ভার চলছে, কিন্তু এই পথ 404 দেয়"
+  },
+  "cannotReach": {
+    "message": "সার্ভারে পৌঁছানো যাচ্ছে না"
+  },
+  "chooseTarget": {
+    "message": "আগে অনুবাদের ভাষা বেছে নিন"
+  },
+  "translatorUnavailableHere": {
+    "message": "অনুবাদক এখানে উপলব্ধ নয়; YouTube ট্যাবে আপনার প্রথম ক্লিকে ডাউনলোড হবে"
+  },
+  "cannotTranslatePair": {
+    "message": "Chrome এই ডিভাইসে $1 → $2 অনুবাদ করতে পারে না"
+  },
+  "preparing": {
+    "message": "প্রস্তুত হচ্ছে…"
+  },
+  "downloading": {
+    "message": "ডাউনলোড হচ্ছে… $1%"
+  },
+  "ready": {
+    "message": "প্রস্তুত ($1 → $2): \"$3\" → \"$4\""
+  },
+  "failed": {
+    "message": "ব্যর্থ: $1"
+  },
+  "idle": {
+    "message": "নিষ্ক্রিয়"
+  },
+  "starting": {
+    "message": "whisper-server চালু হচ্ছে…"
+  },
+  "runningLookahead": {
+    "message": "চলছে (আগাম)"
+  },
+  "runningLive": {
+    "message": "চলছে (লাইভ)"
+  },
+  "runningDelayed": {
+    "message": "চলছে — ~$1 সে. দেরি"
+  },
+  "errorPrefix": {
+    "message": "ত্রুটি: $1"
+  },
+  "openYouTubeFirst": {
+    "message": "আগে একটি YouTube ভিডিও খুলুন।"
+  },
+  "startSubtitles": {
+    "message": "সাবটাইটেল চালু করুন"
+  },
+  "stopSubtitles": {
+    "message": "সাবটাইটেল বন্ধ করুন"
+  },
+  "settings": {
+    "message": "সেটিংস"
+  },
+  "autoStartLabel": {
+    "message": "অটো-স্টার্ট"
+  },
+  "preparingSubtitles": {
+    "message": "সাবটাইটেল প্রস্তুত হচ্ছে…"
+  },
+  "reveal": {
+    "message": "দেখান"
+  },
+  "hide": {
+    "message": "লুকান"
+  },
+  "delayed": {
+    "message": "সাবটাইটেল ~$1 সে. দেরিতে"
+  },
+  "translationNeedsChrome": {
+    "message": "⚠ অনুবাদের জন্য Chrome 138 বা নতুন সংস্করণ লাগবে"
+  },
+  "cannotTranslateDevice": {
+    "message": "⚠ Chrome এই ডিভাইসে $1 → $2 অনুবাদ করতে পারে না"
+  },
+  "clickToDownload": {
+    "message": "অনুবাদ মডেল ডাউনলোড করতে ভিডিওতে একবার ক্লিক করুন"
+  },
+  "preparingTranslation": {
+    "message": "অনুবাদ প্রস্তুত হচ্ছে…"
+  },
+  "downloadingTranslation": {
+    "message": "অনুবাদ মডেল ডাউনলোড হচ্ছে… $1%"
+  },
+  "translationUnavailable": {
+    "message": "⚠ অনুবাদ উপলব্ধ নয়: $1"
+  }
+}

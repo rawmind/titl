@@ -1,0 +1,224 @@
+{
+  "extName": {
+    "message": "Titl"
+  },
+  "extDescription": {
+    "message": "ترجمة نصية وترجمة فورية وخاصة لفيديوهات YouTube، تُنسخ على جهازك باستخدام whisper.cpp."
+  },
+  "optionsTitle": {
+    "message": "الخيارات"
+  },
+  "sectionServer": {
+    "message": "خادم whisper.cpp"
+  },
+  "serverUrl": {
+    "message": "عنوان الخادم"
+  },
+  "serverUrlHint": {
+    "message": "يُستخدم فقط مع whisper-server الذي تشغّله بنفسك، أو عندما لا يكون المساعد مثبتًا. مع التشغيل التلقائي، يشغّل Titl خادمه على منفذ متاح. يجب أن يكون 127.0.0.1 أو localhost."
+  },
+  "autoStart": {
+    "message": "تشغيل whisper-server تلقائيًا إن لم يكن يعمل (يتطلب <code>titl install</code>)"
+  },
+  "testConnection": {
+    "message": "اختبار الاتصال"
+  },
+  "sectionTiming": {
+    "message": "التوقيت"
+  },
+  "mode": {
+    "message": "الوضع"
+  },
+  "modeLookahead": {
+    "message": "مسبق — ترجمة في وقتها (يفتح علامة تبويب مخفية وصامتة)"
+  },
+  "modeLive": {
+    "message": "مباشر — ينسخ ما يُعرض (تتأخر الترجمة بضع ثوانٍ)"
+  },
+  "modeHint": {
+    "message": "يستخدم البث المباشر دائمًا الوضع المباشر."
+  },
+  "skipAds": {
+    "message": "انقر «تخطي الإعلان» في علامة التبويب المخفية عندما يتيحه YouTube"
+  },
+  "showEarly": {
+    "message": "العرض مبكرًا بمقدار (ث)"
+  },
+  "minLead": {
+    "message": "إيقاف مؤقت حتى الجاهزية (ثوانٍ مسبقًا، 0 = إيقاف)"
+  },
+  "sectionTranslation": {
+    "message": "الترجمة"
+  },
+  "translateTo": {
+    "message": "الترجمة إلى"
+  },
+  "off": {
+    "message": "إيقاف"
+  },
+  "translationHint": {
+    "message": "تعمل على هذا الجهاز بمترجم Chrome المدمج. تُترجم الصربية على أنها كرواتية، التي يدعمها Chrome."
+  },
+  "showOriginal": {
+    "message": "عرض النص الأصلي فوق الترجمة"
+  },
+  "blurTranslation": {
+    "message": "تمويه الترجمة حتى تكشفها: اضغط <kbd>V</kbd> أو انقر على السطر"
+  },
+  "downloadModel": {
+    "message": "تنزيل نموذج الترجمة"
+  },
+  "sectionTranscription": {
+    "message": "النسخ"
+  },
+  "spokenLanguage": {
+    "message": "اللغة المنطوقة"
+  },
+  "serbianScript": {
+    "message": "الأبجدية الصربية"
+  },
+  "scriptLatin": {
+    "message": "اللاتينية (latinica)"
+  },
+  "scriptCyrillic": {
+    "message": "السيريلية (ћирилица)"
+  },
+  "scriptOriginal": {
+    "message": "كما يعيدها Whisper (قد تختلط)"
+  },
+  "liveWindow": {
+    "message": "نافذة المباشر (ث)"
+  },
+  "liveStep": {
+    "message": "خطوة المباشر (ث)"
+  },
+  "maxWindow": {
+    "message": "أقصى نافذة (ث)"
+  },
+  "lagThreshold": {
+    "message": "حد تحذير التأخير (ث)"
+  },
+  "save": {
+    "message": "حفظ"
+  },
+  "reset": {
+    "message": "استعادة الافتراضي"
+  },
+  "footerFree": {
+    "message": "Titl مجاني ومفتوح المصدر."
+  },
+  "support": {
+    "message": "ادعمنا على Ko-fi"
+  },
+  "saved": {
+    "message": "تم الحفظ."
+  },
+  "savedApplied": {
+    "message": "تم الحفظ والتطبيق على الترجمة الجارية."
+  },
+  "savedRestartFailed": {
+    "message": "تم الحفظ، لكن فشلت إعادة التشغيل: $1"
+  },
+  "defaultsRestored": {
+    "message": "تمت استعادة الإعدادات الافتراضية."
+  },
+  "testing": {
+    "message": "جارٍ الاختبار…"
+  },
+  "reachable": {
+    "message": "متاح (HTTP $1)"
+  },
+  "notLocalUrl": {
+    "message": "ليس عنوان http محليًا"
+  },
+  "pathNotFound": {
+    "message": "الخادم يعمل، لكن هذا المسار يعيد 404"
+  },
+  "cannotReach": {
+    "message": "تعذّر الوصول إلى الخادم"
+  },
+  "chooseTarget": {
+    "message": "اختر لغة الترجمة أولًا"
+  },
+  "translatorUnavailableHere": {
+    "message": "المترجم غير متاح هنا؛ سيُنزَّل عند أول نقرة لك في علامة تبويب YouTube"
+  },
+  "cannotTranslatePair": {
+    "message": "لا يستطيع Chrome الترجمة $1 → $2 على هذا الجهاز"
+  },
+  "preparing": {
+    "message": "جارٍ التحضير…"
+  },
+  "downloading": {
+    "message": "جارٍ التنزيل… $1%"
+  },
+  "ready": {
+    "message": "جاهز ($1 → $2): «$3» → «$4»"
+  },
+  "failed": {
+    "message": "فشل: $1"
+  },
+  "idle": {
+    "message": "متوقف"
+  },
+  "starting": {
+    "message": "جارٍ تشغيل whisper-server…"
+  },
+  "runningLookahead": {
+    "message": "يعمل (مسبق)"
+  },
+  "runningLive": {
+    "message": "يعمل (مباشر)"
+  },
+  "runningDelayed": {
+    "message": "يعمل — تأخير ~$1 ث"
+  },
+  "errorPrefix": {
+    "message": "خطأ: $1"
+  },
+  "openYouTubeFirst": {
+    "message": "افتح فيديو على YouTube أولًا."
+  },
+  "startSubtitles": {
+    "message": "تشغيل الترجمة النصية"
+  },
+  "stopSubtitles": {
+    "message": "إيقاف الترجمة النصية"
+  },
+  "settings": {
+    "message": "الإعدادات"
+  },
+  "autoStartLabel": {
+    "message": "تشغيل تلقائي"
+  },
+  "preparingSubtitles": {
+    "message": "جارٍ تحضير الترجمة النصية…"
+  },
+  "reveal": {
+    "message": "إظهار"
+  },
+  "hide": {
+    "message": "إخفاء"
+  },
+  "delayed": {
+    "message": "الترجمة النصية متأخرة ~$1 ث"
+  },
+  "translationNeedsChrome": {
+    "message": "⚠ تتطلب الترجمة Chrome 138 أو أحدث"
+  },
+  "cannotTranslateDevice": {
+    "message": "⚠ لا يستطيع Chrome الترجمة $1 → $2 على هذا الجهاز"
+  },
+  "clickToDownload": {
+    "message": "انقر على الفيديو مرة لتنزيل نموذج الترجمة"
+  },
+  "preparingTranslation": {
+    "message": "جارٍ تحضير الترجمة…"
+  },
+  "downloadingTranslation": {
+    "message": "جارٍ تنزيل نموذج الترجمة… $1%"
+  },
+  "translationUnavailable": {
+    "message": "⚠ الترجمة غير متاحة: $1"
+  }
+}

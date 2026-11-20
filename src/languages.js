@@ -23,23 +23,23 @@ function displayName(code, inLocale) {
   }
 }
 
-export function languageName(code) {
-  const english = displayName(code, 'en') ?? code;
-  return english.charAt(0).toUpperCase() + english.slice(1);
+export function languageName(code, locale = 'en') {
+  const name = displayName(code, locale) ?? displayName(code, 'en') ?? code;
+  return name.charAt(0).toLocaleUpperCase(locale) + name.slice(1);
 }
 
-export function languageLabel(code) {
-  const english = languageName(code);
+export function languageLabel(code, locale = 'en') {
+  const english = languageName(code, locale);
   const native = displayName(code, BCP47[code] ?? code);
   return native && native.toLowerCase() !== english.toLowerCase() ? `${english} · ${native}` : english;
 }
 
-export function languageOptions() {
-  return WHISPER_LANGUAGES.map((code) => ({ code, label: languageLabel(code), name: languageName(code) })).sort((a, b) =>
-    a.name.localeCompare(b.name, 'en'),
+export function languageOptions(locale = 'en') {
+  return WHISPER_LANGUAGES.map((code) => ({ code, label: languageLabel(code, locale), name: languageName(code, locale) })).sort((a, b) =>
+    a.name.localeCompare(b.name, locale),
   );
 }
 
-export function translationOptions() {
-  return TRANSLATION_TARGETS.map((code) => ({ code, label: languageLabel(code) }));
+export function translationOptions(locale = 'en') {
+  return TRANSLATION_TARGETS.map((code) => ({ code, label: languageLabel(code, locale) }));
 }

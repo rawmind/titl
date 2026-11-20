@@ -1,0 +1,224 @@
+{
+  "extName": {
+    "message": "Titl"
+  },
+  "extDescription": {
+    "message": "适用于 YouTube 的及时、私密的字幕和翻译，使用 whisper.cpp 在您自己的电脑上转写。"
+  },
+  "optionsTitle": {
+    "message": "选项"
+  },
+  "sectionServer": {
+    "message": "whisper.cpp 服务器"
+  },
+  "serverUrl": {
+    "message": "服务器地址"
+  },
+  "serverUrlHint": {
+    "message": "仅用于您自己启动的 whisper-server，或未安装辅助程序时。启用自动启动后，Titl 会在空闲端口上运行自己的服务器。必须是 127.0.0.1 或 localhost。"
+  },
+  "autoStart": {
+    "message": "如果 whisper-server 未运行则自动启动（需要 <code>titl install</code>）"
+  },
+  "testConnection": {
+    "message": "测试连接"
+  },
+  "sectionTiming": {
+    "message": "时间"
+  },
+  "mode": {
+    "message": "模式"
+  },
+  "modeLookahead": {
+    "message": "提前 — 字幕准时显示（会打开一个隐藏的静音标签页）"
+  },
+  "modeLive": {
+    "message": "实时 — 转写正在播放的内容（字幕会晚几秒）"
+  },
+  "modeHint": {
+    "message": "直播始终使用实时模式。"
+  },
+  "skipAds": {
+    "message": "当 YouTube 提供时，在隐藏标签页中点击“跳过广告”"
+  },
+  "showEarly": {
+    "message": "提前显示（秒）"
+  },
+  "minLead": {
+    "message": "暂停直到就绪（提前秒数，0 = 关闭）"
+  },
+  "sectionTranslation": {
+    "message": "翻译"
+  },
+  "translateTo": {
+    "message": "翻译为"
+  },
+  "off": {
+    "message": "关闭"
+  },
+  "translationHint": {
+    "message": "使用 Chrome 内置翻译器在本设备上运行。塞尔维亚语会按 Chrome 支持的克罗地亚语翻译。"
+  },
+  "showOriginal": {
+    "message": "在翻译上方显示原文"
+  },
+  "blurTranslation": {
+    "message": "模糊翻译直到您显示它：按 <kbd>V</kbd> 或点击该行"
+  },
+  "downloadModel": {
+    "message": "下载翻译模型"
+  },
+  "sectionTranscription": {
+    "message": "转写"
+  },
+  "spokenLanguage": {
+    "message": "口语语言"
+  },
+  "serbianScript": {
+    "message": "塞尔维亚语文字"
+  },
+  "scriptLatin": {
+    "message": "拉丁字母（latinica）"
+  },
+  "scriptCyrillic": {
+    "message": "西里尔字母（ћирилица）"
+  },
+  "scriptOriginal": {
+    "message": "按 Whisper 返回（可能混合）"
+  },
+  "liveWindow": {
+    "message": "实时窗口（秒）"
+  },
+  "liveStep": {
+    "message": "实时步长（秒）"
+  },
+  "maxWindow": {
+    "message": "最大窗口（秒）"
+  },
+  "lagThreshold": {
+    "message": "延迟警告阈值（秒）"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "reset": {
+    "message": "恢复默认"
+  },
+  "footerFree": {
+    "message": "Titl 免费且开源。"
+  },
+  "support": {
+    "message": "在 Ko-fi 上支持"
+  },
+  "saved": {
+    "message": "已保存。"
+  },
+  "savedApplied": {
+    "message": "已保存并应用到正在运行的字幕。"
+  },
+  "savedRestartFailed": {
+    "message": "已保存，但重新启动失败：$1"
+  },
+  "defaultsRestored": {
+    "message": "已恢复默认设置。"
+  },
+  "testing": {
+    "message": "正在测试…"
+  },
+  "reachable": {
+    "message": "可访问（HTTP $1）"
+  },
+  "notLocalUrl": {
+    "message": "不是本地 http 地址"
+  },
+  "pathNotFound": {
+    "message": "服务器在运行，但此路径返回 404"
+  },
+  "cannotReach": {
+    "message": "无法连接服务器"
+  },
+  "chooseTarget": {
+    "message": "请先选择翻译语言"
+  },
+  "translatorUnavailableHere": {
+    "message": "此处无法使用翻译器；将在您第一次点击 YouTube 标签页时下载"
+  },
+  "cannotTranslatePair": {
+    "message": "Chrome 无法在此设备上翻译 $1 → $2"
+  },
+  "preparing": {
+    "message": "正在准备…"
+  },
+  "downloading": {
+    "message": "正在下载… $1%"
+  },
+  "ready": {
+    "message": "就绪（$1 → $2）：“$3” → “$4”"
+  },
+  "failed": {
+    "message": "失败：$1"
+  },
+  "idle": {
+    "message": "空闲"
+  },
+  "starting": {
+    "message": "正在启动 whisper-server…"
+  },
+  "runningLookahead": {
+    "message": "运行中（提前）"
+  },
+  "runningLive": {
+    "message": "运行中（实时）"
+  },
+  "runningDelayed": {
+    "message": "运行中 — 延迟约 $1 秒"
+  },
+  "errorPrefix": {
+    "message": "错误：$1"
+  },
+  "openYouTubeFirst": {
+    "message": "请先打开一个 YouTube 视频。"
+  },
+  "startSubtitles": {
+    "message": "开启字幕"
+  },
+  "stopSubtitles": {
+    "message": "停止字幕"
+  },
+  "settings": {
+    "message": "设置"
+  },
+  "autoStartLabel": {
+    "message": "自动启动"
+  },
+  "preparingSubtitles": {
+    "message": "正在准备字幕…"
+  },
+  "reveal": {
+    "message": "显示"
+  },
+  "hide": {
+    "message": "隐藏"
+  },
+  "delayed": {
+    "message": "字幕延迟约 $1 秒"
+  },
+  "translationNeedsChrome": {
+    "message": "⚠ 翻译需要 Chrome 138 或更高版本"
+  },
+  "cannotTranslateDevice": {
+    "message": "⚠ Chrome 无法在此设备上翻译 $1 → $2"
+  },
+  "clickToDownload": {
+    "message": "点击一次视频以下载翻译模型"
+  },
+  "preparingTranslation": {
+    "message": "正在准备翻译…"
+  },
+  "downloadingTranslation": {
+    "message": "正在下载翻译模型… $1%"
+  },
+  "translationUnavailable": {
+    "message": "⚠ 翻译不可用：$1"
+  }
+}

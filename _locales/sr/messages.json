@@ -1,0 +1,224 @@
+{
+  "extName": {
+    "message": "Titl"
+  },
+  "extDescription": {
+    "message": "Titlovi i prevod za YouTube u pravom trenutku, privatno, transkribovani na vašem računaru pomoću whisper.cpp."
+  },
+  "optionsTitle": {
+    "message": "Podešavanja"
+  },
+  "sectionServer": {
+    "message": "whisper.cpp server"
+  },
+  "serverUrl": {
+    "message": "Adresa servera"
+  },
+  "serverUrlHint": {
+    "message": "Koristi se samo za whisper-server koji sami pokrećete ili kada pomoćni program nije instaliran. Uz automatsko pokretanje, Titl pokreće svoj server na slobodnom portu. Mora biti 127.0.0.1 ili localhost."
+  },
+  "autoStart": {
+    "message": "Automatski pokreni whisper-server ako nije pokrenut (potrebno je <code>titl install</code>)"
+  },
+  "testConnection": {
+    "message": "Proveri vezu"
+  },
+  "sectionTiming": {
+    "message": "Vreme"
+  },
+  "mode": {
+    "message": "Režim"
+  },
+  "modeLookahead": {
+    "message": "Unapred — titlovi na vreme (otvara skrivenu utišanu karticu)"
+  },
+  "modeLive": {
+    "message": "Uživo — transkribuje ono što se pušta (titlovi kasne nekoliko sekundi)"
+  },
+  "modeHint": {
+    "message": "Prenosi uživo uvek koriste režim uživo."
+  },
+  "skipAds": {
+    "message": "Klikni „Preskoči oglas“ u skrivenoj kartici kada YouTube to ponudi"
+  },
+  "showEarly": {
+    "message": "Prikaži ranije za (s)"
+  },
+  "minLead": {
+    "message": "Pauziraj dok nije spremno (s unapred, 0 = isključeno)"
+  },
+  "sectionTranslation": {
+    "message": "Prevod"
+  },
+  "translateTo": {
+    "message": "Prevedi na"
+  },
+  "off": {
+    "message": "Isključeno"
+  },
+  "translationHint": {
+    "message": "Radi na ovom uređaju pomoću Chrome-ovog ugrađenog prevodioca. Srpski se prevodi kao hrvatski, koji Chrome podržava."
+  },
+  "showOriginal": {
+    "message": "Prikaži original iznad prevoda"
+  },
+  "blurTranslation": {
+    "message": "Zamuti prevod dok ga ne otkrijete: pritisnite <kbd>V</kbd> ili kliknite na red"
+  },
+  "downloadModel": {
+    "message": "Preuzmi model za prevod"
+  },
+  "sectionTranscription": {
+    "message": "Transkripcija"
+  },
+  "spokenLanguage": {
+    "message": "Jezik govora"
+  },
+  "serbianScript": {
+    "message": "Srpsko pismo"
+  },
+  "scriptLatin": {
+    "message": "Latinica"
+  },
+  "scriptCyrillic": {
+    "message": "Ćirilica (ћирилица)"
+  },
+  "scriptOriginal": {
+    "message": "Kako ga Whisper vrati (može biti mešano)"
+  },
+  "liveWindow": {
+    "message": "Prozor uživo (s)"
+  },
+  "liveStep": {
+    "message": "Korak uživo (s)"
+  },
+  "maxWindow": {
+    "message": "Najveći prozor (s)"
+  },
+  "lagThreshold": {
+    "message": "Prag upozorenja o kašnjenju (s)"
+  },
+  "save": {
+    "message": "Sačuvaj"
+  },
+  "reset": {
+    "message": "Vrati podrazumevano"
+  },
+  "footerFree": {
+    "message": "Titl je besplatan i otvorenog koda."
+  },
+  "support": {
+    "message": "Podrži na Ko-fi"
+  },
+  "saved": {
+    "message": "Sačuvano."
+  },
+  "savedApplied": {
+    "message": "Sačuvano i primenjeno na aktivne titlove."
+  },
+  "savedRestartFailed": {
+    "message": "Sačuvano, ali ponovno pokretanje nije uspelo: $1"
+  },
+  "defaultsRestored": {
+    "message": "Vraćena podrazumevana podešavanja."
+  },
+  "testing": {
+    "message": "Proveravam…"
+  },
+  "reachable": {
+    "message": "Dostupan (HTTP $1)"
+  },
+  "notLocalUrl": {
+    "message": "Nije lokalna http adresa"
+  },
+  "pathNotFound": {
+    "message": "Server radi, ali ova putanja vraća 404"
+  },
+  "cannotReach": {
+    "message": "Server nije dostupan"
+  },
+  "chooseTarget": {
+    "message": "Prvo izaberite jezik prevoda"
+  },
+  "translatorUnavailableHere": {
+    "message": "Prevodilac ovde nije dostupan; preuzeće se pri prvom kliku na YouTube kartici"
+  },
+  "cannotTranslatePair": {
+    "message": "Chrome ne može da prevede $1 → $2 na ovom uređaju"
+  },
+  "preparing": {
+    "message": "Pripremam…"
+  },
+  "downloading": {
+    "message": "Preuzimam… $1%"
+  },
+  "ready": {
+    "message": "Spremno ($1 → $2): „$3“ → „$4“"
+  },
+  "failed": {
+    "message": "Neuspešno: $1"
+  },
+  "idle": {
+    "message": "Neaktivno"
+  },
+  "starting": {
+    "message": "Pokrećem whisper-server…"
+  },
+  "runningLookahead": {
+    "message": "Radi (unapred)"
+  },
+  "runningLive": {
+    "message": "Radi (uživo)"
+  },
+  "runningDelayed": {
+    "message": "Radi — kasni ~$1 s"
+  },
+  "errorPrefix": {
+    "message": "Greška: $1"
+  },
+  "openYouTubeFirst": {
+    "message": "Prvo otvorite YouTube video."
+  },
+  "startSubtitles": {
+    "message": "Pokreni titlove"
+  },
+  "stopSubtitles": {
+    "message": "Zaustavi titlove"
+  },
+  "settings": {
+    "message": "Podešavanja"
+  },
+  "autoStartLabel": {
+    "message": "automatski"
+  },
+  "preparingSubtitles": {
+    "message": "Pripremam titlove…"
+  },
+  "reveal": {
+    "message": "otkrij"
+  },
+  "hide": {
+    "message": "sakrij"
+  },
+  "delayed": {
+    "message": "Titlovi kasne ~$1 s"
+  },
+  "translationNeedsChrome": {
+    "message": "⚠ Za prevod je potreban Chrome 138 ili noviji"
+  },
+  "cannotTranslateDevice": {
+    "message": "⚠ Chrome ne može da prevede $1 → $2 na ovom uređaju"
+  },
+  "clickToDownload": {
+    "message": "Kliknite jednom na video da preuzmete model za prevod"
+  },
+  "preparingTranslation": {
+    "message": "Pripremam prevod…"
+  },
+  "downloadingTranslation": {
+    "message": "Preuzimam model za prevod… $1%"
+  },
+  "translationUnavailable": {
+    "message": "⚠ Prevod nije dostupan: $1"
+  }
+}

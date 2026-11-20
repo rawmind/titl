@@ -9,6 +9,7 @@
   const REPORT_MS = 500;
   const TRANSLATOR_SOURCE_FALLBACK = { sr: 'hr', bs: 'hr' };
   const REVEAL_KEY = 'v';
+  const t = (key, ...subs) => chrome.i18n.getMessage(key, subs.map(String)) || key;
 
   let root = null;
   let primaryEl = null;
@@ -116,7 +117,7 @@
     if (!root) return;
     const blurrable = root.classList.contains('ct-blurrable');
     root.classList.toggle('ct-blurred', blurrable && !revealed);
-    hintEl.textContent = `${REVEAL_KEY.toUpperCase()} · ${revealed ? 'hide' : 'reveal'}`;
+    hintEl.textContent = `${REVEAL_KEY.toUpperCase()} · ${t(revealed ? 'hide' : 'reveal')}`;
   }
 
   function toggleReveal() {
@@ -145,7 +146,7 @@
 
   function updateBadge() {
     if (!ensureOverlay()) return;
-    const text = waiting ? 'Preparing subtitles…' : translationNotice || statusText;
+    const text = waiting ? t('preparingSubtitles') : translationNotice || statusText;
     if (badgeEl.textContent === text) return;
     badgeEl.textContent = text;
     badgeEl.classList.toggle('ct-visible', Boolean(text));
@@ -153,7 +154,7 @@
 
   function showStatus({ lag, delayed, error }) {
     if (error) statusText = `⚠ ${error}`;
-    else if (delayed) statusText = `Subtitles delayed ~${Math.round(lag)} s`;
+    else if (delayed) statusText = t('delayed', Math.round(lag));
     else statusText = '';
     updateBadge();
   }
@@ -176,12 +177,12 @@
   async function setupTranslator() {
     const target = options.translateTo;
     if (!target) return;
-    if (!('Translator' in self)) return setTranslationNotice('⚠ Translation needs Chrome 138 or newer');
+    if (!('Translator' in self)) return setTranslationNotice(t('translationNeedsChrome'));
     const pair = await pickTranslatorPair(options.language, target);
-    if (!pair) return setTranslationNotice(`⚠ Chrome can't translate ${options.language} → ${target} on this device`);
+    if (!pair) return setTranslationNotice(t('cannotTranslateDevice', options.language, target));
     if (pair.availability === 'available') return createTranslator(pair);
 
-    setTranslationNotice('Click the video once to download the translation model');
+    setTranslationNotice(t('clickToDownload'));
     const onGesture = () => {
       removeGestureListeners?.();
       createTranslator(pair);
@@ -198,13 +199,13 @@
   async function createTranslator({ sourceLanguage, targetLanguage }) {
     const opts = options;
     try {
-      setTranslationNotice('Preparing translation…');
+      setTranslationNotice(t('preparingTranslation'));
       const created = await Translator.create({
         sourceLanguage,
         targetLanguage,
         monitor(m) {
           m.addEventListener('downloadprogress', (e) => {
-            setTranslationNotice(`Downloading translation model… ${Math.round(e.loaded * 100)}%`);
+            setTranslationNotice(t('downloadingTranslation', Math.round(e.loaded * 100)));
           });
         },
       });
@@ -214,7 +215,7 @@
       const t = getVideo()?.currentTime ?? 0;
       cues.filter((c) => c.end >= t - 5).forEach(translateCue);
     } catch (err) {
-      if (options === opts) setTranslationNotice(`⚠ Translation unavailable: ${err.message}`);
+      if (options === opts) setTranslationNotice(t('translationUnavailable', err.message));
     }
   }
 
@@ -397,7 +398,7 @@
     revealed = false;
     window.addEventListener('keydown', onKeyDown, true);
     ensureOverlay();
-    setupTranslator().catch((err) => setTranslationNotice(`⚠ Translation unavailable: ${err.message}`));
+    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
     if (mode !== 'lookahead') return;
     resetCues(getVideoId());
     timer = setInterval(tick, TICK_MS);

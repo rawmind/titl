@@ -10,7 +10,7 @@ delete manifest.key;
 const stage = mkdtempSync(join(tmpdir(), 'titl-'));
 try {
   writeFileSync(join(stage, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
-  for (const path of ['src', 'icons', 'LICENSE']) cpSync(join(root, path), join(stage, path), { recursive: true });
+  for (const path of ['src', 'icons', '_locales', 'LICENSE']) cpSync(join(root, path), join(stage, path), { recursive: true });
   rmSync(join(stage, 'icons/icon.svg'));
   rmSync(join(stage, 'icons/icon-small.svg'));
 

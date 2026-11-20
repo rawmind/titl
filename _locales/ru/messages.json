@@ -1,0 +1,224 @@
+{
+  "extName": {
+    "message": "Titl"
+  },
+  "extDescription": {
+    "message": "Своевременные приватные субтитры и перевод для YouTube, распознанные на вашем компьютере с помощью whisper.cpp."
+  },
+  "optionsTitle": {
+    "message": "Настройки"
+  },
+  "sectionServer": {
+    "message": "Сервер whisper.cpp"
+  },
+  "serverUrl": {
+    "message": "Адрес сервера"
+  },
+  "serverUrlHint": {
+    "message": "Используется только для whisper-server, который вы запускаете сами, или если помощник не установлен. При автозапуске Titl запускает свой сервер на свободном порту. Только 127.0.0.1 или localhost."
+  },
+  "autoStart": {
+    "message": "Автоматически запускать whisper-server, если он не запущен (нужен <code>titl install</code>)"
+  },
+  "testConnection": {
+    "message": "Проверить соединение"
+  },
+  "sectionTiming": {
+    "message": "Тайминг"
+  },
+  "mode": {
+    "message": "Режим"
+  },
+  "modeLookahead": {
+    "message": "Опережение — субтитры вовремя (открывает скрытую беззвучную вкладку)"
+  },
+  "modeLive": {
+    "message": "Вживую — распознаёт то, что играет (субтитры отстают на несколько секунд)"
+  },
+  "modeHint": {
+    "message": "Для прямых трансляций всегда используется режим «вживую»."
+  },
+  "skipAds": {
+    "message": "Нажимать «Пропустить рекламу» в скрытой вкладке, когда YouTube это предлагает"
+  },
+  "showEarly": {
+    "message": "Показывать раньше на (с)"
+  },
+  "minLead": {
+    "message": "Пауза до готовности (с вперёд, 0 = выкл.)"
+  },
+  "sectionTranslation": {
+    "message": "Перевод"
+  },
+  "translateTo": {
+    "message": "Переводить на"
+  },
+  "off": {
+    "message": "Выкл."
+  },
+  "translationHint": {
+    "message": "Работает на этом устройстве через встроенный переводчик Chrome. Сербский переводится как хорватский, который поддерживает Chrome."
+  },
+  "showOriginal": {
+    "message": "Показывать оригинал над переводом"
+  },
+  "blurTranslation": {
+    "message": "Размывать перевод, пока вы его не откроете: нажмите <kbd>V</kbd> или щёлкните по строке"
+  },
+  "downloadModel": {
+    "message": "Скачать модель перевода"
+  },
+  "sectionTranscription": {
+    "message": "Распознавание"
+  },
+  "spokenLanguage": {
+    "message": "Язык речи"
+  },
+  "serbianScript": {
+    "message": "Сербский алфавит"
+  },
+  "scriptLatin": {
+    "message": "Латиница (latinica)"
+  },
+  "scriptCyrillic": {
+    "message": "Кириллица (ћирилица)"
+  },
+  "scriptOriginal": {
+    "message": "Как возвращает Whisper (может смешиваться)"
+  },
+  "liveWindow": {
+    "message": "Окно (живой режим, с)"
+  },
+  "liveStep": {
+    "message": "Шаг (живой режим, с)"
+  },
+  "maxWindow": {
+    "message": "Максимальное окно (с)"
+  },
+  "lagThreshold": {
+    "message": "Порог предупреждения о задержке (с)"
+  },
+  "save": {
+    "message": "Сохранить"
+  },
+  "reset": {
+    "message": "Сбросить"
+  },
+  "footerFree": {
+    "message": "Titl бесплатный и с открытым исходным кодом."
+  },
+  "support": {
+    "message": "Поддержать на Ko-fi"
+  },
+  "saved": {
+    "message": "Сохранено."
+  },
+  "savedApplied": {
+    "message": "Сохранено и применено к работающим субтитрам."
+  },
+  "savedRestartFailed": {
+    "message": "Сохранено, но перезапуск не удался: $1"
+  },
+  "defaultsRestored": {
+    "message": "Настройки сброшены."
+  },
+  "testing": {
+    "message": "Проверяю…"
+  },
+  "reachable": {
+    "message": "Доступен (HTTP $1)"
+  },
+  "notLocalUrl": {
+    "message": "Это не локальный http-адрес"
+  },
+  "pathNotFound": {
+    "message": "Сервер работает, но этот путь возвращает 404"
+  },
+  "cannotReach": {
+    "message": "Сервер недоступен"
+  },
+  "chooseTarget": {
+    "message": "Сначала выберите язык перевода"
+  },
+  "translatorUnavailableHere": {
+    "message": "Переводчик здесь недоступен; он загрузится при первом щелчке на вкладке YouTube"
+  },
+  "cannotTranslatePair": {
+    "message": "Chrome не может переводить $1 → $2 на этом устройстве"
+  },
+  "preparing": {
+    "message": "Подготовка…"
+  },
+  "downloading": {
+    "message": "Загрузка… $1%"
+  },
+  "ready": {
+    "message": "Готово ($1 → $2): «$3» → «$4»"
+  },
+  "failed": {
+    "message": "Ошибка: $1"
+  },
+  "idle": {
+    "message": "Не активно"
+  },
+  "starting": {
+    "message": "Запускаю whisper-server…"
+  },
+  "runningLookahead": {
+    "message": "Работает (опережение)"
+  },
+  "runningLive": {
+    "message": "Работает (вживую)"
+  },
+  "runningDelayed": {
+    "message": "Работает — задержка ~$1 с"
+  },
+  "errorPrefix": {
+    "message": "Ошибка: $1"
+  },
+  "openYouTubeFirst": {
+    "message": "Сначала откройте видео на YouTube."
+  },
+  "startSubtitles": {
+    "message": "Включить субтитры"
+  },
+  "stopSubtitles": {
+    "message": "Выключить субтитры"
+  },
+  "settings": {
+    "message": "Настройки"
+  },
+  "autoStartLabel": {
+    "message": "автозапуск"
+  },
+  "preparingSubtitles": {
+    "message": "Готовлю субтитры…"
+  },
+  "reveal": {
+    "message": "показать"
+  },
+  "hide": {
+    "message": "скрыть"
+  },
+  "delayed": {
+    "message": "Субтитры задерживаются ~$1 с"
+  },
+  "translationNeedsChrome": {
+    "message": "⚠ Для перевода нужен Chrome 138 или новее"
+  },
+  "cannotTranslateDevice": {
+    "message": "⚠ Chrome не может переводить $1 → $2 на этом устройстве"
+  },
+  "clickToDownload": {
+    "message": "Щёлкните по видео один раз, чтобы скачать модель перевода"
+  },
+  "preparingTranslation": {
+    "message": "Готовлю перевод…"
+  },
+  "downloadingTranslation": {
+    "message": "Загрузка модели перевода… $1%"
+  },
+  "translationUnavailable": {
+    "message": "⚠ Перевод недоступен: $1"
+  }
+}
