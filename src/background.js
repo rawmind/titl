@@ -76,6 +76,7 @@ async function start(tabId) {
       language: config.language,
       translateTo: config.translateTo,
       showOriginal: config.showOriginal,
+      blurTranslation: config.blurTranslation,
     },
   });
   if (mode === 'lookahead') {
@@ -118,6 +119,13 @@ async function handle(msg, sender) {
       return start(msg.tabId);
     case 'stop':
       return stop();
+    case 'restart': {
+      const { tabId, status } = await getState();
+      if (status !== 'running' || tabId == null) return { restarted: false };
+      await stop();
+      await start(tabId);
+      return { restarted: true };
+    }
 
     case 'caption': {
       const { tabId } = await getState();
@@ -143,7 +151,7 @@ async function handle(msg, sender) {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.target !== 'background') return;
   handle(msg, sender).then(
-    () => sendResponse({ ok: true }),
+    (result) => sendResponse({ ok: true, ...result }),
     (err) => sendResponse({ ok: false, error: err.message }),
   );
   return true;

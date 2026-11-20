@@ -2,7 +2,7 @@ import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validat
 import { languageOptions, translationOptions } from './languages.js';
 
 const $ = (id) => document.getElementById(id);
-const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'showOriginal', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
+const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'showOriginal', 'blurTranslation', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
 
 function fill(settings) {
   for (const f of FIELDS) {
@@ -35,7 +35,10 @@ $('form').addEventListener('submit', async (e) => {
   const error = validateSettings(settings);
   if (error) return say($('message'), error, false);
   await chrome.storage.local.set({ settings });
-  say($('message'), 'Saved. Applies the next time subtitles are started.', true);
+  say($('message'), 'Saved.', true);
+  const res = await chrome.runtime.sendMessage({ target: 'background', type: 'restart' }).catch(() => null);
+  if (res?.restarted) say($('message'), 'Saved and applied to the running subtitles.', true);
+  else if (res && !res.ok) say($('message'), `Saved, but restarting failed: ${res.error}`, false);
 });
 
 $('reset').addEventListener('click', async () => {

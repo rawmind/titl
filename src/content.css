@@ -68,3 +68,28 @@
 .ct-badge.ct-visible {
   display: block;
 }
+
+.ct-overlay.ct-blurrable .ct-primary {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.ct-overlay.ct-blurred .ct-primary span {
+  filter: blur(0.32em);
+  user-select: none;
+}
+
+.ct-primary span {
+  transition: filter 0.15s ease;
+}
+
+.ct-hint {
+  display: none;
+  font-size: 0.5em;
+  color: #f5c518;
+  letter-spacing: 0.4px;
+}
+
+.ct-overlay.ct-blurred .ct-hint {
+  display: block;
+}

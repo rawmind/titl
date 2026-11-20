@@ -2,6 +2,22 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.10](https://github.com/rawmind/titl/releases/tag/v0.1.10) - 2026-11-20
+
+Practise listening with a hidden translation, and settings that apply immediately.
+
+### Added
+- **Blur the translation until you reveal it** (Options → Translation). Each new translated line starts blurred: press **V** or click the line to reveal it, and again to hide it. The original line stays readable. V does nothing while you type (e.g. in YouTube's search box) or with Ctrl/Cmd/Alt, and it isn't one of YouTube's own shortcuts. Clicking the line doesn't pause the video.
+
+### Changed
+- **Save applies settings right away.** If subtitles are running, Save restarts them with the new settings ("Saved and applied to the running subtitles"). If nothing is running, it just saves.
+
+### Upgrade
+```bash
+brew upgrade rawmind/tap/titl
+```
+Then reload the extension in `chrome://extensions`.
+
 ## [0.1.9](https://github.com/rawmind/titl/releases/tag/v0.1.9) - 2026-11-20
 
 Windows and Linux setup is now one command, and the local server no longer needs a fixed port.

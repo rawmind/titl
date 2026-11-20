@@ -8,6 +8,7 @@
   const TICK_MS = 100;
   const REPORT_MS = 500;
   const TRANSLATOR_SOURCE_FALLBACK = { sr: 'hr', bs: 'hr' };
+  const REVEAL_KEY = 'v';
 
   let root = null;
   let primaryEl = null;
@@ -32,6 +33,8 @@
   let waiting = false;
   let resumingByUs = false;
   let checkOnPlay = false;
+
+  let revealed = false;
 
   let translator = null;
   let translateChain = Promise.resolve();
@@ -68,7 +71,21 @@
       primary.className = 'ct-primary';
       primaryEl = document.createElement('span');
       primary.append(primaryEl);
-      box.append(secondary, primary);
+      primary.addEventListener('click', (e) => {
+        if (!root?.classList.contains('ct-blurrable')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        toggleReveal();
+      });
+      for (const type of ['pointerdown', 'mousedown', 'dblclick']) {
+        primary.addEventListener(type, (e) => {
+          if (root?.classList.contains('ct-blurrable')) e.stopPropagation();
+        });
+      }
+      const hint = document.createElement('div');
+      hint.className = 'ct-hint';
+      hint.textContent = `${REVEAL_KEY.toUpperCase()} · reveal`;
+      box.append(secondary, primary, hint);
       badgeEl = document.createElement('div');
       badgeEl.className = 'ct-badge';
       root.append(badgeEl, box);
@@ -85,12 +102,36 @@
     return root;
   }
 
-  function setText(primary, secondary = '') {
+  function setText(primary, secondary = '', isTranslation = false) {
     if (!ensureOverlay()) return;
-    if (primaryEl.textContent !== primary) primaryEl.textContent = primary;
+    if (primaryEl.textContent !== primary) {
+      primaryEl.textContent = primary;
+      revealed = false;
+    }
     if (secondaryEl.textContent !== secondary) secondaryEl.textContent = secondary;
     root.classList.toggle('ct-visible', Boolean(primary || secondary));
     root.classList.toggle('ct-dual', Boolean(secondary));
+    const blurrable = Boolean(options?.blurTranslation && isTranslation && primary);
+    root.classList.toggle('ct-blurrable', blurrable);
+    root.classList.toggle('ct-blurred', blurrable && !revealed);
+  }
+
+  function toggleReveal() {
+    if (!root?.classList.contains('ct-blurrable')) return false;
+    revealed = !revealed;
+    root.classList.toggle('ct-blurred', !revealed);
+    return true;
+  }
+
+  function onKeyDown(e) {
+    if (!options?.blurTranslation || e.key.toLowerCase() !== REVEAL_KEY) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    const target = e.target;
+    if (target?.isContentEditable || /^(input|textarea|select)$/i.test(target?.tagName ?? '')) return;
+    if (toggleReveal()) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }
 
   function updateBadge() {
@@ -191,7 +232,7 @@
 
   function renderLive() {
     if (translator && liveTranslation) {
-      setText(liveTranslation, options.showOriginal ? liveOriginal : '');
+      setText(liveTranslation, options.showOriginal ? liveOriginal : '', true);
     } else {
       setText(liveOriginal);
     }
@@ -220,7 +261,7 @@
   function renderCue(cue) {
     if (!cue) return setText('');
     if (translator && cue.translation) {
-      return setText(cue.translation, options.showOriginal ? cue.text : '');
+      return setText(cue.translation, options.showOriginal ? cue.text : '', true);
     }
     setText(cue.text);
   }
@@ -344,6 +385,8 @@
     stop();
     mode = newMode;
     options = opts;
+    revealed = false;
+    window.addEventListener('keydown', onKeyDown, true);
     ensureOverlay();
     setupTranslator().catch((err) => setTranslationNotice(`⚠ Translation unavailable: ${err.message}`));
     if (mode !== 'lookahead') return;
@@ -352,6 +395,7 @@
   }
 
   function stop() {
+    window.removeEventListener('keydown', onKeyDown, true);
     clearInterval(timer);
     clearTimeout(liveClearTimer);
     removeGestureListeners?.();

@@ -5,6 +5,7 @@ export const DEFAULTS = {
   script: 'latin',
   translateTo: '',
   showOriginal: true,
+  blurTranslation: false,
   skipAds: false,
   mode: 'lookahead',
   showEarlySec: 0.3,

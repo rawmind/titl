@@ -136,6 +136,7 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Serbian script | Latin | Latin, Cyrillic, or as returned (may mix). Only used for `sr`. |
 | Translate to | Off | Target language for Chrome's on-device translator. |
 | Show the original above the translation | on | Two-line display: original small on top, translation below. |
+| Blur the translation until you reveal it | off | Each new translated line starts blurred; press **V** or click it to reveal. V isn't a YouTube shortcut and is ignored while typing. |
 | Skip ads in the hidden tab | off | Lookahead: click YouTube's "Skip ad" in the muted tab when offered. Otherwise it waits the ad out. |
 | Live window / step | 6 s / 4 s | Live mode chunking (2 s overlap). |
 | Max window | 12 s | Largest chunk when transcription falls behind. |
