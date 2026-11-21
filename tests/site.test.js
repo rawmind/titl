@@ -6,11 +6,24 @@ import { LANGUAGES, loadStrings, render } from '../site/build.mjs';
 const template = readFileSync(new URL('../site/template.html', import.meta.url), 'utf8');
 const strings = loadStrings();
 
-test('website has English and Russian with the same strings', () => {
-  assert.deepEqual(LANGUAGES.map((l) => l.slug), ['en', 'ru']);
-  assert.deepEqual(Object.keys(strings).sort(), ['en', 'ru']);
-  assert.deepEqual(Object.keys(strings.ru).sort(), Object.keys(strings.en).sort());
-  for (const [key, value] of Object.entries(strings.ru)) assert.ok(value.trim(), `ru.${key} is empty`);
+const tags = (text) => [...text.matchAll(/<\/?(\w+)|\{\w+\}/g)].map((m) => m[0]).sort().join(' ');
+
+test('website has the extension\'s 12 languages with the same strings', () => {
+  assert.equal(LANGUAGES.length, 12);
+  assert.deepEqual(Object.keys(strings).sort(), LANGUAGES.map((l) => l.slug).sort());
+  for (const lang of LANGUAGES) {
+    const table = strings[lang.slug];
+    assert.deepEqual(Object.keys(table).sort(), Object.keys(strings.en).sort(), lang.slug);
+    for (const [key, value] of Object.entries(table)) {
+      assert.ok(value.trim(), `${lang.slug}.${key} is empty`);
+      assert.equal(tags(value), tags(strings.en[key]), `${lang.slug}.${key} has different markup`);
+    }
+  }
+});
+
+test('Arabic renders right to left', () => {
+  const html = render(template, LANGUAGES.find((l) => l.slug === 'ar'), strings.ar);
+  assert.match(html, /<html lang="ar" dir="rtl">/);
 });
 
 test('every page renders with no placeholder left', () => {

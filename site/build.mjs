@@ -7,13 +7,24 @@ const REPO = 'https://github.com/rawmind/titl';
 
 export const LANGUAGES = [
   { slug: 'en', htmlLang: 'en', ogLocale: 'en_US', name: 'English', match: ['en'] },
+  { slug: 'zh', htmlLang: 'zh-CN', ogLocale: 'zh_CN', name: '中文', match: ['zh'] },
+  { slug: 'hi', htmlLang: 'hi', ogLocale: 'hi_IN', name: 'हिन्दी', match: ['hi'] },
+  { slug: 'es', htmlLang: 'es', ogLocale: 'es_ES', name: 'Español', match: ['es'] },
+  { slug: 'ar', htmlLang: 'ar', ogLocale: 'ar_AR', name: 'العربية', match: ['ar'], rtl: true },
+  { slug: 'fr', htmlLang: 'fr', ogLocale: 'fr_FR', name: 'Français', match: ['fr'] },
+  { slug: 'bn', htmlLang: 'bn', ogLocale: 'bn_BD', name: 'বাংলা', match: ['bn'] },
+  { slug: 'pt', htmlLang: 'pt-BR', ogLocale: 'pt_BR', name: 'Português', match: ['pt'] },
   { slug: 'ru', htmlLang: 'ru', ogLocale: 'ru_RU', name: 'Русский', match: ['ru', 'be', 'kk'] },
+  { slug: 'id', htmlLang: 'id', ogLocale: 'id_ID', name: 'Bahasa Indonesia', match: ['id', 'in', 'ms'] },
+  { slug: 'uk', htmlLang: 'uk', ogLocale: 'uk_UA', name: 'Українська', match: ['uk'] },
+  { slug: 'sr', htmlLang: 'sr-Latn', ogLocale: 'sr_RS', name: 'Srpski', match: ['sr', 'hr', 'bs', 'sh', 'cnr'] },
 ];
 
 const LINKS = {
   store: 'https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme',
   github: REPO,
   release: `${REPO}/releases/latest`,
+  winExe: `${REPO}/releases/latest/download/titl-windows-x64.exe`,
   guide: `${REPO}#install`,
   changelog: `${REPO}/blob/master/CHANGELOG.md`,
   privacy: `${REPO}/blob/master/PRIVACY.md`,

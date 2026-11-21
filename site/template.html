@@ -27,7 +27,7 @@
       <a href="#features">{{navFeatures}}</a>
       <a href="#install">{{navInstall}}</a>
       <a href="#faq">{{navFaq}}</a>
-      <a href="{{github}}">GitHub</a>
+      <a href="{{github}}">★ GitHub</a>
       <select id="lang" class="lang" aria-label="{{language}}">
 {{languageOptions}}
       </select>
@@ -112,9 +112,10 @@
             <pre dir="ltr"><code>brew install rawmind/tap/titl &amp;&amp; titl install</code></pre>
           </div>
           <div class="panel" data-os="win" hidden>
-            <p class="small">{{winPs}}</p>
+            <a class="button primary download" href="{{winExe}}">{{winDownload}}</a>
+            <p>{{winRun}}</p>
+            <p class="small">{{winOr}}</p>
             <pre dir="ltr"><code>irm https://github.com/rawmind/titl/releases/latest/download/install.ps1 | iex</code></pre>
-            <p class="small">{{winAlt}}</p>
           </div>
           <div class="panel" data-os="linux" hidden>
             <p class="small">{{linuxText}}</p>
@@ -134,8 +135,13 @@
       <details><summary>{{q1}}</summary><p>{{a1}}</p></details>
       <details><summary>{{q2}}</summary><p>{{a2}}</p></details>
       <details><summary>{{q3}}</summary><p>{{a3}}</p></details>
+      <details><summary>{{q6}}</summary><p>{{a6}}</p></details>
       <details><summary>{{q4}}</summary><p>{{a4}}</p></details>
       <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
+    </section>
+    <section class="star-cta">
+      <p>{{starText}}</p>
+      <a class="button" href="{{github}}"><span class="star" aria-hidden="true">★</span> {{starCta}}</a>
     </section>
   </main>
 

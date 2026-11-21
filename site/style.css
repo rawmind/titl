@@ -236,7 +236,7 @@ figcaption {
 
 .grid ul {
   margin: 0;
-  padding-left: 18px;
+  padding-inline-start: 18px;
   color: #d6d9de;
   font-size: 15.5px;
 }
@@ -270,14 +270,15 @@ figcaption {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 22px 22px 22px 72px;
+  padding: 22px;
+  padding-inline-start: 72px;
   min-width: 0;
 }
 
 .steps > li::before {
   content: counter(step);
   position: absolute;
-  left: 22px;
+  inset-inline-start: 22px;
   top: 20px;
   width: 34px;
   height: 34px;
@@ -375,10 +376,11 @@ footer p {
 
   .steps > li {
     padding: 64px 18px 18px;
+    padding-inline-start: 18px;
   }
 
   .steps > li::before {
-    left: 18px;
+    inset-inline-start: 18px;
     top: 18px;
   }
 }
@@ -392,4 +394,23 @@ footer p {
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
+}
+
+.download {
+  margin: 4px 0 12px;
+}
+
+.star-cta {
+  text-align: center;
+  padding-top: 64px;
+}
+
+.star-cta p {
+  font-size: 19px;
+  color: #d6d9de;
+  margin: 0 0 16px;
+}
+
+.star {
+  color: var(--accent);
 }
