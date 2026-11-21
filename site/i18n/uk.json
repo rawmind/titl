@@ -77,5 +77,9 @@
   "privacyLabel": "Конфіденційність",
   "securityLabel": "Безпека",
   "support": "Підтримати на Ko-fi",
-  "footerFree": "Titl безкоштовний і має відкритий код за ліцензією MIT."
+  "footerFree": "Titl безкоштовний і має відкритий код за ліцензією MIT.",
+  "consentText": "Цей сайт використовує Google Analytics для підрахунку відвідувань, лише якщо ви погоджуєтеся. Саме розширення Titl ніколи за вами не стежить.",
+  "consentAccept": "Дозволити",
+  "consentDecline": "Відхилити",
+  "cookieSettings": "Налаштування cookie"
 }

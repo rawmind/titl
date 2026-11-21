@@ -77,5 +77,9 @@
   "privacyLabel": "الخصوصية",
   "securityLabel": "الأمان",
   "support": "ادعمه على Ko-fi",
-  "footerFree": "Titl مجاني ومفتوح المصدر بموجب ترخيص MIT."
+  "footerFree": "Titl مجاني ومفتوح المصدر بموجب ترخيص MIT.",
+  "consentText": "يستخدم هذا الموقع Google Analytics لعدّ الزيارات، فقط إذا وافقت. أما إضافة Titl نفسها فلا تتتبعك أبدًا.",
+  "consentAccept": "السماح",
+  "consentDecline": "الرفض",
+  "cookieSettings": "إعدادات ملفات تعريف الارتباط"
 }

@@ -77,5 +77,9 @@
   "privacyLabel": "গোপনীয়তা",
   "securityLabel": "নিরাপত্তা",
   "support": "Ko-fi-তে সমর্থন করুন",
-  "footerFree": "Titl বিনামূল্যে ও MIT লাইসেন্সের অধীনে ওপেন সোর্স।"
+  "footerFree": "Titl বিনামূল্যে ও MIT লাইসেন্সের অধীনে ওপেন সোর্স।",
+  "consentText": "এই সাইটটি আপনি সম্মতি দিলে তবেই ভিজিট গোনার জন্য Google Analytics ব্যবহার করে। Titl এক্সটেনশন নিজে কখনো আপনাকে ট্র্যাক করে না।",
+  "consentAccept": "অনুমতি দিন",
+  "consentDecline": "প্রত্যাখ্যান করুন",
+  "cookieSettings": "কুকি সেটিংস"
 }

@@ -77,5 +77,9 @@
   "privacyLabel": "Confidentialité",
   "securityLabel": "Sécurité",
   "support": "Soutenir sur Ko-fi",
-  "footerFree": "Titl est gratuit et open source, sous licence MIT."
+  "footerFree": "Titl est gratuit et open source, sous licence MIT.",
+  "consentText": "Ce site utilise Google Analytics pour compter les visites, uniquement si vous l'acceptez. L'extension Titl elle-même ne vous suit jamais.",
+  "consentAccept": "Autoriser",
+  "consentDecline": "Refuser",
+  "cookieSettings": "Paramètres des cookies"
 }

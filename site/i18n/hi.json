@@ -77,5 +77,9 @@
   "privacyLabel": "गोपनीयता",
   "securityLabel": "सुरक्षा",
   "support": "Ko-fi पर समर्थन करें",
-  "footerFree": "Titl MIT लाइसेंस के तहत मुफ़्त और ओपन सोर्स है।"
+  "footerFree": "Titl MIT लाइसेंस के तहत मुफ़्त और ओपन सोर्स है।",
+  "consentText": "यह साइट आपकी सहमति होने पर ही विज़िट गिनने के लिए Google Analytics का उपयोग करती है। Titl एक्सटेंशन खुद आपको कभी ट्रैक नहीं करता।",
+  "consentAccept": "अनुमति दें",
+  "consentDecline": "अस्वीकार करें",
+  "cookieSettings": "कुकी सेटिंग्स"
 }

@@ -30,6 +30,10 @@ As with any download, these sites see your IP address and which file is requeste
 
 Titl works on YouTube pages that you open. In its default "lookahead" mode, it opens a second, muted copy of the same video in a collapsed tab, so subtitles can be prepared before the speech. That tab is an ordinary YouTube page, subject to YouTube's own [terms](https://www.youtube.com/t/terms) and Google's [privacy policy](https://policies.google.com/privacy). Titl does not collect anything from it beyond the audio described above.
 
+## Website
+
+This policy covers the Titl extension and helper. The project website, https://rawmind.github.io/titl/, uses Google Analytics to count visits only after you click **Allow** in its banner; until then nothing is loaded from Google. You can change your choice under **Cookie settings** at the bottom of the site. Google Analytics is subject to Google's [privacy policy](https://policies.google.com/privacy).
+
 ## Contact
 
 Questions or concerns: email [titl@devs.team](mailto:titl@devs.team) or open an issue at https://github.com/rawmind/titl/issues.

@@ -77,5 +77,9 @@
   "privacyLabel": "Privasi",
   "securityLabel": "Keamanan",
   "support": "Dukung di Ko-fi",
-  "footerFree": "Titl gratis dan open source dengan lisensi MIT."
+  "footerFree": "Titl gratis dan open source dengan lisensi MIT.",
+  "consentText": "Situs ini memakai Google Analytics untuk menghitung kunjungan, hanya jika Anda setuju. Ekstensi Titl sendiri tidak pernah melacak Anda.",
+  "consentAccept": "Izinkan",
+  "consentDecline": "Tolak",
+  "cookieSettings": "Pengaturan cookie"
 }

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const SITE = 'https://rawmind.github.io/titl/';
 const REPO = 'https://github.com/rawmind/titl';
+const GA_ID = 'G-EDP0HX0XPS';
 
 export const LANGUAGES = [
   { slug: 'en', htmlLang: 'en', ogLocale: 'en_US', name: 'English', match: ['en'] },
@@ -68,6 +69,7 @@ export function render(template, lang, strings) {
     slug: lang.slug,
     url: urlFor(lang.slug),
     site: SITE,
+    gaId: GA_ID,
     base,
     alternates,
     languageLinks,

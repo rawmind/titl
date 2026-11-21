@@ -77,5 +77,9 @@
   "privacyLabel": "隐私",
   "securityLabel": "安全",
   "support": "在 Ko-fi 上支持",
-  "footerFree": "Titl 免费开源，采用 MIT 许可证。"
+  "footerFree": "Titl 免费开源，采用 MIT 许可证。",
+  "consentText": "本网站仅在你同意后使用 Google Analytics 统计访问量。Titl 扩展本身从不跟踪你。",
+  "consentAccept": "允许",
+  "consentDecline": "拒绝",
+  "cookieSettings": "Cookie 设置"
 }

@@ -169,12 +169,59 @@
       <a href="{{changelog}}">{{changelogLabel}}</a> ·
       <a href="{{privacy}}">{{privacyLabel}}</a> ·
       <a href="{{security}}">{{securityLabel}}</a> ·
-      <a href="{{kofi}}"><span class="heart">♥</span> {{support}}</a>
+      <a href="{{kofi}}"><span class="heart">♥</span> {{support}}</a> ·
+      <button type="button" class="link" id="cookie-settings">{{cookieSettings}}</button>
     </p>
     <p class="small">{{footerFree}}</p>
   </footer>
 
+  <div class="consent" id="consent" role="region" aria-label="{{cookieSettings}}" hidden>
+    <p>{{consentText}}</p>
+    <div class="consent-actions">
+      <button type="button" class="button primary" data-consent="yes">{{consentAccept}}</button>
+      <button type="button" class="button" data-consent="no">{{consentDecline}}</button>
+    </div>
+  </div>
+
   <script>
+    const GA_ID = '{{gaId}}';
+    const CONSENT_KEY = 'titl-consent';
+    const banner = document.getElementById('consent');
+    const readConsent = () => {
+      try {
+        return localStorage.getItem(CONSENT_KEY);
+      } catch {
+        return null;
+      }
+    };
+    const loadAnalytics = () => {
+      if (window.gtag) return;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function gtag() {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag('js', new Date());
+      window.gtag('config', GA_ID);
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+      document.head.append(script);
+    };
+    for (const button of banner.querySelectorAll('[data-consent]')) {
+      button.addEventListener('click', () => {
+        try {
+          localStorage.setItem(CONSENT_KEY, button.dataset.consent);
+        } catch {}
+        banner.hidden = true;
+        if (button.dataset.consent === 'yes') loadAnalytics();
+        else if (window.gtag) location.reload();
+      });
+    }
+    document.getElementById('cookie-settings').addEventListener('click', () => {
+      banner.hidden = false;
+    });
+    if (readConsent() === 'yes') loadAnalytics();
+    else if (readConsent() !== 'no') banner.hidden = false;
     for (const link of document.querySelectorAll('.lang a')) {
       link.addEventListener('click', () => {
         try {

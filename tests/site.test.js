@@ -60,3 +60,10 @@ test('install tabs are wired to their panels and the redirect runs in the head',
   }
   assert.ok(html.indexOf('location.replace') < html.indexOf('</head>'));
 });
+
+test('Google Analytics loads only after consent', () => {
+  const html = render(template, LANGUAGES[0], strings.en);
+  assert.doesNotMatch(html, /<script[^>]+googletagmanager/);
+  assert.match(html, /const GA_ID = 'G-EDP0HX0XPS';/);
+  assert.match(html, /if \(readConsent\(\) === 'yes'\) loadAnalytics\(\);/);
+});

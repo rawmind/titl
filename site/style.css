@@ -460,3 +460,51 @@ footer p {
 :lang(zh) h2 {
   word-break: keep-all;
 }
+
+.link {
+  font: inherit;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.consent {
+  position: fixed;
+  inset-inline: 16px;
+  bottom: 16px;
+  z-index: 30;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.consent[hidden] {
+  display: none;
+}
+
+.consent p {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: 15px;
+  color: #d6d9de;
+}
+
+.consent-actions {
+  display: flex;
+  gap: 10px;
+}
