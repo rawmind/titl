@@ -2,7 +2,7 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
-## Unreleased
+## [0.1.16](https://github.com/rawmind/titl/releases/tag/v0.1.16) - 2026-11-22
 
 ### Added
 - **Translate with a local AI model.** Options → Translator → Local LLM uses any OpenAI-compatible server on your computer (llama-server, Ollama, LM Studio). Each line is translated with the lines around it, so sentences split across lines come out right and Serbian is translated as Serbian. Only 127.0.0.1 and localhost are accepted. See the README for models, speed and memory.
