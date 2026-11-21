@@ -2,6 +2,17 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Added
+- **Translate with a local AI model.** Options → Translator → Local LLM uses any OpenAI-compatible server on your computer (llama-server, Ollama, LM Studio). Each line is translated with the lines around it, so sentences split across lines come out right and Serbian is translated as Serbian. Only 127.0.0.1 and localhost are accepted. See the README for models, speed and memory.
+- **Subtitle size** in Options (50–300%).
+
+### Changed
+- **Subtitles are 25% larger by default.** The new Subtitle size setting starts at 125%; set it to 100% for the previous size.
+- In lookahead mode, the line nearest the playhead is translated first, and pause until ready also waits for the translation, so lines don't show untranslated. Pressing play skips the wait for that line.
+- Larger text on the Options page.
+
 ## [0.1.15](https://github.com/rawmind/titl/releases/tag/v0.1.15) - 2026-11-20
 
 ### Added

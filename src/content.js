@@ -44,6 +44,7 @@
   let translator = null;
   let translateChain = Promise.resolve();
   let cueJob = null;
+  let playedThrough = null;
   let removeGestureListeners = null;
 
   const findPlayer = () => document.querySelector('#movie_player') ?? document.querySelector('.html5-video-player');
@@ -181,7 +182,9 @@
 
   const llmTranslator = {
     async translate(text, context = {}) {
+      const opts = options;
       const res = await chrome.runtime.sendMessage({ target: 'background', type: 'llm-translate', text, ...context });
+      if (options !== opts) throw new Error('stopped');
       if (!res?.ok) {
         setTranslationNotice(t('translationUnavailable', res?.error ?? 'no response'));
         throw new Error(res?.error);
@@ -242,7 +245,7 @@
 
   function translate(text, context = () => ({})) {
     const active = translator;
-    const result = translateChain.then(() => active.translate(text, context()));
+    const result = translateChain.then(() => (active === llmTranslator ? active.translate(text, context()) : active.translate(text)));
     translateChain = result.catch(() => {});
     return result;
   }
@@ -334,6 +337,8 @@
     cues = [];
     coverage = [];
     checkOnPlay = true;
+    cueJob = playedThrough = null;
+    translateChain = Promise.resolve();
   }
 
   function coveredAhead(t) {
@@ -403,6 +408,7 @@
         resumingByUs = false;
       } else if (waiting) {
         waiting = false;
+        playedThrough = cueAt(video.currentTime + options.showEarlySec);
         updateBadge();
       }
     });
@@ -437,7 +443,7 @@
     const cue = isAd() ? null : cueAt(video.currentTime + options.showEarlySec);
     renderCue(cue);
     translateCues();
-    if (cue && translator && !waiting && !video.paused && !translationReady(cue)) pauseUntilReady(video);
+    if (cue && translator && !waiting && !video.paused && cue !== playedThrough && !translationReady(cue)) pauseUntilReady(video);
 
     if (Date.now() - lastReport >= REPORT_MS) {
       lastReport = Date.now();
@@ -473,7 +479,8 @@
     removeGestureListeners?.();
     translator?.destroy();
     if (waiting) getVideo()?.play().catch(() => {});
-    timer = options = mode = translator = cueJob = null;
+    timer = options = mode = translator = cueJob = playedThrough = null;
+    translateChain = Promise.resolve();
     waiting = false;
     liveOriginal = liveTranslation = statusText = translationNotice = '';
     liveHistory = [];

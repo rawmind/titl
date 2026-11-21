@@ -190,8 +190,6 @@ Use the source code, not the `titl-x.y.z.zip` file attached to releases. That fi
 | `titl update` | Windows: download the newest helper, check it against the release's `SHA256SUMS`, and replace the installed copy |
 | `titl uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
 
-The helper was called `chrome-transcriber-helper` before 0.1.7. Homebrew still installs that name as an alias.
-
 Per-user files (config, downloaded models, `server.log`, and on Windows the daily update check in `update.json`) live in:
 - macOS: `~/Library/Application Support/chrome-transcriber/`
 - Linux: `~/.local/share/chrome-transcriber/`

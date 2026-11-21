@@ -72,3 +72,29 @@ test('LLM settings are validated', () => {
   assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'llm', llmUrl: 'https://api.example.com/v1' }), /Model API URL/);
   assert.match(validateSettings({ ...DEFAULTS, llmModel: 'bad model' }), /Model name/);
 });
+
+test('chat URL keeps a query string out of the path', () => {
+  assert.equal(chatUrl('http://127.0.0.1:8081/v1?key=1'), 'http://127.0.0.1:8081/v1/chat/completions?key=1');
+});
+
+test('cut-off reasoning and inner quotes are handled', () => {
+  assert.equal(cleanTranslation('<think>The user wants a translation of'), '');
+  assert.equal(cleanTranslation('"Come here," she said. "Now."'), '"Come here," she said. "Now."');
+});
+
+test('requests never go to a non-local model API', async (t) => {
+  const fetch = t.mock.method(globalThis, 'fetch', async () => new Response('{}'));
+  await assert.rejects(translateWithLlm({ ...DEFAULTS, translateTo: 'en', llmUrl: 'https://api.example.com/v1' }, { text: 'x' }), /must be http:\/\/127\.0\.0\.1/);
+  assert.equal(fetch.mock.callCount(), 0);
+});
+
+test('a slow model API is reported as a timeout, not as unreachable', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => {
+    throw new DOMException('The operation timed out.', 'TimeoutError');
+  });
+  await assert.rejects(translateWithLlm({ ...DEFAULTS, translateTo: 'en' }, { text: 'x' }), /didn't answer within 30 s/);
+});
+
+test('a non-local model API URL is refused whichever translator is chosen', () => {
+  assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'chrome', llmUrl: 'https://api.example.com/v1' }), /Model API URL/);
+});

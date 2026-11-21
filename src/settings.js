@@ -46,7 +46,7 @@ export function validateSettings(s) {
   if (!/^([a-z]{2,3}(-[A-Za-z]{2,4})?)?$/.test(s.translateTo)) return 'Unknown translation language';
   if (!(s.subtitleSize >= 50 && s.subtitleSize <= 300)) return 'Subtitle size must be between 50% and 300%';
   if (!['chrome', 'llm'].includes(s.translationEngine)) return 'Unknown translator';
-  if (s.translationEngine === 'llm' && !isLocalUrl(s.llmUrl)) return 'Model API URL must be http://127.0.0.1 or http://localhost';
+  if (!isLocalUrl(s.llmUrl)) return 'Model API URL must be http://127.0.0.1 or http://localhost';
   if (!/^[\w.:/@-]*$/.test(s.llmModel)) return 'Model name may only contain letters, digits and . : / @ - _';
   if (!(s.minLeadSec >= 0 && s.maxLeadSec > s.minLeadSec + s.lookaheadWindowSec)) {
     return 'Max lead must exceed min lead plus the lookahead window';

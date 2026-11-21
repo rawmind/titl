@@ -1,11 +1,13 @@
 import { languageName } from './languages.js';
+import { isLocalUrl } from './settings.js';
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
 export function chatUrl(base) {
-  const url = base.trim().replace(/\/+$/, '');
-  if (/\/chat\/completions$/.test(url)) return url;
-  return /\/v1$/.test(url) ? `${url}/chat/completions` : `${url}/v1/chat/completions`;
+  const url = new URL(base.trim());
+  const path = url.pathname.replace(/\/+$/, '');
+  if (!/\/chat\/completions$/.test(path)) url.pathname = /\/v1$/.test(path) ? `${path}/chat/completions` : `${path}/v1/chat/completions`;
+  return url.href;
 }
 
 export function buildMessages({ text, before = [], after = [], source, target }) {
@@ -36,14 +38,16 @@ export function buildMessages({ text, before = [], after = [], source, target })
 export function cleanTranslation(content) {
   let text = String(content ?? '')
     .replace(/<think>[\s\S]*?<\/think>/g, '')
+    .replace(/<think>[\s\S]*$/, '')
     .replace(/\s+/g, ' ')
     .trim();
-  const quoted = text.match(/^["“«„](.*)["”»“]$/);
+  const quoted = text.match(/^["“«„]([^"“”«»„]*)["”»“]$/);
   if (quoted) text = quoted[1].trim();
   return text;
 }
 
 export async function translateWithLlm(config, { text, before, after }) {
+  if (!isLocalUrl(config.llmUrl)) throw new Error('Model API URL must be http://127.0.0.1 or http://localhost');
   const url = chatUrl(config.llmUrl);
   const body = {
     messages: buildMessages({ text, before, after, source: config.language, target: config.translateTo }),
@@ -60,7 +64,8 @@ export async function translateWithLlm(config, { text, before, after }) {
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-  } catch {
+  } catch (err) {
+    if (err?.name === 'TimeoutError') throw new Error(`The model API at ${url} didn't answer within ${REQUEST_TIMEOUT_MS / 1000} s`);
     throw new Error(`Cannot reach the model API at ${url}`);
   }
   if (!res.ok) {
