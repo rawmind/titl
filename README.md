@@ -271,16 +271,18 @@ Lines are translated one at a time, nearest to the playhead first. In lookahead 
 
 #### Which model
 
-Measured on 45 lines of a Serbian TEDx talk transcribed by `large-v3-turbo`, translated to English on an Apple M4 Max with the llama-server flags above. "Clearly wrong" is a manual count of lines whose meaning is lost or invented.
+Measured on 45 lines of a Serbian TEDx talk transcribed by `large-v3-turbo`, translated to English on an Apple M4 Max with the llama-server flags above, and in Chrome 157 for Chrome's translator. "Clearly wrong" is a manual count of lines whose meaning is lost or invented.
 
 | Model | Download | Memory in use | Time per line (median / max) | Clearly wrong |
 |---|---|---|---|---|
 | [Gemma 3 12B](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF) (Q4_K_M) | 7.3 GB | 11.5 GB | 0.64 s / 0.82 s | ~3–4 of 45 |
 | [Gemma 3 4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF) (Q4_K_M) | 2.5 GB | 4.9 GB | 0.20 s / 0.43 s | ~7 of 45 |
 | [NLLB-200 distilled 600M](https://huggingface.co/facebook/nllb-200-distilled-600M) (int8, CTranslate2) | 0.6 GB | 1.5 GB | 0.27 s / 3.0 s | ~10 of 45 |
+| Chrome's built-in translator (Serbian sent as Croatian) | one language pack, kept by Chrome | inside Chrome, not measured | 0.003 s / 0.03 s | ~8 of 45 |
 
 - **Gemma 3 12B** is the one to use if you have 16 GB of memory or more. It gets split sentences and context right.
 - **Gemma 3 4B** fits on smaller machines but makes more meaning errors in Serbian.
+- **Chrome's built-in translator** is the default and by far the fastest, and needs no setup. It translates each line on its own and only knows Croatian, so it trips on lines cut mid-sentence ("I'm in order to find a tool…") and misheard words ("in Slavia").
 - **NLLB** is small and fast, but it translates each line on its own, without context. llama.cpp can't run it, it needs a separate server, and its license (CC-BY-NC 4.0) allows non-commercial use only.
 
 Memory in use is the server's resident memory: the model weights plus the cache. Gemma 3 4B was measured with `-c 8192`; `-c 2048` uses a little less.
@@ -350,44 +352,6 @@ popup → background (tabCapture stream id) → offscreen document
 ### Auto-start helper
 
 Chrome extensions can't run native programs, so `titl` (Rust, in `helper/`) is registered as a Chrome [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) host. On Start, the extension asks it to launch `whisper-server`. The server stops when that connection closes, which in practice means when Chrome quits. On Windows the popup also asks it, once a day, whether a newer helper is out ([Updates](#windows)).
-
-## Project layout
-
-```
-manifest.json
-src/
-  background.js      service worker: start/stop, routing, server auto-start
-  lookahead.js       hidden-tab control and timeline transcription
-  scout.js           runs in the hidden tab: audio capture, play/seek commands
-  content.js/.css    runs in your tab: subtitle overlay, translation, sync, pause-until-ready
-  offscreen.js       live mode: tab capture and chunked transcription
-  capture-worklet.js live mode: PCM capture at 16 kHz
-  whisper.js         whisper-server client
-  text.js            dedup, Serbian transliteration, cleanup, cue splitting
-  audio.js           ring buffer, RMS, WAV encoding
-  coverage.js        transcribed time ranges
-  llm.js             local LLM translation: prompt with context, OpenAI-compatible request
-  settings.js        defaults and validation
-  popup.*, options.* UI
-helper/              Rust: installer and native messaging host
-  src/install.rs     find server/model, self-copy, browser registration
-  src/extension.rs   locate the extension folder, detect it in browser profiles
-  src/host.rs        native messaging protocol, whisper-server process
-  src/model.rs       model download from Hugging Face
-  src/whisper_cpp.rs prebuilt whisper.cpp download (Windows, Linux)
-  src/paths.rs       per-OS folders and browser registration locations
-  src/config.rs      the helper's config.json
-  src/registry.rs    Windows registry access
-  src/update.rs      Windows self-update from GitHub releases
-  build.rs, windows/ Windows version resource, icon and manifest
-icons/               extension icons (SVG sources and PNGs)
-store/               Chrome Web Store promo tile and screenshots
-scripts/package.mjs  builds the store zip
-scripts/locales.py   generates _locales/ from one translation table
-scripts/install.ps1  Windows one-line installer, attached to each release
-scripts/*-smoke.py   end-to-end checks of the helper, run in CI
-tests/               node:test unit tests
-```
 
 ## Development
 
