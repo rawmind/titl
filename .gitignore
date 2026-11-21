@@ -6,6 +6,7 @@ node_modules/
 
 helper/target/
 dist/
+_site/
 store/listing.md
 store/description/
 __pycache__/

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="{{htmlLang}}" dir="{{dir}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <meta name="description" content="{{metaDesc}}">
+  <link rel="canonical" href="{{url}}">
+{{alternates}}
+  <link rel="icon" type="image/png" sizes="32x32" href="{{base}}icons/icon32.png">
+  <link rel="icon" type="image/svg+xml" href="{{base}}icons/icon.svg">
+  <meta property="og:title" content="{{title}}">
+  <meta property="og:description" content="{{metaDesc}}">
+  <meta property="og:image" content="{{site}}store/screenshot-1-subtitles.png">
+  <meta property="og:url" content="{{url}}">
+  <meta property="og:locale" content="{{ogLocale}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="{{base}}style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#top">
+      <img src="{{base}}icons/icon48.png" width="32" height="32" alt="">
+      <span>Titl</span>
+    </a>
+    <nav>
+      <a href="#features">{{navFeatures}}</a>
+      <a href="#install">{{navInstall}}</a>
+      <a href="#faq">{{navFaq}}</a>
+      <a href="{{github}}">GitHub</a>
+      <select id="lang" class="lang" aria-label="{{language}}">
+{{languageOptions}}
+      </select>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <h1>{{heroTitle}}</h1>
+      <p class="lead">{{heroLead}}</p>
+      <div class="cta-row">
+        <a class="button primary" href="{{store}}">{{ctaAdd}}</a>
+        <a class="button" href="#install">{{ctaHelper}}</a>
+      </div>
+      <p class="small">{{heroBrowsers}}</p>
+      <figure class="shot">
+        <img src="{{base}}store/screenshot-1-subtitles.png" width="1280" height="800" alt="{{shotAlt}}">
+        <figcaption>{{shotCaption}}</figcaption>
+      </figure>
+    </section>
+
+    <section class="why">
+      <h2>{{whyTitle}}</h2>
+      <p>{{whyText}}</p>
+    </section>
+
+    <section id="features">
+      <h2>{{featuresTitle}}</h2>
+      <div class="grid">
+        <article>
+          <h3><span aria-hidden="true">⏱️</span> {{f1Title}}</h3>
+          <ul><li>{{f1a}}</li><li>{{f1b}}</li><li>{{f1c}}</li></ul>
+        </article>
+        <article>
+          <h3><span aria-hidden="true">🔒</span> {{f2Title}}</h3>
+          <ul><li>{{f2a}}</li><li>{{f2b}}</li><li>{{f2c}}</li></ul>
+        </article>
+        <article>
+          <h3><span aria-hidden="true">🌍</span> {{f3Title}}</h3>
+          <ul><li>{{f3a}}</li><li>{{f3b}}</li><li>{{f3c}}</li></ul>
+        </article>
+        <article>
+          <h3><span aria-hidden="true">🎯</span> {{f4Title}}</h3>
+          <ul><li>{{f4a}}</li><li>{{f4b}}</li><li>{{f4c}}</li></ul>
+        </article>
+        <article>
+          <h3><span aria-hidden="true">⚙️</span> {{f5Title}}</h3>
+          <ul><li>{{f5a}}</li><li>{{f5b}}</li><li>{{f5c}}</li></ul>
+        </article>
+        <article>
+          <h3><span aria-hidden="true">🎨</span> {{f6Title}}</h3>
+          <ul><li>{{f6a}}</li><li>{{f6b}}</li><li>{{f6c}}</li></ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="screens">
+      <h2>{{seeTitle}}</h2>
+      <div class="screens-row">
+        <figure><img src="{{base}}store/screenshot-2-on-youtube.png" loading="lazy" width="1280" height="800" alt="{{scrYoutube}}"><figcaption>{{scrYoutube}}</figcaption></figure>
+        <figure><img src="{{base}}store/screenshot-3-popup.png" loading="lazy" width="1280" height="800" alt="{{scrPopup}}"><figcaption>{{scrPopup}}</figcaption></figure>
+        <figure><img src="{{base}}store/screenshot-4-options.png" loading="lazy" width="1280" height="800" alt="{{scrOptions}}"><figcaption>{{scrOptions}}</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>{{installTitle}}</h2>
+      <ol class="steps">
+        <li>
+          <h3>{{s1Title}}</h3>
+          <p>{{s1Text}}</p>
+        </li>
+        <li>
+          <h3>{{s2Title}}</h3>
+          <p>{{s2Text}}</p>
+          <div class="tabs" role="tablist">
+            <button role="tab" aria-selected="true" data-os="mac">macOS</button>
+            <button role="tab" aria-selected="false" data-os="win">Windows</button>
+            <button role="tab" aria-selected="false" data-os="linux">Linux</button>
+          </div>
+          <div class="panel" data-os="mac">
+            <pre dir="ltr"><code>brew install rawmind/tap/titl &amp;&amp; titl install</code></pre>
+          </div>
+          <div class="panel" data-os="win" hidden>
+            <p class="small">{{winPs}}</p>
+            <pre dir="ltr"><code>irm https://github.com/rawmind/titl/releases/latest/download/install.ps1 | iex</code></pre>
+            <p class="small">{{winAlt}}</p>
+          </div>
+          <div class="panel" data-os="linux" hidden>
+            <p class="small">{{linuxText}}</p>
+            <pre dir="ltr"><code>chmod +x titl-linux-x64 &amp;&amp; ./titl-linux-x64 install</code></pre>
+          </div>
+        </li>
+        <li>
+          <h3>{{s3Title}}</h3>
+          <p>{{s3Text}}</p>
+        </li>
+      </ol>
+      <p class="small">{{installNote}}</p>
+    </section>
+
+    <section id="faq">
+      <h2>{{faqTitle}}</h2>
+      <details><summary>{{q1}}</summary><p>{{a1}}</p></details>
+      <details><summary>{{q2}}</summary><p>{{a2}}</p></details>
+      <details><summary>{{q3}}</summary><p>{{a3}}</p></details>
+      <details><summary>{{q4}}</summary><p>{{a4}}</p></details>
+      <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      <a href="{{github}}">GitHub</a> ·
+      <a href="{{changelog}}">{{changelogLabel}}</a> ·
+      <a href="{{privacy}}">{{privacyLabel}}</a> ·
+      <a href="{{security}}">{{securityLabel}}</a> ·
+      <a href="{{kofi}}"><span class="heart">♥</span> {{support}}</a>
+    </p>
+    <p class="small">{{footerFree}}</p>
+  </footer>
+
+  <script>
+    const LANGS = {{langsJson}};
+    const CURRENT = '{{slug}}';
+    const ROOT = '{{base}}';
+    const pathFor = (slug) => ROOT + (slug === 'en' ? '' : `${slug}/`);
+    let chosen = null;
+    try {
+      chosen = localStorage.getItem('titl-lang');
+    } catch {}
+    if (!chosen && CURRENT === 'en') {
+      const wanted = (navigator.languages ?? [navigator.language]).map((l) => l.toLowerCase());
+      const first = wanted.map((l) => LANGS.find((x) => x.match.some((m) => l === m || l.startsWith(`${m}-`)))).find(Boolean);
+      if (first && first.slug !== 'en') location.replace(pathFor(first.slug) + location.hash);
+    }
+    document.getElementById('lang').addEventListener('change', (e) => {
+      try {
+        localStorage.setItem('titl-lang', e.target.value);
+      } catch {}
+      location.href = pathFor(e.target.value) + location.hash;
+    });
+    for (const tab of document.querySelectorAll('.tabs button')) {
+      tab.addEventListener('click', () => {
+        for (const t of document.querySelectorAll('.tabs button')) t.setAttribute('aria-selected', String(t === tab));
+        for (const p of document.querySelectorAll('.panel')) p.hidden = p.dataset.os !== tab.dataset.os;
+      });
+    }
+    const os = /Win/.test(navigator.platform) ? 'win' : /Linux/.test(navigator.platform) ? 'linux' : 'mac';
+    document.querySelector(`.tabs button[data-os="${os}"]`).click();
+  </script>
+</body>
+</html>
