@@ -54,9 +54,11 @@ export function render(template, lang, strings) {
     ...LANGUAGES.map((l) => `  <link rel="alternate" hreflang="${l.htmlLang}" href="${urlFor(l.slug)}">`),
     `  <link rel="alternate" hreflang="x-default" href="${SITE}">`,
   ].join('\n');
-  const languageOptions = LANGUAGES.map(
-    (l) => `          <option value="${l.slug}" lang="${l.htmlLang}"${l.slug === lang.slug ? ' selected' : ''}>${l.name}</option>`,
-  ).join('\n');
+  const languageLinks = LANGUAGES.map((l) => {
+    const href = `${base}${l.slug === 'en' ? '' : `${l.slug}/`}`;
+    const current = l.slug === lang.slug ? ' aria-current="page"' : '';
+    return `          <li><a href="${href || './'}" hreflang="${l.htmlLang}" lang="${l.htmlLang}" data-slug="${l.slug}"${current}>${l.name}</a></li>`;
+  }).join('\n');
   const values = {
     ...LINKS,
     ...Object.fromEntries(Object.entries(strings).map(([k, v]) => [k, withLinks(v)])),
@@ -68,10 +70,11 @@ export function render(template, lang, strings) {
     site: SITE,
     base,
     alternates,
-    languageOptions,
+    languageLinks,
+    languageName: lang.name,
     langsJson: JSON.stringify(LANGUAGES.map(({ slug, match }) => ({ slug, match }))),
   };
-  for (const key of ['title', 'metaDesc', 'shotAlt', 'scrYoutube', 'scrPopup', 'scrOptions', 'language']) {
+  for (const key of ['title', 'metaDesc', 'shotAlt', 'scrYoutubeAlt', 'scrPopupAlt', 'scrOptionsAlt', 'language', 's2Title']) {
     values[key] = escapeAttr(strings[key]);
   }
   return template.replace(/\{\{(\w+)\}\}/g, (m, key) => {

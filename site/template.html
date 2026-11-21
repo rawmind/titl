@@ -16,6 +16,20 @@
   <meta property="og:locale" content="{{ogLocale}}">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="{{base}}style.css">
+  <script>
+    (() => {
+      const LANGS = {{langsJson}};
+      if ('{{slug}}' !== 'en') return;
+      let chosen = null;
+      try {
+        chosen = localStorage.getItem('titl-lang');
+      } catch {}
+      const wanted = (navigator.languages ?? [navigator.language]).map((l) => l.toLowerCase());
+      const fromBrowser = () => wanted.map((l) => LANGS.find((x) => x.match.some((m) => l === m || l.startsWith(`${m}-`)))).find(Boolean);
+      const target = chosen ? LANGS.find((x) => x.slug === chosen) : fromBrowser();
+      if (target && target.slug !== 'en') location.replace(`{{base}}${target.slug}/${location.hash}`);
+    })();
+  </script>
 </head>
 <body>
   <header class="nav">
@@ -28,9 +42,12 @@
       <a href="#install">{{navInstall}}</a>
       <a href="#faq">{{navFaq}}</a>
       <a href="{{github}}">★ GitHub</a>
-      <select id="lang" class="lang" aria-label="{{language}}">
-{{languageOptions}}
-      </select>
+      <details class="lang">
+        <summary aria-label="{{language}}: {{languageName}}"><span aria-hidden="true">🌐</span> {{languageName}}</summary>
+        <ul>
+{{languageLinks}}
+        </ul>
+      </details>
     </nav>
   </header>
 
@@ -87,9 +104,9 @@
     <section class="screens">
       <h2>{{seeTitle}}</h2>
       <div class="screens-row">
-        <figure><img src="{{base}}store/screenshot-2-on-youtube.png" loading="lazy" width="1280" height="800" alt="{{scrYoutube}}"><figcaption>{{scrYoutube}}</figcaption></figure>
-        <figure><img src="{{base}}store/screenshot-3-popup.png" loading="lazy" width="1280" height="800" alt="{{scrPopup}}"><figcaption>{{scrPopup}}</figcaption></figure>
-        <figure><img src="{{base}}store/screenshot-4-options.png" loading="lazy" width="1280" height="800" alt="{{scrOptions}}"><figcaption>{{scrOptions}}</figcaption></figure>
+        <figure><img src="{{base}}store/screenshot-2-on-youtube.png" loading="lazy" width="1280" height="800" alt="{{scrYoutubeAlt}}"><figcaption>{{scrYoutube}}</figcaption></figure>
+        <figure><img src="{{base}}store/screenshot-3-popup.png" loading="lazy" width="1280" height="800" alt="{{scrPopupAlt}}"><figcaption>{{scrPopup}}</figcaption></figure>
+        <figure><img src="{{base}}store/screenshot-4-options.png" loading="lazy" width="1280" height="800" alt="{{scrOptionsAlt}}"><figcaption>{{scrOptions}}</figcaption></figure>
       </div>
     </section>
 
@@ -103,21 +120,21 @@
         <li>
           <h3>{{s2Title}}</h3>
           <p>{{s2Text}}</p>
-          <div class="tabs" role="tablist">
-            <button role="tab" aria-selected="true" data-os="mac">macOS</button>
-            <button role="tab" aria-selected="false" data-os="win">Windows</button>
-            <button role="tab" aria-selected="false" data-os="linux">Linux</button>
+          <div class="tabs" role="tablist" aria-label="{{s2Title}}">
+            <button role="tab" id="tab-mac" aria-controls="panel-mac" aria-selected="true" tabindex="0" data-os="mac">macOS</button>
+            <button role="tab" id="tab-win" aria-controls="panel-win" aria-selected="false" tabindex="-1" data-os="win">Windows</button>
+            <button role="tab" id="tab-linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1" data-os="linux">Linux</button>
           </div>
-          <div class="panel" data-os="mac">
+          <div class="panel" role="tabpanel" id="panel-mac" aria-labelledby="tab-mac" tabindex="0" data-os="mac">
             <pre dir="ltr"><code>brew install rawmind/tap/titl &amp;&amp; titl install</code></pre>
           </div>
-          <div class="panel" data-os="win" hidden>
+          <div class="panel" role="tabpanel" id="panel-win" aria-labelledby="tab-win" tabindex="0" data-os="win" hidden>
             <a class="button primary download" href="{{winExe}}">{{winDownload}}</a>
             <p>{{winRun}}</p>
             <p class="small">{{winOr}}</p>
             <pre dir="ltr"><code>irm https://github.com/rawmind/titl/releases/latest/download/install.ps1 | iex</code></pre>
           </div>
-          <div class="panel" data-os="linux" hidden>
+          <div class="panel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux" tabindex="0" data-os="linux" hidden>
             <p class="small">{{linuxText}}</p>
             <pre dir="ltr"><code>chmod +x titl-linux-x64 &amp;&amp; ./titl-linux-x64 install</code></pre>
           </div>
@@ -157,33 +174,40 @@
   </footer>
 
   <script>
-    const LANGS = {{langsJson}};
-    const CURRENT = '{{slug}}';
-    const ROOT = '{{base}}';
-    const pathFor = (slug) => ROOT + (slug === 'en' ? '' : `${slug}/`);
-    let chosen = null;
-    try {
-      chosen = localStorage.getItem('titl-lang');
-    } catch {}
-    if (!chosen && CURRENT === 'en') {
-      const wanted = (navigator.languages ?? [navigator.language]).map((l) => l.toLowerCase());
-      const first = wanted.map((l) => LANGS.find((x) => x.match.some((m) => l === m || l.startsWith(`${m}-`)))).find(Boolean);
-      if (first && first.slug !== 'en') location.replace(pathFor(first.slug) + location.hash);
+    for (const link of document.querySelectorAll('.lang a')) {
+      link.addEventListener('click', () => {
+        try {
+          localStorage.setItem('titl-lang', link.dataset.slug);
+        } catch {}
+      });
     }
-    document.getElementById('lang').addEventListener('change', (e) => {
-      try {
-        localStorage.setItem('titl-lang', e.target.value);
-      } catch {}
-      location.href = pathFor(e.target.value) + location.hash;
-    });
-    for (const tab of document.querySelectorAll('.tabs button')) {
-      tab.addEventListener('click', () => {
-        for (const t of document.querySelectorAll('.tabs button')) t.setAttribute('aria-selected', String(t === tab));
-        for (const p of document.querySelectorAll('.panel')) p.hidden = p.dataset.os !== tab.dataset.os;
+    const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
+    const select = (tab, focus = false) => {
+      for (const t of tabs) {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      }
+      if (focus) tab.focus();
+    };
+    for (const tab of tabs) {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (e) => {
+        const rtl = document.dir === 'rtl';
+        const step = { ArrowRight: rtl ? -1 : 1, ArrowLeft: rtl ? 1 : -1 }[e.key];
+        const i = tabs.indexOf(tab);
+        let next = null;
+        if (step) next = tabs.at((i + step) % tabs.length);
+        else if (e.key === 'Home') next = tabs.at(0);
+        else if (e.key === 'End') next = tabs.at(-1);
+        if (!next) return;
+        e.preventDefault();
+        select(next, true);
       });
     }
     const os = /Win/.test(navigator.platform) ? 'win' : /Linux/.test(navigator.platform) ? 'linux' : 'mac';
-    document.querySelector(`.tabs button[data-os="${os}"]`).click();
+    select(document.getElementById(`tab-${os}`));
   </script>
 </body>
 </html>

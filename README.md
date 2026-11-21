@@ -133,7 +133,7 @@ Or by hand: from the [latest release](https://github.com/rawmind/titl/releases/l
 
 Either way, the helper downloads whisper.cpp (the CUDA build if you have an NVIDIA GPU, otherwise the CPU build) and a matching model, then registers with Chrome, Edge and Brave. It copies itself to `%LOCALAPPDATA%\chrome-transcriber\`, so you can delete the download afterwards.
 
-### Linux (x64 and arm64)
+### Linux (x64)
 
 1. From the [latest release](https://github.com/rawmind/titl/releases/latest), download **`titl-linux-x64`** and make it executable: `chmod +x titl-linux-x64`.
 2. Start Chrome once (so its profile folder exists), then:

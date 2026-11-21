@@ -40,3 +40,23 @@ test('Russian page loads assets from the site root', () => {
   assert.match(html, /href="\.\.\/style\.css"/);
   assert.match(html, /src="\.\.\/store\/screenshot-1-subtitles\.png"/);
 });
+
+test('every page links to every language and marks its own', () => {
+  for (const lang of LANGUAGES) {
+    const html = render(template, lang, strings[lang.slug]);
+    const links = [...html.matchAll(/<li><a href="([^"]+)" hreflang="[^"]+" lang="[^"]+" data-slug="(\w+)"( aria-current="page")?>/g)];
+    assert.equal(links.length, LANGUAGES.length, lang.slug);
+    assert.deepEqual(links.filter((m) => m[3]).map((m) => m[2]), [lang.slug]);
+    const ru = links.find((m) => m[2] === 'ru')[1];
+    assert.equal(ru, lang.slug === 'en' ? 'ru/' : '../ru/', lang.slug);
+  }
+});
+
+test('install tabs are wired to their panels and the redirect runs in the head', () => {
+  const html = render(template, LANGUAGES[0], strings.en);
+  for (const os of ['mac', 'win', 'linux']) {
+    assert.match(html, new RegExp(`role="tab" id="tab-${os}" aria-controls="panel-${os}"`));
+    assert.match(html, new RegExp(`role="tabpanel" id="panel-${os}" aria-labelledby="tab-${os}"`));
+  }
+  assert.ok(html.indexOf('location.replace') < html.indexOf('</head>'));
+});
