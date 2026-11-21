@@ -12,6 +12,17 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 - In lookahead mode, the line nearest the playhead is translated first, and pause until ready also waits for the translation, so lines don't show untranslated. Pressing play skips the wait for that line, and a translation that takes too long (10 s for Chrome's translator, 30 s for a local model) shows the line untranslated instead of holding playback.
 - Larger text on the Options page.
 
+### Removed
+- Homebrew no longer installs `chrome-transcriber-helper`, the helper's name before 0.1.7. Use `titl`. If auto-start stops working after `brew upgrade`, run `titl install` once to register the current name.
+
+### Upgrade
+- Chrome updates the extension from the Chrome Web Store.
+- The helper only changes its version number, so updating it is optional:
+  - macOS: `brew upgrade rawmind/tap/titl`
+  - Windows: the popup offers the update, or run `titl update`.
+  - Linux: download `titl-linux-x64` from this release and run `./titl-linux-x64 install`.
+- To try the local AI translation, see [Local LLM](README.md#local-llm) in the README.
+
 ## [0.1.15](https://github.com/rawmind/titl/releases/tag/v0.1.15) - 2026-11-20
 
 ### Added
