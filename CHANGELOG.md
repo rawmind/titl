@@ -9,7 +9,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 - **Subtitle size** in Options (50–300%).
 
 ### Changed
-- In lookahead mode, the line nearest the playhead is translated first. With a local model, pause until ready also waits for the translation, so lines don't show untranslated; pressing play skips the wait for that line.
+- In lookahead mode, the line nearest the playhead is translated first, and pause until ready also waits for the translation, so lines don't show untranslated. Pressing play skips the wait for that line, and a translation that takes too long (10 s for Chrome's translator, 30 s for a local model) shows the line untranslated instead of holding playback.
 - Larger text on the Options page.
 
 ## [0.1.15](https://github.com/rawmind/titl/releases/tag/v0.1.15) - 2026-11-20

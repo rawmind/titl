@@ -10,6 +10,7 @@
   const TRANSLATOR_SOURCE_FALLBACK = { sr: 'hr', bs: 'hr' };
   const LLM_CONTEXT_BEFORE = 4;
   const LLM_CONTEXT_AFTER = 2;
+  const CHROME_TRANSLATE_TIMEOUT_MS = 10000;
   const REVEAL_KEY = 'v';
   const t = (key, ...subs) => chrome.i18n.getMessage(key, subs.map(String)) || key;
 
@@ -245,7 +246,11 @@
 
   function translate(text, context = () => ({})) {
     const active = translator;
-    const result = translateChain.then(() => (active === llmTranslator ? active.translate(text, context()) : active.translate(text)));
+    const result = translateChain.then(() =>
+      active === llmTranslator
+        ? active.translate(text, context())
+        : active.translate(text, { signal: AbortSignal.timeout(CHROME_TRANSLATE_TIMEOUT_MS) }),
+    );
     translateChain = result.catch(() => {});
     return result;
   }
@@ -345,7 +350,7 @@
     const range = coverage.find(([a, b]) => t >= a - 1 && t <= b);
     if (!range) return -1;
     let end = range[1];
-    if (translator === llmTranslator) {
+    if (translator) {
       const pending = cues.find((c) => c.end >= t && c.start < end && !translationReady(c));
       if (pending) end = Math.max(t, pending.start);
     }
@@ -443,7 +448,7 @@
     const cue = isAd() ? null : cueAt(video.currentTime + options.showEarlySec);
     renderCue(cue);
     translateCues();
-    if (cue && translator === llmTranslator && !waiting && !video.paused && cue !== playedThrough && !translationReady(cue)) pauseUntilReady(video);
+    if (cue && translator && !waiting && !video.paused && cue !== playedThrough && !translationReady(cue)) pauseUntilReady(video);
 
     if (Date.now() - lastReport >= REPORT_MS) {
       lastReport = Date.now();
