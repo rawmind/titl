@@ -48,6 +48,7 @@ Most live-caption tools show each line **after** it's spoken, upload your audio 
 
 ### 🌍 Translation, built in
 - **On-device** translation with Chrome's built-in translator into ~36 languages, ordered by popularity
+- Or a **local LLM** (llama-server, Ollama, LM Studio) that reads the surrounding lines for context
 - Original and translation shown together, or just the translation
 - **Blur the translation** to practise listening: **V** (any keyboard layout) or a click reveals it
 
@@ -102,7 +103,7 @@ Most live-caption tools show each line **after** it's spoken, upload your audio 
 
 ## Requirements
 
-- Chrome 116+, or Edge or Brave, on macOS, Windows or Linux (Chrome 138+ for translation)
+- Chrome 116+, or Edge or Brave, on macOS, Windows or Linux (Chrome 138+ for Chrome's translator; any version for a local LLM)
 - A GPU is recommended (Apple Silicon, or an NVIDIA card on Windows/Linux). CPU works with smaller models.
 - About 0.5–1.6 GB of disk for the Whisper model, which the helper downloads
 
@@ -221,9 +222,13 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Pause until ready | 3 s | Lookahead: pause until this much is transcribed ahead. 0 never pauses. |
 | Language | `sr` | Any Whisper language code. |
 | Serbian script | Latin | Latin, Cyrillic, or as returned (may mix). Only used for `sr`. |
-| Translate to | Off | Target language for Chrome's on-device translator. |
+| Translate to | Off | Target language. |
+| Translator | Chrome's built-in | Chrome's on-device translator, or a local LLM through an OpenAI-compatible API. See [Translation](#translation). |
+| Model API URL | `http://127.0.0.1:8081/v1` | Local LLM only. A server root, a `/v1` base or the full `/v1/chat/completions` URL. Must be on 127.0.0.1 or localhost. |
+| Model name | empty | Local LLM only. Optional for llama-server; required by Ollama (`gemma3:12b`) and LM Studio. |
 | Show the original above the translation | on | Two-line display: original small on top, translation below. |
 | Blur the translation until you reveal it | off | The translation starts blurred; **V** or a click toggles it, and the choice carries over to the next lines. V isn't a YouTube shortcut and is ignored while typing. |
+| Subtitle size | 125 % | Scales the subtitle text, 50–300 %. The size still follows the player's height. |
 | Skip ads in the hidden tab | off | Lookahead: click YouTube's "Skip ad" in the muted tab when offered. Otherwise it waits the ad out. |
 | Live window / step | 6 s / 4 s | Live mode chunking (2 s overlap). |
 | Max window | 12 s | Largest chunk when transcription falls behind. |
@@ -237,12 +242,48 @@ Titl's popup, Options page and on-screen messages are available in English, Chin
 
 ## Translation
 
+Titl can translate with Chrome's built-in translator (the default) or with a language model running on your computer. Pick one in **Options → Translation → Translator**.
+
+### Chrome's built-in translator
+
 Choose **Options → Translate to**, then click **Download translation model** once. It downloads the language pack (one time, kept by Chrome) and shows a sample translation. If you skip this, the first click on the YouTube page during playback starts the download instead.
 
 - Everything runs on this device through Chrome's [Translator API](https://developer.chrome.com/docs/ai/translator-api) (Chrome 138+).
 - Chrome has no Serbian translation model, so Serbian is translated as Croatian. The text is always sent as Latin script, even when subtitles are shown in Cyrillic. Expect occasional word-choice slips where the two languages' vocabularies differ.
 - In lookahead mode, translation happens seconds before a line is shown, so it adds no delay. In live mode it adds a fraction of a second.
 - Whisper's own translation isn't used: `large-v3-turbo` was trained without translation data, and Whisper can only translate into English.
+
+### Local LLM
+
+A local model translates each line together with the 4 lines before it (and their translations) and, in lookahead mode, the 2 lines after it. That fixes most of what goes wrong when a sentence is split across lines or a word is misheard, keeps names and terms consistent, and translates Serbian as Serbian, not Croatian. It needs more memory than Chrome's translator, and you start the model server yourself.
+
+1. Start an OpenAI-compatible server on this computer, for example [llama.cpp](https://github.com/ggml-org/llama.cpp) (`brew install llama.cpp`):
+
+   ```sh
+   llama-server -hf ggml-org/gemma-3-12b-it-GGUF --port 8081 --no-mmproj --swa-full -c 2048 -np 1
+   ```
+
+   The first start downloads the model. `--swa-full -c 2048 -np 1` matters: Titl's prompts stay under 300 tokens, and without `--swa-full` llama.cpp reprocesses Gemma's prompt on every line, which makes it about 3× slower. With `--swa-full` and Gemma's default 128k context, the cache doesn't fit in memory.
+2. **Options → Translator → Local LLM**, check the **Model API URL**, and click **Test connection**. For Ollama use `http://127.0.0.1:11434/v1` and a model name such as `gemma3:12b`; for LM Studio, `http://127.0.0.1:1234/v1`.
+3. **Save**.
+
+Lines are translated one at a time, nearest to the playhead first. In lookahead mode, **Pause until ready** also waits for the translation, so lines don't show untranslated; set it to 0 to never pause. In live mode the translation appears a moment after the original.
+
+#### Which model
+
+Measured on 45 lines of a Serbian TEDx talk transcribed by `large-v3-turbo`, translated to English on an Apple M4 Max with the llama-server flags above. "Clearly wrong" is a manual count of lines whose meaning is lost or invented.
+
+| Model | Download | Memory in use | Time per line (median / max) | Clearly wrong |
+|---|---|---|---|---|
+| [Gemma 3 12B](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF) (Q4_K_M) | 7.3 GB | 11.5 GB | 0.64 s / 0.82 s | ~3–4 of 45 |
+| [Gemma 3 4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF) (Q4_K_M) | 2.5 GB | 4.9 GB | 0.20 s / 0.43 s | ~7 of 45 |
+| [NLLB-200 distilled 600M](https://huggingface.co/facebook/nllb-200-distilled-600M) (int8, CTranslate2) | 0.6 GB | 1.5 GB | 0.27 s / 3.0 s | ~10 of 45 |
+
+- **Gemma 3 12B** is the one to use if you have 16 GB of memory or more. It gets split sentences and context right.
+- **Gemma 3 4B** fits on smaller machines but makes more meaning errors in Serbian.
+- **NLLB** is small and fast, but it translates each line on its own, without context. llama.cpp can't run it, it needs a separate server, and its license (CC-BY-NC 4.0) allows non-commercial use only.
+
+Memory in use is the server's resident memory: the model weights plus the cache. Gemma 3 4B was measured with `-c 8192`; `-c 2048` uses a little less.
 
 ## Languages
 
@@ -270,6 +311,9 @@ Automatic language detection isn't supported yet.
 | Subtitles appear in the wrong script | Options → Serbian script. |
 | Translation doesn't appear | The language pack may not be downloaded yet. Use **Download translation model** in Options, or click the YouTube page once while subtitles are on. |
 | "Click the video once to download the translation model" | Click anywhere on the YouTube page, or use **Download translation model** in Options. |
+| "Translation unavailable: Cannot reach the model API" | The local model server isn't running, or the **Model API URL** is wrong. Use **Test connection** in Options. |
+| "Model API returned 403" with Ollama | Start Ollama with `OLLAMA_ORIGINS='chrome-extension://*'` so it accepts requests from the extension. |
+| Local LLM translation pauses the video often | The model is slower than the speech. Start llama-server with `--swa-full -c 2048 -np 1`, or pick a smaller model. |
 | "Chrome can't translate … on this device" | That language pair isn't offered by Chrome's translator. Pick another target. |
 | Nothing happens after moving the extension folder | Remove and re-load the unpacked extension. |
 
@@ -322,6 +366,7 @@ src/
   text.js            dedup, Serbian transliteration, cleanup, cue splitting
   audio.js           ring buffer, RMS, WAV encoding
   coverage.js        transcribed time ranges
+  llm.js             local LLM translation: prompt with context, OpenAI-compatible request
   settings.js        defaults and validation
   popup.*, options.* UI
 helper/              Rust: installer and native messaging host

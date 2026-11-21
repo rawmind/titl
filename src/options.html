@@ -49,7 +49,22 @@
           <option value="" data-i18n="off">Off</option>
         </select>
       </label>
-      <p class="hint" data-i18n="translationHint">Runs on this device with Chrome's built-in translator. Serbian is translated as Croatian, which Chrome supports.</p>
+      <label><span data-i18n="translationEngine">Translator</span>
+        <select id="translationEngine">
+          <option value="chrome" data-i18n="engineChrome">Chrome's built-in (fast, basic quality)</option>
+          <option value="llm" data-i18n="engineLlm">Local LLM (better, uses context)</option>
+        </select>
+      </label>
+      <div id="llmRows">
+        <label><span data-i18n="llmUrl">Model API URL</span>
+          <input id="llmUrl" type="url" placeholder="http://127.0.0.1:8081/v1">
+        </label>
+        <label><span data-i18n="llmModel">Model name</span>
+          <input id="llmModel" type="text" placeholder="gemma3:4b">
+        </label>
+        <p class="hint" data-i18n-html="llmHint"></p>
+      </div>
+      <p class="hint" id="chromeHint" data-i18n="translationHint">Runs on this device with Chrome's built-in translator. Serbian is translated as Croatian, which Chrome supports.</p>
       <label class="check"><input id="showOriginal" type="checkbox"> <span data-i18n="showOriginal">Show the original above the translation</span></label>
       <label class="check"><input id="blurTranslation" type="checkbox"> <span data-i18n-html="blurTranslation">Blur the translation until you reveal it: press <kbd>V</kbd> or click the line</span></label>
       <button type="button" id="prepareTranslation" class="secondary" data-i18n="downloadModel">Download translation model</button>
@@ -67,6 +82,9 @@
           <option value="cyrillic" data-i18n="scriptCyrillic">Cyrillic (ћирилица)</option>
           <option value="original" data-i18n="scriptOriginal">As returned by Whisper (may mix)</option>
         </select>
+      </label>
+      <label><span data-i18n="subtitleSize">Subtitle size (%)</span>
+        <input id="subtitleSize" type="number" min="50" max="300" step="5" required>
       </label>
       <div class="row">
         <label><span data-i18n="liveWindow">Live window (s)</span> <input id="windowSec" type="number" min="2" max="30" step="0.5" required></label>

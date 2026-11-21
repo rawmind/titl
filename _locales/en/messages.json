@@ -238,5 +238,26 @@
   },
   "releaseNotes": {
     "message": "Release notes"
+  },
+  "translationEngine": {
+    "message": "Translator"
+  },
+  "engineChrome": {
+    "message": "Chrome's built-in (fast, basic quality)"
+  },
+  "engineLlm": {
+    "message": "Local LLM (better, uses context)"
+  },
+  "llmUrl": {
+    "message": "Model API URL"
+  },
+  "llmModel": {
+    "message": "Model name (optional for llama-server, e.g. gemma3:4b for Ollama)"
+  },
+  "llmHint": {
+    "message": "Any OpenAI-compatible server on this computer: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, about 2.5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) or LM Studio (<code>http://127.0.0.1:1234/v1</code>). Must be on 127.0.0.1 or localhost."
+  },
+  "subtitleSize": {
+    "message": "Subtitle size (%)"
   }
 }

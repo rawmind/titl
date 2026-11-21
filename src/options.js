@@ -1,9 +1,10 @@
 import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
 import { languageOptions, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
+import { translateWithLlm } from './llm.js';
 
 const $ = (id) => document.getElementById(id);
-const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'showOriginal', 'blurTranslation', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
+const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'translationEngine', 'llmUrl', 'llmModel', 'showOriginal', 'blurTranslation', 'subtitleSize', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
 
 function fill(settings) {
   for (const f of FIELDS) {
@@ -14,6 +15,13 @@ function fill(settings) {
 
 function syncScriptRow() {
   $('scriptRow').hidden = $('language').value !== 'sr';
+}
+
+function syncEngineRows() {
+  const llm = $('translationEngine').value === 'llm';
+  $('llmRows').hidden = !llm;
+  $('chromeHint').hidden = llm;
+  $('prepareTranslation').textContent = t(llm ? 'testConnection' : 'downloadModel');
 }
 
 function read() {
@@ -46,6 +54,7 @@ $('reset').addEventListener('click', async () => {
   await chrome.storage.local.remove('settings');
   fill(DEFAULTS);
   syncScriptRow();
+  syncEngineRows();
   say($('message'), t('defaultsRestored'), true);
 });
 
@@ -67,6 +76,7 @@ $('prepareTranslation').addEventListener('click', async () => {
   const language = $('language').value.trim();
   const target = $('translateTo').value;
   if (!target) return say(out, t('chooseTarget'), false);
+  if ($('translationEngine').value === 'llm') return testLlm(out, language, target);
   if (!('Translator' in self)) return say(out, t('translatorUnavailableHere'), false);
   try {
     let pair = null;
@@ -93,9 +103,23 @@ $('prepareTranslation').addEventListener('click', async () => {
   }
 });
 
+async function testLlm(out, language, target) {
+  const config = { ...read(), language, translateTo: target };
+  if (!isLocalUrl(config.llmUrl)) return say(out, t('notLocalUrl'), false);
+  say(out, t('testing'), true);
+  try {
+    const sample = await translateWithLlm(config, { text: 'Dobar dan, kako ste?' });
+    say(out, t('ready', language, target, 'Dobar dan, kako ste?', sample), true);
+  } catch (err) {
+    say(out, t('failed', err.message), false);
+  }
+}
+
 localizePage();
 for (const { code, label } of languageOptions(uiLocale())) $('language').add(new Option(label, code));
 for (const { code, label } of translationOptions(uiLocale())) $('translateTo').add(new Option(label, code));
 fill(await loadSettings());
 syncScriptRow();
+syncEngineRows();
 $('language').addEventListener('change', syncScriptRow);
+$('translationEngine').addEventListener('change', syncEngineRows);

@@ -1,0 +1,74 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { buildMessages, chatUrl, cleanTranslation, translateWithLlm } from '../src/llm.js';
+import { DEFAULTS, validateSettings } from '../src/settings.js';
+
+test('chat URL accepts a server root, a /v1 base or the full endpoint', () => {
+  assert.equal(chatUrl('http://127.0.0.1:8081'), 'http://127.0.0.1:8081/v1/chat/completions');
+  assert.equal(chatUrl('http://127.0.0.1:11434/v1/'), 'http://127.0.0.1:11434/v1/chat/completions');
+  assert.equal(chatUrl('http://localhost:1234/v1/chat/completions'), 'http://localhost:1234/v1/chat/completions');
+});
+
+test('prompt names both languages and carries the surrounding lines', () => {
+  const [system, user] = buildMessages({
+    text: 'da je ovo veoma važno',
+    before: [{ text: 'Mislim', translation: 'I think' }, { text: 'Dobro veče', translation: '' }],
+    after: ['za našu ekonomiju.'],
+    source: 'sr',
+    target: 'en',
+  });
+  assert.match(system.content, /from Serbian to English/);
+  assert.equal(
+    user.content,
+    [
+      'Previous lines:',
+      '- Mislim => I think',
+      '- Dobro veče',
+      'Current line (translate this):',
+      'da je ovo veoma važno',
+      'Next lines (context only):',
+      '- za našu ekonomiju.',
+    ].join('\n'),
+  );
+});
+
+test('prompt without context is just the current line', () => {
+  const [, user] = buildMessages({ text: 'Zdravo', source: 'sr', target: 'en' });
+  assert.equal(user.content, 'Current line (translate this):\nZdravo');
+});
+
+test('model output is cleaned of reasoning, quotes and line breaks', () => {
+  assert.equal(cleanTranslation('<think>hmm</think>\n"that this is very\nimportant"'), 'that this is very important');
+  assert.equal(cleanTranslation('«Bonjour»'), 'Bonjour');
+  assert.equal(cleanTranslation(undefined), '');
+});
+
+test('translation request goes to the OpenAI-compatible endpoint', async (t) => {
+  const calls = [];
+  t.mock.method(globalThis, 'fetch', async (url, init) => {
+    calls.push({ url, body: JSON.parse(init.body) });
+    return new Response(JSON.stringify({ choices: [{ message: { content: ' Good evening ' } }] }));
+  });
+  const config = { ...DEFAULTS, translateTo: 'en', llmModel: 'gemma3:4b' };
+  assert.equal(await translateWithLlm(config, { text: 'Dobro veče' }), 'Good evening');
+  assert.equal(calls[0].url, 'http://127.0.0.1:8081/v1/chat/completions');
+  assert.equal(calls[0].body.model, 'gemma3:4b');
+  assert.equal(calls[0].body.stream, false);
+});
+
+test('unreachable or failing model API gives a readable error', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => {
+    throw new TypeError('fetch failed');
+  });
+  await assert.rejects(translateWithLlm({ ...DEFAULTS, translateTo: 'en' }, { text: 'x' }), /Cannot reach the model API/);
+  t.mock.restoreAll();
+  t.mock.method(globalThis, 'fetch', async () => new Response('model not found', { status: 404 }));
+  await assert.rejects(translateWithLlm({ ...DEFAULTS, translateTo: 'en' }, { text: 'x' }), /returned 404: model not found/);
+});
+
+test('LLM settings are validated', () => {
+  assert.equal(validateSettings({ ...DEFAULTS, translationEngine: 'llm' }), null);
+  assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'cloud' }), /Unknown translator/);
+  assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'llm', llmUrl: 'https://api.example.com/v1' }), /Model API URL/);
+  assert.match(validateSettings({ ...DEFAULTS, llmModel: 'bad model' }), /Model name/);
+});

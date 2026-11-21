@@ -8,7 +8,7 @@ Titl (the "Chrome Transcriber" project) creates subtitles for YouTube videos on 
 
 - **Audio of the YouTube video you choose to subtitle.** It is captured only after you press **Start subtitles**, and only from that video. Titl sends it to a speech-recognition server (whisper.cpp) running **on your own computer**, at `127.0.0.1` or `localhost`. The extension refuses any other address. Audio is processed in memory and is not stored.
 - **Subtitle text.** It is kept in memory in your YouTube tab while subtitles are shown, and discarded when you stop or close the tab.
-- **Translation.** If you turn translation on, subtitle text is translated by Chrome's built-in on-device translator. The text is not sent to any translation service.
+- **Translation.** If you turn translation on, subtitle text is translated either by Chrome's built-in on-device translator or, if you choose **Local LLM**, by a language model server running **on your own computer** at `127.0.0.1` or `localhost`. The extension refuses any other address. The text is not sent to any translation service.
 - **Settings.** Your choices on the Options page (server address, language, display preferences) are stored in your browser's local extension storage.
 
 ## What Titl does not do

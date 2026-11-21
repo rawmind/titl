@@ -238,5 +238,26 @@
   },
   "releaseNotes": {
     "message": "Catatan rilis"
+  },
+  "translationEngine": {
+    "message": "Penerjemah"
+  },
+  "engineChrome": {
+    "message": "Bawaan Chrome (cepat, kualitas dasar)"
+  },
+  "engineLlm": {
+    "message": "LLM lokal (lebih baik, memakai konteks)"
+  },
+  "llmUrl": {
+    "message": "URL API model"
+  },
+  "llmModel": {
+    "message": "Nama model (opsional untuk llama-server, mis. gemma3:4b untuk Ollama)"
+  },
+  "llmHint": {
+    "message": "Server apa pun yang kompatibel dengan OpenAI di komputer ini: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, sekitar 2,5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) atau LM Studio (<code>http://127.0.0.1:1234/v1</code>). Harus di 127.0.0.1 atau localhost."
+  },
+  "subtitleSize": {
+    "message": "Ukuran subtitle (%)"
   }
 }

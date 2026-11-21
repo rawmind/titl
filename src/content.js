@@ -8,6 +8,8 @@
   const TICK_MS = 100;
   const REPORT_MS = 500;
   const TRANSLATOR_SOURCE_FALLBACK = { sr: 'hr', bs: 'hr' };
+  const LLM_CONTEXT_BEFORE = 4;
+  const LLM_CONTEXT_AFTER = 2;
   const REVEAL_KEY = 'v';
   const t = (key, ...subs) => chrome.i18n.getMessage(key, subs.map(String)) || key;
 
@@ -21,6 +23,7 @@
 
   let liveOriginal = '';
   let liveTranslation = '';
+  let liveHistory = [];
   let liveClearTimer = null;
 
   let mode = null;
@@ -40,6 +43,7 @@
 
   let translator = null;
   let translateChain = Promise.resolve();
+  let cueJob = null;
   let removeGestureListeners = null;
 
   const findPlayer = () => document.querySelector('#movie_player') ?? document.querySelector('.html5-video-player');
@@ -95,7 +99,8 @@
       player.append(root);
       resizeObserver?.disconnect();
       resizeObserver = new ResizeObserver(() => {
-        const size = Math.max(14, Math.min(44, player.clientHeight * 0.045));
+        const scale = (options?.subtitleSize ?? 100) / 100;
+        const size = Math.max(14, Math.min(44, player.clientHeight * 0.045)) * scale;
         root.style.setProperty('--ct-font-size', `${size}px`);
       });
       resizeObserver.observe(player);
@@ -174,9 +179,26 @@
     return null;
   }
 
+  const llmTranslator = {
+    async translate(text, context = {}) {
+      const res = await chrome.runtime.sendMessage({ target: 'background', type: 'llm-translate', text, ...context });
+      if (!res?.ok) {
+        setTranslationNotice(t('translationUnavailable', res?.error ?? 'no response'));
+        throw new Error(res?.error);
+      }
+      if (translationNotice) setTranslationNotice('');
+      return res.translation;
+    },
+    destroy() {},
+  };
+
   async function setupTranslator() {
     const target = options.translateTo;
     if (!target) return;
+    if (options.translationEngine === 'llm') {
+      translator = llmTranslator;
+      return;
+    }
     if (!('Translator' in self)) return setTranslationNotice(t('translationNeedsChrome'));
     const pair = await pickTranslatorPair(options.language, target);
     if (!pair) return setTranslationNotice(t('cannotTranslateDevice', options.language, target));
@@ -212,27 +234,56 @@
       if (options !== opts) return created.destroy();
       translator = created;
       setTranslationNotice('');
-      const now = getVideo()?.currentTime ?? 0;
-      cues.filter((c) => c.end >= now - 5).forEach(translateCue);
+      translateCues();
     } catch (err) {
       if (options === opts) setTranslationNotice(t('translationUnavailable', err.message));
     }
   }
 
-  function translate(text) {
+  function translate(text, context = () => ({})) {
     const active = translator;
-    const result = translateChain.then(() => active.translate(text));
+    const result = translateChain.then(() => active.translate(text, context()));
     translateChain = result.catch(() => {});
     return result;
   }
 
-  function translateCue(cue) {
-    if (!translator || cue.translation != null) return;
+  function cueContext(cue) {
+    const i = cues.indexOf(cue);
+    if (i < 0) return {};
+    return {
+      before: cues.slice(Math.max(0, i - LLM_CONTEXT_BEFORE), i).map((c) => ({ text: c.src ?? c.text, translation: c.translation || '' })),
+      after: cues.slice(i + 1, i + 1 + LLM_CONTEXT_AFTER).map((c) => c.src ?? c.text),
+    };
+  }
+
+  function translationReady(cue) {
+    return Boolean(cue.translation) || Boolean(cue.translationFailed);
+  }
+
+  function translateCues() {
+    if (!translator || cueJob) return;
+    const now = getVideo()?.currentTime ?? 0;
+    const cue = cues.find((c) => c.translation == null && !c.translationFailed && c.end >= now - CUE_HOLD_SEC);
+    if (!cue) return;
+    const job = (cueJob = {});
     cue.translation = '';
-    translate(cue.src ?? cue.text).then(
-      (translated) => (cue.translation = translated),
-      () => (cue.translation = null),
-    );
+    translate(cue.src ?? cue.text, () => cueContext(cue))
+      .then(
+        (translated) => {
+          cue.translation = translated;
+          if (!translated) cue.translationFailed = true;
+        },
+        () => {
+          cue.translation = null;
+          cue.translationFailed = true;
+        },
+      )
+      .finally(() => {
+        if (cueJob !== job) return;
+        cueJob = null;
+        maybeResume();
+        translateCues();
+      });
   }
 
   function trimTail(text, max) {
@@ -253,8 +304,10 @@
     liveOriginal = trimTail(`${liveOriginal} ${text}`.trim(), max);
     renderLive();
     if (translator) {
-      translate(src ?? text).then(
+      const source = src ?? text;
+      translate(source, () => ({ before: liveHistory.slice(-LLM_CONTEXT_BEFORE) })).then(
         (translated) => {
+          liveHistory = [...liveHistory.slice(1 - LLM_CONTEXT_BEFORE), { text: source, translation: translated }];
           liveTranslation = trimTail(`${liveTranslation} ${translated}`.trim(), max);
           renderLive();
         },
@@ -285,7 +338,13 @@
 
   function coveredAhead(t) {
     const range = coverage.find(([a, b]) => t >= a - 1 && t <= b);
-    return range ? range[1] - t : -1;
+    if (!range) return -1;
+    let end = range[1];
+    if (translator) {
+      const pending = cues.find((c) => c.end >= t && c.start < end && !translationReady(c));
+      if (pending) end = Math.max(t, pending.start);
+    }
+    return end - t;
   }
 
   function cueAt(t) {
@@ -312,7 +371,7 @@
     if (msg.cues.length) {
       cues.push(...msg.cues);
       cues.sort((a, b) => a.start - b.start);
-      msg.cues.forEach(translateCue);
+      translateCues();
     }
     coverage = msg.coverage;
     maybeResume();
@@ -375,7 +434,10 @@
       pauseUntilReady(video);
     }
 
-    renderCue(isAd() ? null : cueAt(video.currentTime + options.showEarlySec));
+    const cue = isAd() ? null : cueAt(video.currentTime + options.showEarlySec);
+    renderCue(cue);
+    translateCues();
+    if (cue && translator && !waiting && !video.paused && !translationReady(cue)) pauseUntilReady(video);
 
     if (Date.now() - lastReport >= REPORT_MS) {
       lastReport = Date.now();
@@ -411,9 +473,10 @@
     removeGestureListeners?.();
     translator?.destroy();
     if (waiting) getVideo()?.play().catch(() => {});
-    timer = options = mode = translator = null;
+    timer = options = mode = translator = cueJob = null;
     waiting = false;
     liveOriginal = liveTranslation = statusText = translationNotice = '';
+    liveHistory = [];
     resizeObserver?.disconnect();
     root?.remove();
     root = primaryEl = secondaryEl = badgeEl = hintEl = resizeObserver = null;

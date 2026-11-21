@@ -1,6 +1,7 @@
 import { loadSettings, validateSettings } from './settings.js';
 import { LookaheadSession } from './lookahead.js';
 import { resolveServer } from './server.js';
+import { translateWithLlm } from './llm.js';
 
 const OFFSCREEN_URL = 'src/offscreen.html';
 
@@ -75,8 +76,10 @@ async function start(tabId) {
       minLeadSec: config.minLeadSec,
       language: config.language,
       translateTo: config.translateTo,
+      translationEngine: config.translationEngine,
       showOriginal: config.showOriginal,
       blurTranslation: config.blurTranslation,
+      subtitleSize: config.subtitleSize,
     },
   });
   if (mode === 'lookahead') {
@@ -126,6 +129,9 @@ async function handle(msg, sender) {
       await start(tabId);
       return { restarted: true };
     }
+
+    case 'llm-translate':
+      return { translation: await translateWithLlm(await loadSettings(), msg) };
 
     case 'caption': {
       const { tabId } = await getState();

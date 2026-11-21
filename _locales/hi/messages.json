@@ -238,5 +238,26 @@
   },
   "releaseNotes": {
     "message": "नया क्या है"
+  },
+  "translationEngine": {
+    "message": "अनुवादक"
+  },
+  "engineChrome": {
+    "message": "Chrome में बिल्ट-इन (तेज़, सामान्य गुणवत्ता)"
+  },
+  "engineLlm": {
+    "message": "लोकल LLM (बेहतर, संदर्भ का उपयोग करता है)"
+  },
+  "llmUrl": {
+    "message": "मॉडल API URL"
+  },
+  "llmModel": {
+    "message": "मॉडल का नाम (llama-server के लिए वैकल्पिक, जैसे Ollama के लिए gemma3:4b)"
+  },
+  "llmHint": {
+    "message": "इस कंप्यूटर पर कोई भी OpenAI-संगत सर्वर: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, लगभग 2.5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) या LM Studio (<code>http://127.0.0.1:1234/v1</code>)। 127.0.0.1 या localhost पर होना चाहिए।"
+  },
+  "subtitleSize": {
+    "message": "सबटाइटल का आकार (%)"
   }
 }

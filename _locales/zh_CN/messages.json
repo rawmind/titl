@@ -238,5 +238,26 @@
   },
   "releaseNotes": {
     "message": "更新说明"
+  },
+  "translationEngine": {
+    "message": "翻译引擎"
+  },
+  "engineChrome": {
+    "message": "Chrome 内置（快速，基础质量）"
+  },
+  "engineLlm": {
+    "message": "本地 LLM（更好，结合上下文）"
+  },
+  "llmUrl": {
+    "message": "模型 API 地址"
+  },
+  "llmModel": {
+    "message": "模型名称（llama-server 可留空，Ollama 例如 gemma3:4b）"
+  },
+  "llmHint": {
+    "message": "本机上任何兼容 OpenAI 的服务器：llama-server（<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>，约 2.5 GB）、Ollama（<code>http://127.0.0.1:11434/v1</code>）或 LM Studio（<code>http://127.0.0.1:1234/v1</code>）。必须是 127.0.0.1 或 localhost。"
+  },
+  "subtitleSize": {
+    "message": "字幕大小（%）"
   }
 }

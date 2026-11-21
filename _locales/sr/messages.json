@@ -238,5 +238,26 @@
   },
   "releaseNotes": {
     "message": "Šta je novo"
+  },
+  "translationEngine": {
+    "message": "Prevodilac"
+  },
+  "engineChrome": {
+    "message": "Ugrađeni u Chrome (brz, osnovni kvalitet)"
+  },
+  "engineLlm": {
+    "message": "Lokalni LLM (bolji, koristi kontekst)"
+  },
+  "llmUrl": {
+    "message": "Adresa API-ja modela"
+  },
+  "llmModel": {
+    "message": "Naziv modela (opciono za llama-server, npr. gemma3:4b za Ollama)"
+  },
+  "llmHint": {
+    "message": "Bilo koji server kompatibilan sa OpenAI na ovom računaru: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, oko 2,5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) ili LM Studio (<code>http://127.0.0.1:1234/v1</code>). Mora biti 127.0.0.1 ili localhost."
+  },
+  "subtitleSize": {
+    "message": "Veličina titlova (%)"
   }
 }
