@@ -226,7 +226,7 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Model name | empty | Local LLM only. Optional for llama-server; required by Ollama (`gemma3:12b`) and LM Studio. |
 | Show the original above the translation | on | Two-line display: original small on top, translation below. |
 | Blur the translation until you reveal it | off | The translation starts blurred; **V** or a click toggles it, and the choice carries over to the next lines. V isn't a YouTube shortcut and is ignored while typing. |
-| Subtitle size | 125 % | Scales the subtitle text, 50–300 %. The size still follows the player's height. |
+| Subtitle size | 100 % | Scales the subtitle text, 50–300 %. The size still follows the player's height. |
 | Skip ads in the hidden tab | off | Lookahead: click YouTube's "Skip ad" in the muted tab when offered. Otherwise it waits the ad out. |
 | Live window / step | 6 s / 4 s | Live mode chunking (2 s overlap). |
 | Max window | 12 s | Largest chunk when transcription falls behind. |

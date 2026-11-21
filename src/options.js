@@ -20,6 +20,7 @@ function syncScriptRow() {
 function syncEngineRows() {
   const llm = $('translationEngine').value === 'llm';
   $('llmRows').hidden = !llm;
+  $('llmUrl').disabled = $('llmModel').disabled = !llm;
   $('chromeHint').hidden = llm;
   $('prepareTranslation').textContent = t(llm ? 'testConnection' : 'downloadModel');
 }

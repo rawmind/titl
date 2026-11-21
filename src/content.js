@@ -345,7 +345,7 @@
     const range = coverage.find(([a, b]) => t >= a - 1 && t <= b);
     if (!range) return -1;
     let end = range[1];
-    if (translator) {
+    if (translator === llmTranslator) {
       const pending = cues.find((c) => c.end >= t && c.start < end && !translationReady(c));
       if (pending) end = Math.max(t, pending.start);
     }
@@ -443,7 +443,7 @@
     const cue = isAd() ? null : cueAt(video.currentTime + options.showEarlySec);
     renderCue(cue);
     translateCues();
-    if (cue && translator && !waiting && !video.paused && cue !== playedThrough && !translationReady(cue)) pauseUntilReady(video);
+    if (cue && translator === llmTranslator && !waiting && !video.paused && cue !== playedThrough && !translationReady(cue)) pauseUntilReady(video);
 
     if (Date.now() - lastReport >= REPORT_MS) {
       lastReport = Date.now();

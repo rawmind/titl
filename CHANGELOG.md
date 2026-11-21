@@ -9,8 +9,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 - **Subtitle size** in Options (50–300%).
 
 ### Changed
-- **Subtitles are 25% larger by default.** The new Subtitle size setting starts at 125%; set it to 100% for the previous size.
-- In lookahead mode, the line nearest the playhead is translated first, and pause until ready also waits for the translation, so lines don't show untranslated. Pressing play skips the wait for that line.
+- In lookahead mode, the line nearest the playhead is translated first. With a local model, pause until ready also waits for the translation, so lines don't show untranslated; pressing play skips the wait for that line.
 - Larger text on the Options page.
 
 ## [0.1.15](https://github.com/rawmind/titl/releases/tag/v0.1.15) - 2026-11-20

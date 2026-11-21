@@ -70,7 +70,6 @@ test('LLM settings are validated', () => {
   assert.equal(validateSettings({ ...DEFAULTS, translationEngine: 'llm' }), null);
   assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'cloud' }), /Unknown translator/);
   assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'llm', llmUrl: 'https://api.example.com/v1' }), /Model API URL/);
-  assert.match(validateSettings({ ...DEFAULTS, llmModel: 'bad model' }), /Model name/);
 });
 
 test('chat URL keeps a query string out of the path', () => {
@@ -95,6 +94,7 @@ test('a slow model API is reported as a timeout, not as unreachable', async (t) 
   await assert.rejects(translateWithLlm({ ...DEFAULTS, translateTo: 'en' }, { text: 'x' }), /didn't answer within 30 s/);
 });
 
-test('a non-local model API URL is refused whichever translator is chosen', () => {
-  assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'chrome', llmUrl: 'https://api.example.com/v1' }), /Model API URL/);
+test('hidden local LLM fields never block saving with the Chrome translator', () => {
+  assert.equal(validateSettings({ ...DEFAULTS, translationEngine: 'chrome', llmUrl: 'not a url', llmModel: 'bad model' }), null);
+  assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'llm', llmModel: 'bad model' }), /Model name/);
 });
