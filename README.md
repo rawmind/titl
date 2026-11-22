@@ -47,7 +47,7 @@ Most live-caption tools show each line **after** it's spoken, upload your audio 
 <td valign="top">
 
 ### 🌍 Translation, built in
-- **On-device** translation with Chrome's built-in translator into ~36 languages, ordered by popularity
+- **On-device** translation with Chrome's built-in translator into ~36 languages, sorted by name
 - Or a **local LLM** (llama-server, Ollama, LM Studio) that reads the surrounding lines for context
 - Original and translation shown together, or just the translation
 - **Blur the translation** to practise listening: **V** (any keyboard layout) or a click reveals it

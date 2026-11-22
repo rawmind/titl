@@ -44,6 +44,7 @@
   let hintEl = null;
 
   let translator = null;
+  let translationGen = 0;
   let translateChain = Promise.resolve();
   let cueJob = null;
   let skipTranslationWait = false;
@@ -238,6 +239,27 @@
     setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
   }
 
+  function setTranslateTo(target) {
+    if (!options || target === options.translateTo) return;
+    removeGestureListeners?.();
+    translator?.destroy();
+    translator = cueJob = null;
+    translationGen++;
+    translateChain = Promise.resolve();
+    skipTranslationWait = false;
+    for (const cue of cues) {
+      delete cue.translation;
+      delete cue.translationFailed;
+    }
+    liveTranslation = '';
+    liveHistory = [];
+    options = { ...options, translateTo: target };
+    setTranslationNotice('');
+    if (mode === 'live') renderLive();
+    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
+    maybeResume();
+  }
+
   async function createTranslator({ sourceLanguage, targetLanguage }) {
     const opts = options;
     try {
@@ -290,15 +312,18 @@
     const cue = cues.find((c) => c.translation == null && !c.translationFailed && c.end >= now - CUE_HOLD_SEC);
     if (!cue) return;
     const job = (cueJob = {});
+    const gen = translationGen;
     cue.translation = '';
     translate(cue.src ?? cue.text, () => cueContext(cue))
       .then(
         (translated) => {
+          if (gen !== translationGen) return;
           cue.translation = translated;
           if (translated) skipTranslationWait = false;
           else cue.translationFailed = skipTranslationWait = true;
         },
         () => {
+          if (gen !== translationGen) return;
           cue.translation = null;
           cue.translationFailed = skipTranslationWait = true;
         },
@@ -330,8 +355,10 @@
     renderLive();
     if (translator) {
       const source = src ?? text;
+      const gen = translationGen;
       translate(source, () => ({ before: liveHistory.slice(-LLM_CONTEXT_BEFORE) })).then(
         (translated) => {
+          if (gen !== translationGen) return;
           liveHistory = [...liveHistory.slice(1 - LLM_CONTEXT_BEFORE), { text: source, translation: translated }];
           liveTranslation = trimTail(`${liveTranslation} ${translated}`.trim(), max);
           renderLive();
@@ -540,6 +567,9 @@
         break;
       case 'language':
         setLanguage(msg.language);
+        break;
+      case 'translate-to':
+        setTranslateTo(msg.translateTo);
         break;
     }
   });

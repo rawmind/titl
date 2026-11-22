@@ -5,11 +5,21 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 ## Unreleased
 
 ### Added
-- **Automatic language detection**, now the default. Options → Spoken language → Detect automatically lets whisper.cpp recognise the language, then keeps it once it has been detected 3 times. Serbian script, Chrome's translator and the local LLM follow the detected language, and the popup shows it. Settings you saved earlier keep their language.
+- **Automatic language detection, now the default.** Titl recognises the spoken language by itself: whisper.cpp guesses the language of each stretch of speech, and once the same language has come up 3 times Titl keeps it for the rest of the video. Serbian script, Chrome's translator and the local LLM follow the detected language, and the popup shows it, e.g. "Serbian (detected)". Close languages such as Serbian, Croatian and Bosnian can be mixed up, so pick yours in **Options → Spoken language** if you know it. Settings you saved earlier keep their language.
+- **Choose the translation language in the popup.** The change applies to running subtitles straight away: lines already on screen are translated again, and nothing restarts.
 
 ### Changed
-- The popup shows the spoken language (chosen or detected) and the translation target instead of the server address.
-- When the helper isn't installed, the popup says so and links to the download instructions on the website.
+- The popup shows the spoken language and the translation target instead of the server address.
+- When the helper isn't installed, the popup says so and links to the install steps on the website, in your browser's language and for your system.
+- **Options → Translate to** and the popup list languages alphabetically in your interface language. **Off** comes first and stays the default.
+- Website: the install steps explain the first start (pinning Titl, language detection and the hidden tab that plays ahead), and each system has its own link: `#installation_macos`, `#installation_windows` and `#installation_linux`.
+
+### Fixed
+- The website now builds into `dist/site`. The old `_site` folder stopped Chrome from loading the project folder as an unpacked extension.
+
+### Upgrade
+- Chrome updates the extension from the Chrome Web Store.
+- The helper only changes its version number, so updating it is optional.
 
 ## [0.1.17](https://github.com/rawmind/titl/releases/tag/v0.1.17) - 2026-11-22
 
