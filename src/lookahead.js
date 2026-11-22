@@ -141,7 +141,7 @@ function decodeInt16Base64(data) {
 }
 
 export class LookaheadSession {
-  constructor(mainTabId, config, { onLanguage = () => {} } = {}) {
+  constructor(mainTabId, config, { onLanguage = () => {}, onTiming = () => {} } = {}) {
     this.mainTabId = mainTabId;
     this.config = config;
     this.scoutTabId = null;
@@ -152,7 +152,7 @@ export class LookaheadSession {
     this.holdUntil = 0;
     this.focusReturned = false;
     this.stopped = false;
-    const pace = new Pace();
+    const pace = new Pace(onTiming);
     this.transcriber = new LookaheadTranscriber(config, {
       transcribe: (samples, language) => transcribe(config, samples, { verbose: true, language, pace }),
       onCues: (cues, from, to) => this.emit(cues, from, to),

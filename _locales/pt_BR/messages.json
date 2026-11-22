@@ -277,5 +277,17 @@
   },
   "subtitleSize": {
     "message": "Tamanho das legendas (%)"
+  },
+  "debugInfo": {
+    "message": "Informações de depuração"
+  },
+  "debugHint": {
+    "message": "Inclua isto ao relatar um problema. Mostra caminhos de arquivos deste computador, que podem conter seu nome de usuário."
+  },
+  "copy": {
+    "message": "Copiar"
+  },
+  "copied": {
+    "message": "Copiado"
   }
 }

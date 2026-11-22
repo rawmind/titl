@@ -277,5 +277,17 @@
   },
   "subtitleSize": {
     "message": "Subtitle size (%)"
+  },
+  "debugInfo": {
+    "message": "Debug info"
+  },
+  "debugHint": {
+    "message": "Include this when you report a problem. It shows file paths on this computer, which may contain your user name."
+  },
+  "copy": {
+    "message": "Copy"
+  },
+  "copied": {
+    "message": "Copied"
   }
 }

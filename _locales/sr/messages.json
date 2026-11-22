@@ -277,5 +277,17 @@
   },
   "subtitleSize": {
     "message": "Veličina titlova (%)"
+  },
+  "debugInfo": {
+    "message": "Informacije za otklanjanje grešaka"
+  },
+  "debugHint": {
+    "message": "Priložite ovo kada prijavljujete problem. Prikazuje putanje do datoteka na ovom računaru, koje mogu sadržati vaše korisničko ime."
+  },
+  "copy": {
+    "message": "Kopiraj"
+  },
+  "copied": {
+    "message": "Kopirano"
   }
 }

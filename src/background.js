@@ -62,7 +62,7 @@ async function start(tabId) {
   const invalid = validateSettings(config);
   if (invalid) throw new Error(invalid);
 
-  await setState({ status: 'starting', language: null });
+  await setState({ status: 'starting', language: null, timing: null });
   try {
     config.serverUrl = await resolveServer(config);
   } catch (err) {
@@ -89,7 +89,7 @@ async function start(tabId) {
     },
   });
   if (mode === 'lookahead') {
-    lookahead = new LookaheadSession(tabId, config, { onLanguage: announceLanguage });
+    lookahead = new LookaheadSession(tabId, config, { onLanguage: announceLanguage, onTiming: (timing) => setState({ timing }) });
     await lookahead.start(info);
   } else {
     await startLive(tabId, config);
@@ -145,6 +145,10 @@ async function handle(msg, sender) {
 
     case 'language':
       return announceLanguage(msg.language);
+
+    case 'timing':
+      await setState({ timing: msg.timing });
+      return;
 
     case 'translate-to': {
       const { tabId, status } = await getState();

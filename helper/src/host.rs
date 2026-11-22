@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::diagnostics;
 use crate::paths;
 use crate::update;
 use serde_json::{json, Value};
@@ -216,6 +217,7 @@ pub fn run() {
                 server.stop();
                 json!({ "status": "stopped" })
             }
+            Some("info") => diagnostics::info_reply(),
             Some("checkUpdate") => update::status_reply(),
             Some("update") => update::apply_reply(),
             _ => error("unknown command"),

@@ -4,6 +4,9 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 
 ## Unreleased
 
+### Added
+- **Debug info** at the bottom of Options: Titl and browser versions, your settings, the helper's whisper.cpp build and model, whether whisper.cpp runs on the **CPU or GPU** and with how many threads, the last request's duration, and whether Chrome's translator is available. **Copy** puts it on the clipboard for a bug report. `titl status` also shows CPU or GPU and the thread count. With an older helper, Debug info estimates CPU or GPU from the speed of the last request and says so.
+
 ### Changed
 - **Faster on slow computers.** Whisper always encodes 30 seconds of audio, even for an 8-second window. When a request takes more than half as long as the audio it covers, Titl asks whisper.cpp to encode only the window plus a second for the rest of the session. That was about 3.5 times faster on a 4-thread CPU, with the same words. Fast machines keep the full context, because the short one makes timestamps less exact.
 

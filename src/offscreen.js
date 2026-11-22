@@ -63,7 +63,7 @@ async function start(streamId, config) {
     ring,
     transcript: new Transcript(),
     lock: new LanguageLock(config.language),
-    pace: new Pace(),
+    pace: new Pace((timing) => send({ type: 'timing', timing })),
     lastEnd: 0,
     busy: false,
     abort: null,

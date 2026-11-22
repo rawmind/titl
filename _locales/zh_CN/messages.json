@@ -277,5 +277,17 @@
   },
   "subtitleSize": {
     "message": "字幕大小（%）"
+  },
+  "debugInfo": {
+    "message": "调试信息"
+  },
+  "debugHint": {
+    "message": "报告问题时请附上此信息。其中包含此电脑上的文件路径，可能含有你的用户名。"
+  },
+  "copy": {
+    "message": "复制"
+  },
+  "copied": {
+    "message": "已复制"
   }
 }

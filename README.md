@@ -299,6 +299,8 @@ A few parts are tuned for Serbian:
 
 ## Troubleshooting
 
+**Options → Debug info** (at the bottom of the page) lists your versions, settings, whether whisper.cpp runs on the CPU or GPU, how long the last request took, and whether Chrome's translator is available. Click **Copy** and paste it into a bug report. In a terminal, `titl status` shows the helper's part.
+
 | Symptom | Fix |
 |---|---|
 | Extension doesn't appear in Chrome after `install` | `install` doesn't add it: install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) ([Install the extension](#install-the-extension)). `titl status` shows whether Chrome has it. |
@@ -315,6 +317,7 @@ A few parts are tuned for Serbian:
 | "Click the video once to download the translation model" | Click anywhere on the YouTube page, or use **Download translation model** in Options. |
 | "Translation unavailable: Cannot reach the model API" | The local model server isn't running, or the **Model API URL** is wrong. Use **Test connection** in Options. |
 | "Model API returned 403" with Ollama | Start Ollama with `OLLAMA_ORIGINS='chrome-extension://*'` so it accepts requests from the extension. |
+| Subtitles keep pausing the video, or "Preparing subtitles…" takes long | Open **Options → Debug info**. If **runs on** says CPU and **last request** is close to or above 1× real time, the computer is too slow for the model. Titl already switches to a faster mode on slow computers. On Windows with an NVIDIA card, run `titl install` again so it can pick the CUDA build. |
 | Local LLM translation pauses the video often | The model is slower than the speech. Start llama-server with `--swa-full -c 2048 -np 1`, or pick a smaller model. |
 | "Chrome can't translate … on this device" | That language pair isn't offered by Chrome's translator. Pick another target. |
 | "Chrome downloaded the language pack but didn't finish installing it", or an older version stuck at "Downloading… 100%" | Restart Chrome and click **Download translation model** once more. If it happens again, check that the disk Chrome is installed on has free space. |

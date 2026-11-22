@@ -277,5 +277,17 @@
   },
   "subtitleSize": {
     "message": "Taille des sous-titres (%)"
+  },
+  "debugInfo": {
+    "message": "Informations de débogage"
+  },
+  "debugHint": {
+    "message": "Joignez-les quand vous signalez un problème. Elles montrent des chemins de fichiers de cet ordinateur, qui peuvent contenir votre nom d'utilisateur."
+  },
+  "copy": {
+    "message": "Copier"
+  },
+  "copied": {
+    "message": "Copié"
   }
 }

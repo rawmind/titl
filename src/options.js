@@ -2,6 +2,8 @@ import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validat
 import { languageOptions, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
 import { translateWithLlm } from './llm.js';
+import { HOST_NAME } from './server.js';
+import { browserFromBrands, browserName, describeTiming, estimateBackend, formatDebugInfo } from './debug.js';
 
 const $ = (id) => document.getElementById(id);
 const INSTALL_TIMEOUT_MS = 60_000;
@@ -162,3 +164,92 @@ syncScriptRow();
 syncEngineRows();
 $('language').addEventListener('change', syncScriptRow);
 $('translationEngine').addEventListener('change', syncEngineRows);
+
+async function helperInfo() {
+  try {
+    const res = await chrome.runtime.sendNativeMessage(HOST_NAME, { cmd: 'info' });
+    if (res?.status === 'info') return res;
+    return { problem: res?.error === 'unknown command' ? 'helper is older than this feature: update it' : res?.error ?? 'no answer' };
+  } catch (err) {
+    return { problem: /not found/i.test(err.message) ? 'not installed' : err.message };
+  }
+}
+
+async function translatorInfo(settings) {
+  if (!('Translator' in self)) return 'not available in this browser';
+  if (!settings.translateTo || settings.translationEngine !== 'chrome') return 'not in use';
+  const language = settings.language === 'auto' ? 'sr' : settings.language;
+  const results = [];
+  for (const source of [language, TRANSLATOR_SOURCE_FALLBACK[language]]) {
+    if (!source || source === settings.translateTo) continue;
+    try {
+      results.push(`${source} → ${settings.translateTo}: ${await Translator.availability({ sourceLanguage: source, targetLanguage: settings.translateTo })}`);
+    } catch (err) {
+      results.push(`${source} → ${settings.translateTo}: ${err.message}`);
+    }
+  }
+  return results.join(', ');
+}
+
+async function browserVersion() {
+  try {
+    const { fullVersionList } = await navigator.userAgentData.getHighEntropyValues(['fullVersionList']);
+    return browserFromBrands(fullVersionList) ?? browserName(navigator.userAgent);
+  } catch {
+    return browserName(navigator.userAgent);
+  }
+}
+
+async function collectDebugInfo() {
+  const settings = await loadSettings();
+  const manifest = chrome.runtime.getManifest();
+  const platform = await chrome.runtime.getPlatformInfo();
+  const { state } = await chrome.storage.session.get('state');
+  const [helper, translator, browser] = await Promise.all([helperInfo(), translatorInfo(settings), browserVersion()]);
+  return formatDebugInfo([
+    ['Titl', [['version', manifest.version], ['extension id', chrome.runtime.id], ['interface language', uiLocale()]]],
+    ['Browser', [['browser', browser], ['system', `${platform.os} ${platform.arch}`]]],
+    ['Settings', [
+      ['mode', settings.mode],
+      ['spoken language', settings.language],
+      ['Serbian script', settings.script],
+      ['translate to', settings.translateTo || 'off'],
+      ['translator', settings.translationEngine],
+      ['start whisper-server automatically', settings.autoStartServer],
+      ['server URL', settings.autoStartServer ? null : settings.serverUrl],
+    ]],
+    ['Helper', [
+      ['problem', helper.problem],
+      ['version', helper.version],
+      ['runs on', helper.backend ?? (helper.version ? 'unknown (start subtitles once)' : estimateBackend(state?.timing))],
+      ['threads', helper.threads],
+      ['whisper-server', helper.server],
+      ['model', helper.model],
+      ['extra flags', helper.args?.join(' ')],
+      ['setup problem', helper.config_error],
+      ['log', helper.log],
+    ]],
+    ['Session', [
+      ['status', state?.status ?? 'idle'],
+      ['mode', state?.mode],
+      ['server', state?.serverUrl],
+      ['detected language', settings.language === 'auto' ? state?.language : null],
+      ['last request', describeTiming(state?.timing)],
+      ['short audio context', state?.timing ? (state.timing.shortContext ? 'on' : 'off') : null],
+      ['error', state?.error],
+    ]],
+    ["Chrome's translator", [['availability', translator]]],
+  ]);
+}
+
+async function showDebugInfo() {
+  if (!$('debug').open) return;
+  $('debugText').textContent = '…';
+  $('debugText').textContent = await collectDebugInfo();
+}
+
+$('debug').addEventListener('toggle', showDebugInfo);
+$('copyDebug').addEventListener('click', async () => {
+  await navigator.clipboard.writeText($('debugText').textContent);
+  say($('copyResult'), t('copied'), true);
+});

@@ -277,5 +277,17 @@
   },
   "subtitleSize": {
     "message": "Ukuran subtitle (%)"
+  },
+  "debugInfo": {
+    "message": "Info debug"
+  },
+  "debugHint": {
+    "message": "Sertakan ini saat melaporkan masalah. Isinya menampilkan jalur file di komputer ini, yang bisa memuat nama pengguna Anda."
+  },
+  "copy": {
+    "message": "Salin"
+  },
+  "copied": {
+    "message": "Tersalin"
   }
 }

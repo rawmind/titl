@@ -277,5 +277,17 @@
   },
   "subtitleSize": {
     "message": "Tamaño de los subtítulos (%)"
+  },
+  "debugInfo": {
+    "message": "Información de depuración"
+  },
+  "debugHint": {
+    "message": "Inclúyela cuando informes de un problema. Muestra rutas de archivos de este ordenador, que pueden contener tu nombre de usuario."
+  },
+  "copy": {
+    "message": "Copiar"
+  },
+  "copied": {
+    "message": "Copiado"
   }
 }

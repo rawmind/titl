@@ -311,6 +311,12 @@ pub fn status() -> Result<(), String> {
             if !c.args.is_empty() {
                 println!("args:     {}", c.args.join(" "));
             }
+            if let Some(run) = crate::diagnostics::server_run() {
+                println!("runs on:  {}", run.backend.as_deref().unwrap_or("unknown (start subtitles once)"));
+                if let Some(threads) = run.threads {
+                    println!("threads:  {threads}");
+                }
+            }
         }
         Err(e) => println!("{e}"),
     }

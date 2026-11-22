@@ -13,8 +13,9 @@ export function audioContext(seconds) {
 }
 
 export class Pace {
-  constructor() {
+  constructor(onRecord = () => {}) {
     this.slow = false;
+    this.onRecord = onRecord;
   }
 
   audioContext(seconds) {
@@ -23,6 +24,7 @@ export class Pace {
 
   record(seconds, elapsedMs) {
     if (elapsedMs > seconds * SLOW_RATIO * 1000) this.slow = true;
+    this.onRecord({ audioSec: seconds, requestMs: Math.round(elapsedMs), shortContext: this.slow });
   }
 }
 

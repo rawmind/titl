@@ -1,4 +1,5 @@
 mod config;
+mod diagnostics;
 mod extension;
 mod host;
 mod install;
