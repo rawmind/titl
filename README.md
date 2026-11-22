@@ -317,6 +317,9 @@ A few parts are tuned for Serbian:
 | "Model API returned 403" with Ollama | Start Ollama with `OLLAMA_ORIGINS='chrome-extension://*'` so it accepts requests from the extension. |
 | Local LLM translation pauses the video often | The model is slower than the speech. Start llama-server with `--swa-full -c 2048 -np 1`, or pick a smaller model. |
 | "Chrome can't translate … on this device" | That language pair isn't offered by Chrome's translator. Pick another target. |
+| "Chrome downloaded the language pack but didn't finish installing it", or an older version stuck at "Downloading… 100%" | Restart Chrome and click **Download translation model** once more. If it happens again, check that the disk Chrome is installed on has free space. |
+| "Chrome is still setting up its translator", or "Unable to create translator…" or "The translation service count exceeded the limitation" in the console | The first time Chrome translates, it installs its translation engine and the language pack, which can take a couple of minutes, and refuses to create a translator until they're ready. Wait a minute and click **Download translation model** again. On the YouTube page, Titl tries again by itself. If it keeps failing, open `chrome://components`: when **Chrome TranslateKit** shows version 0.0.0.0, the engine was never installed. Click **Check for update** under it, wait until the version changes, then try again. If it stays at 0.0.0.0, a firewall, proxy, antivirus or company policy is blocking Chrome's component downloads. |
+| "The requested language options are not supported" in the console | Harmless. Chrome has no Serbian model, so Titl first asks for Serbian, gets this warning, and then uses Croatian. |
 | Nothing happens after moving the extension folder | Remove and re-load the unpacked extension. |
 
 To remove the helper, run `titl uninstall`.

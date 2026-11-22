@@ -6,6 +6,8 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 
 ### Fixed
 - Downloading a translation model no longer sits at "Downloading… 100%". Titl now says it's installing the language pack, and if Chrome hasn't finished within a minute, or the sample translation takes over 10 seconds, it says so and suggests restarting Chrome. The same applies on the YouTube page.
+- The first time Chrome translates, it installs its translation engine and refuses to create a translator for a couple of minutes, reporting "Unable to create translator" or "The translation service count exceeded the limitation". Titl now explains that Chrome is still setting up and to try again in a minute. The YouTube page tries again by itself every 15 seconds.
+- **Download translation model** can't be clicked again while it's working.
 
 ## [0.1.18](https://github.com/rawmind/titl/releases/tag/v0.1.18) - 2026-11-22
 

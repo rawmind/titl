@@ -233,6 +233,9 @@
   "translationStalled": {
     "message": "⚠ Chrome 已下载语言包，但未完成安装。请重启 Chrome 后重试。"
   },
+  "translatorSettingUp": {
+    "message": "Chrome 仍在设置其翻译器。首次设置可能需要几分钟。请一分钟后再试。"
+  },
   "translationUnavailable": {
     "message": "⚠ 翻译不可用：$1"
   },

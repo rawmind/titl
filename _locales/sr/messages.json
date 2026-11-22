@@ -233,6 +233,9 @@
   "translationStalled": {
     "message": "⚠ Chrome je preuzeo jezički paket, ali nije završio instalaciju. Ponovo pokrenite Chrome i pokušajte opet."
   },
+  "translatorSettingUp": {
+    "message": "Chrome još podešava svoj prevodilac. Prvi put to može da potraje nekoliko minuta. Pokušajte ponovo za minut."
+  },
   "translationUnavailable": {
     "message": "⚠ Prevod nije dostupan: $1"
   },

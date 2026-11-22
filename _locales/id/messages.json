@@ -233,6 +233,9 @@
   "translationStalled": {
     "message": "⚠ Chrome sudah mengunduh paket bahasa, tetapi belum selesai memasangnya. Mulai ulang Chrome lalu coba lagi."
   },
+  "translatorSettingUp": {
+    "message": "Chrome masih menyiapkan penerjemahnya. Pertama kali, ini bisa memakan beberapa menit. Coba lagi dalam satu menit."
+  },
   "translationUnavailable": {
     "message": "⚠ Terjemahan tidak tersedia: $1"
   },

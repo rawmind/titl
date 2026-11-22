@@ -233,6 +233,9 @@
   "translationStalled": {
     "message": "⚠ نزّل Chrome حزمة اللغة لكنه لم يُكمل تثبيتها. أعد تشغيل Chrome وحاول مرة أخرى."
   },
+  "translatorSettingUp": {
+    "message": "لا يزال Chrome يُعدّ المترجم. قد يستغرق ذلك بضع دقائق في المرة الأولى. حاول مرة أخرى بعد دقيقة."
+  },
   "translationUnavailable": {
     "message": "⚠ الترجمة غير متاحة: $1"
   },

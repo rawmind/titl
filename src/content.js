@@ -12,6 +12,8 @@
   const LLM_CONTEXT_AFTER = 2;
   const CHROME_TRANSLATE_TIMEOUT_MS = 10000;
   const TRANSLATOR_INSTALL_TIMEOUT_MS = 60000;
+  const TRANSLATOR_SETTING_UP = /Unable to create translator|service count exceeded/i;
+  const TRANSLATOR_RETRY_MS = 15000;
   const REVEAL_KEY = 'v';
   const AUTO = 'auto';
   const t = (key, ...subs) => chrome.i18n.getMessage(key, subs.map(String)) || key;
@@ -286,7 +288,14 @@
       translateCues();
     } catch (err) {
       if (options !== opts) return;
-      setTranslationNotice(stall.signal.aborted ? t('translationStalled') : t('translationUnavailable', err.message));
+      if (stall.signal.aborted) setTranslationNotice(t('translationStalled'));
+      else if (TRANSLATOR_SETTING_UP.test(err.message)) {
+        setTranslationNotice(t('translatorSettingUp'));
+        setTimeout(() => {
+          if (options === opts && !translator) setupTranslator().catch((e) => setTranslationNotice(t('translationUnavailable', e.message)));
+        }, TRANSLATOR_RETRY_MS);
+      }
+      else setTranslationNotice(t('translationUnavailable', err.message));
     } finally {
       clearTimeout(stallTimer);
     }

@@ -233,6 +233,9 @@
   "translationStalled": {
     "message": "⚠ Chrome ভাষা প্যাক ডাউনলোড করেছে, কিন্তু ইনস্টল শেষ করেনি। Chrome আবার চালু করে আবার চেষ্টা করুন।"
   },
+  "translatorSettingUp": {
+    "message": "Chrome এখনও তার অনুবাদক প্রস্তুত করছে। প্রথমবার এতে কয়েক মিনিট লাগতে পারে। এক মিনিট পরে আবার চেষ্টা করুন।"
+  },
   "translationUnavailable": {
     "message": "⚠ অনুবাদ উপলব্ধ নয়: $1"
   },

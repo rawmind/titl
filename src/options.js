@@ -6,6 +6,7 @@ import { translateWithLlm } from './llm.js';
 const $ = (id) => document.getElementById(id);
 const INSTALL_TIMEOUT_MS = 60_000;
 const SAMPLE_TIMEOUT_MS = 10_000;
+const TRANSLATOR_SETTING_UP = /Unable to create translator|service count exceeded/i;
 const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'translationEngine', 'llmUrl', 'llmModel', 'showOriginal', 'blurTranslation', 'subtitleSize', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
 
 function fill(settings) {
@@ -75,6 +76,17 @@ $('test').addEventListener('click', async () => {
 });
 
 $('prepareTranslation').addEventListener('click', async () => {
+  const button = $('prepareTranslation');
+  if (button.disabled) return;
+  button.disabled = true;
+  try {
+    await prepareTranslation();
+  } finally {
+    button.disabled = false;
+  }
+});
+
+async function prepareTranslation() {
   const out = $('translationResult');
   const chosen = $('language').value.trim();
   const language = chosen === 'auto' ? 'sr' : chosen;
@@ -125,9 +137,9 @@ $('prepareTranslation').addEventListener('click', async () => {
     }
     say(out, t('ready', pair.sourceLanguage, pair.targetLanguage, 'Dobar dan, kako ste?', sample), true);
   } catch (err) {
-    say(out, t('failed', err.message), false);
+    say(out, TRANSLATOR_SETTING_UP.test(err.message) ? t('translatorSettingUp') : t('failed', err.message), false);
   }
-});
+}
 
 async function testLlm(out, language, target) {
   const config = { ...read(), language, translateTo: target };

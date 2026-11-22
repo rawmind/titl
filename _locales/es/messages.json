@@ -233,6 +233,9 @@
   "translationStalled": {
     "message": "⚠ Chrome descargó el paquete de idioma, pero no terminó de instalarlo. Reinicia Chrome y vuelve a intentarlo."
   },
+  "translatorSettingUp": {
+    "message": "Chrome todavía está preparando su traductor. La primera vez puede tardar un par de minutos. Vuelve a intentarlo en un minuto."
+  },
   "translationUnavailable": {
     "message": "⚠ Traducción no disponible: $1"
   },

@@ -233,6 +233,9 @@
   "translationStalled": {
     "message": "⚠ Chrome a téléchargé le pack de langue sans terminer son installation. Redémarrez Chrome et réessayez."
   },
+  "translatorSettingUp": {
+    "message": "Chrome prépare encore son traducteur. La première fois, cela peut prendre quelques minutes. Réessayez dans une minute."
+  },
   "translationUnavailable": {
     "message": "⚠ Traduction indisponible : $1"
   },
