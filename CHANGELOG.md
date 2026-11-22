@@ -2,7 +2,7 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
-## Unreleased
+## [0.1.19](https://github.com/rawmind/titl/releases/tag/v0.1.19) - 2026-11-22
 
 ### Added
 - **Debug info** at the bottom of Options: Titl and browser versions, your settings, the helper's whisper.cpp build and model, whether whisper.cpp runs on the **CPU or GPU** and with how many threads, the last request's duration, and whether Chrome's translator is available. **Copy** puts it on the clipboard for a bug report. `titl status` also shows CPU or GPU and the thread count. With an older helper, Debug info estimates CPU or GPU from the speed of the last request and says so.
@@ -15,6 +15,14 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 - Downloading a translation model no longer sits at "Downloading… 100%". Titl now says it's installing the language pack, and if Chrome hasn't finished within a minute, or the sample translation takes over 10 seconds, it says so and suggests restarting Chrome. The same applies on the YouTube page.
 - The first time Chrome translates, it installs its translation engine and refuses to create a translator for a couple of minutes, reporting "Unable to create translator" or "The translation service count exceeded the limitation". Titl now explains that Chrome is still setting up and to try again in a minute. The YouTube page tries again by itself every 15 seconds.
 - **Download translation model** can't be clicked again while it's working.
+
+### Upgrade
+- Chrome updates the extension from the Chrome Web Store. That alone brings Debug info, the faster mode for slow computers and the translator fixes.
+- Updating the helper adds the exact CPU or GPU line to Debug info and the `titl` folder:
+  - Windows: the popup offers the update, or run `titl update`. To also move the files to `%LOCALAPPDATA%\titl`, stop subtitles and run the PowerShell install line once more. The installed helper can't move the folder it runs from.
+  - macOS: `brew upgrade rawmind/tap/titl`, then `titl install` to move the files.
+  - Linux: download `titl-linux-x64` from this release and run `./titl-linux-x64 install`, which also moves the files.
+- Until the files are moved, the helper keeps using `chrome-transcriber`, which works just as well.
 
 ## [0.1.18](https://github.com/rawmind/titl/releases/tag/v0.1.18) - 2026-11-22
 
