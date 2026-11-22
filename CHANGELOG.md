@@ -4,6 +4,9 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 
 ## Unreleased
 
+### Changed
+- **Faster on slow computers.** Whisper always encodes 30 seconds of audio, even for an 8-second window. When a request takes more than half as long as the audio it covers, Titl asks whisper.cpp to encode only the window plus a second for the rest of the session. That was about 3.5 times faster on a 4-thread CPU, with the same words. Fast machines keep the full context, because the short one makes timestamps less exact.
+
 ### Fixed
 - Downloading a translation model no longer sits at "Downloading… 100%". Titl now says it's installing the language pack, and if Chrome hasn't finished within a minute, or the sample translation takes over 10 seconds, it says so and suggests restarting Chrome. The same applies on the YouTube page.
 - The first time Chrome translates, it installs its translation engine and refuses to create a translator for a couple of minutes, reporting "Unable to create translator" or "The translation service count exceeded the limitation". Titl now explains that Chrome is still setting up and to try again in a minute. The YouTube page tries again by itself every 15 seconds.

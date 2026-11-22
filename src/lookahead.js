@@ -1,6 +1,6 @@
 import { rms } from './audio.js';
 import { Coverage } from './coverage.js';
-import { SAMPLE_RATE, transcribe } from './whisper.js';
+import { Pace, SAMPLE_RATE, transcribe } from './whisper.js';
 import { Transcript, applyScript, cleanText, splitCue, translationSource } from './text.js';
 import { LanguageLock } from './detect.js';
 
@@ -85,10 +85,11 @@ export class LookaheadTranscriber {
     }
     if (gen !== this.gen) return true;
     if (this.lock.observe(result)) this.onLanguage(this.lock.current);
-    const segments = result.segments ?? [];
     const language = this.lock.current;
-
     const winLen = we - ws;
+    const winSec = winLen / rate;
+    const segments = (result.segments ?? []).map((s) => ({ ...s, start: Math.min(s.start, winSec), end: Math.min(s.end, winSec) }));
+
     const toVideo = (s) => ({ start: ws + s.start * rate, end: ws + s.end * rate, text: s.text });
     let accepted = segments.filter((s) => s.end * rate <= winLen - TAIL_SEC);
     let commitT = ws + (accepted.at(-1)?.end ?? 0) * rate;
@@ -151,8 +152,9 @@ export class LookaheadSession {
     this.holdUntil = 0;
     this.focusReturned = false;
     this.stopped = false;
+    const pace = new Pace();
     this.transcriber = new LookaheadTranscriber(config, {
-      transcribe: (samples, language) => transcribe(config, samples, { verbose: true, language }),
+      transcribe: (samples, language) => transcribe(config, samples, { verbose: true, language, pace }),
       onCues: (cues, from, to) => this.emit(cues, from, to),
       onLanguage,
       onError: (err) => this.toMain({ type: 'status', error: err.message }),

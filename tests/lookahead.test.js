@@ -150,3 +150,21 @@ test('auto language: detected Serbian gets the chosen script and is sent until l
   assert.deepEqual(detected, ['sr']);
   assert.equal(emitted[0].text, 'Dobar dan.');
 });
+
+test('segment times past the window are clamped to it', async () => {
+  const emitted = [];
+  const t = new LookaheadTranscriber(
+    { ...DEFAULTS, language: 'en', script: 'original' },
+    {
+      transcribe: async () => ({ segments: [{ start: 0, end: 3, text: 'One.' }, { start: 3, end: 28, text: 'Two.' }] }),
+      onCues: (cues, from, to) => emitted.push({ cues, from, to }),
+      onError: (err) => assert.fail(err),
+    },
+  );
+  for (let i = 0; i < 8; i++) t.addAudio({ t0: i, rate: 1, samples: loud(1) });
+  t.finish();
+  for (let i = 0; i < 5; i++) await flush();
+  const all = emitted.flatMap((e) => e.cues);
+  assert.ok(all.length > 0);
+  for (const cue of all) assert.ok(cue.end <= 8, `cue ends at ${cue.end}`);
+});

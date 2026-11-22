@@ -1,5 +1,5 @@
 import { RingBuffer, rms } from './audio.js';
-import { SAMPLE_RATE, transcribe } from './whisper.js';
+import { Pace, SAMPLE_RATE, transcribe } from './whisper.js';
 import { Transcript, applyScript, cleanText, translationSource } from './text.js';
 import { isLocalUrl } from './settings.js';
 import { LanguageLock } from './detect.js';
@@ -63,6 +63,7 @@ async function start(streamId, config) {
     ring,
     transcript: new Transcript(),
     lock: new LanguageLock(config.language),
+    pace: new Pace(),
     lastEnd: 0,
     busy: false,
     abort: null,
@@ -104,7 +105,7 @@ function tick() {
   const controller = new AbortController();
   s.abort = controller;
   const { lock } = s;
-  transcribe(config, samples, { signal: controller.signal, verbose: lock.detecting, language: lock.request })
+  transcribe(config, samples, { signal: controller.signal, verbose: lock.detecting, language: lock.request, pace: s.pace })
     .then((result) => {
       if (session !== s) return;
       if (lock.observe(result)) send({ type: 'language', language: lock.current });
