@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 pub enum Outcome {
     NothingToDo,
-    BothExist { old: PathBuf, new: PathBuf },
+    BothExist { old: PathBuf },
     Moved { from: PathBuf, to: PathBuf },
     Kept { dir: PathBuf, reason: String },
 }
@@ -20,7 +20,7 @@ pub fn move_dir(old: &Path, new: &Path) -> Outcome {
         return Outcome::NothingToDo;
     }
     if new.exists() {
-        return Outcome::BothExist { old: old.to_path_buf(), new: new.to_path_buf() };
+        return Outcome::BothExist { old: old.to_path_buf() };
     }
     if let Some(parent) = new.parent() {
         let _ = fs::create_dir_all(parent);

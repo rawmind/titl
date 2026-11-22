@@ -109,7 +109,10 @@ fn homebrew_exe(current: &Path) -> Option<PathBuf> {
 }
 
 fn reregister_after_move(current: &Path) {
-    let exe = homebrew_exe(current).or_else(|| Some(paths::installed_exe()).filter(|p| p.is_file()));
+    let exe = install_self(current)
+        .ok()
+        .or_else(|| homebrew_exe(current))
+        .or_else(|| Some(paths::installed_exe()).filter(|p| p.is_file()));
     let Some(exe) = exe else { return };
     let extra = Config::load().map(|c| c.extension_ids).unwrap_or_default();
     if let Err(e) = register(&exe, &config::extension_ids(&extra)) {
@@ -191,6 +194,7 @@ pub fn default_model(macos: bool, build: Option<Build>, nvidia: bool) -> &'stati
 
 pub fn install(mut opts: Options) -> Result<(), String> {
     let mut current = env::current_exe().map_err(|e| e.to_string())?;
+    let mut leftover = None;
     match crate::migrate::legacy_data_dir() {
         crate::migrate::Outcome::Moved { from, to } => {
             println!("Moved {} to {}.", from.display(), to.display());
@@ -202,9 +206,7 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         crate::migrate::Outcome::Kept { dir, reason } => {
             println!("Keeping {} (could not move it to the new titl folder: {reason}).", dir.display())
         }
-        crate::migrate::Outcome::BothExist { old, new } => {
-            println!("Titl uses {}. {} is left over from an older helper and can be deleted.", new.display(), old.display())
-        }
+        crate::migrate::Outcome::BothExist { old, .. } => leftover = Some(old),
         crate::migrate::Outcome::NothingToDo => {}
     }
     let (server, build) = resolve_server(&opts)?;
@@ -254,6 +256,9 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         println!("Registered with {}.", registered.join(", "));
     }
     println!("Extra server flags go in \"args\" in {}", paths::config_path().display());
+    if let Some(old) = leftover.filter(|_| !registered.is_empty()) {
+        println!("{} is left over from an older helper and can be deleted.", old.display());
+    }
     println!();
     print_extension_steps(extension_dir.as_deref(), &ids);
     Ok(())
