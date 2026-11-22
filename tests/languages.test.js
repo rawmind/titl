@@ -23,10 +23,11 @@ test('languages get readable names', () => {
   assert.ok(languageOptions().every(({ name, code }) => name !== code), 'every language has a name');
 });
 
-test('options are sorted by English name and include the default', () => {
+test('options are sorted by English name and the default detects the language', () => {
   const names = languageOptions().map((o) => o.name);
   assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b, 'en')));
-  assert.ok(languageOptions().some((o) => o.code === DEFAULTS.language));
+  assert.equal(DEFAULTS.language, 'auto');
+  assert.ok(languageOptions().some((o) => o.code === 'sr'));
 });
 
 test('translation targets keep their popularity order and are valid settings', () => {

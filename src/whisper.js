@@ -2,11 +2,12 @@ import { encodeWav } from './audio.js';
 
 export const SAMPLE_RATE = 16000;
 
-export async function transcribe(config, samples, { verbose = false, signal } = {}) {
+export async function transcribe(config, samples, { verbose = false, signal, language = config.language } = {}) {
   const form = new FormData();
   form.append('file', new Blob([encodeWav(samples, SAMPLE_RATE)], { type: 'audio/wav' }), 'window.wav');
-  form.append('language', config.language);
+  form.append('language', language);
   form.append('response_format', verbose ? 'verbose_json' : 'json');
+  form.append('no_language_probabilities', 'true');
   form.append('temperature', '0');
 
   const timeout = AbortSignal.timeout(config.requestTimeoutSec * 1000);

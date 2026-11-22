@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "Язык речи"
   },
+  "detectLanguage": {
+    "message": "Определять автоматически"
+  },
+  "detectedLanguage": {
+    "message": "$1 (определён)"
+  },
   "serbianScript": {
     "message": "Сербский алфавит"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "Настройки"
-  },
-  "autoStartLabel": {
-    "message": "автозапуск"
   },
   "preparingSubtitles": {
     "message": "Готовлю субтитры…"

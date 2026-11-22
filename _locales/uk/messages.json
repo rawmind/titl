@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "Мова мовлення"
   },
+  "detectLanguage": {
+    "message": "Визначати автоматично"
+  },
+  "detectedLanguage": {
+    "message": "$1 (визначено)"
+  },
   "serbianScript": {
     "message": "Сербський алфавіт"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "Налаштування"
-  },
-  "autoStartLabel": {
-    "message": "автозапуск"
   },
   "preparingSubtitles": {
     "message": "Готую субтитри…"

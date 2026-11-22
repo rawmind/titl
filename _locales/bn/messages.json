@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "কথ্য ভাষা"
   },
+  "detectLanguage": {
+    "message": "স্বয়ংক্রিয়ভাবে শনাক্ত করুন"
+  },
+  "detectedLanguage": {
+    "message": "$1 (শনাক্ত)"
+  },
   "serbianScript": {
     "message": "সার্বিয়ান লিপি"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "সেটিংস"
-  },
-  "autoStartLabel": {
-    "message": "অটো-স্টার্ট"
   },
   "preparingSubtitles": {
     "message": "সাবটাইটেল প্রস্তুত হচ্ছে…"

@@ -12,6 +12,7 @@
   const LLM_CONTEXT_AFTER = 2;
   const CHROME_TRANSLATE_TIMEOUT_MS = 10000;
   const REVEAL_KEY = 'v';
+  const AUTO = 'auto';
   const t = (key, ...subs) => chrome.i18n.getMessage(key, subs.map(String)) || key;
 
   let root = null;
@@ -184,7 +185,7 @@
   const llmTranslator = {
     async translate(text, context = {}) {
       const opts = options;
-      const res = await chrome.runtime.sendMessage({ target: 'background', type: 'llm-translate', text, ...context });
+      const res = await chrome.runtime.sendMessage({ target: 'background', type: 'llm-translate', text, source: opts.language, ...context });
       if (options !== opts) throw new Error('stopped');
       if (!res?.ok) {
         setTranslationNotice(t('translationUnavailable', res?.error ?? 'no response'));
@@ -204,6 +205,7 @@
       return;
     }
     if (!('Translator' in self)) return setTranslationNotice(t('translationNeedsChrome'));
+    if (options.language === AUTO) return;
     const pair = await pickTranslatorPair(options.language, target);
     if (!pair) return setTranslationNotice(t('cannotTranslateDevice', options.language, target));
     if (pair.availability === 'available') return createTranslator(pair);
@@ -220,6 +222,20 @@
       window.removeEventListener('keydown', onGesture, true);
       removeGestureListeners = null;
     };
+  }
+
+  function setLanguage(language) {
+    if (!options || !language || language === options.language) return;
+    if (options.translationEngine === 'llm') {
+      options.language = language;
+      return;
+    }
+    removeGestureListeners?.();
+    translator?.destroy();
+    translator = null;
+    options = { ...options, language };
+    setTranslationNotice('');
+    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
   }
 
   async function createTranslator({ sourceLanguage, targetLanguage }) {
@@ -521,6 +537,9 @@
         break;
       case 'status':
         showStatus(msg);
+        break;
+      case 'language':
+        setLanguage(msg.language);
         break;
     }
   });

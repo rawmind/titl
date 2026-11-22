@@ -2,15 +2,18 @@ import { rms } from './audio.js';
 import { Coverage } from './coverage.js';
 import { SAMPLE_RATE, transcribe } from './whisper.js';
 import { Transcript, applyScript, cleanText, splitCue, translationSource } from './text.js';
+import { LanguageLock } from './detect.js';
 
 const TAIL_SEC = 1;
 
 export class LookaheadTranscriber {
-  constructor(config, { transcribe, onCues, onError }) {
+  constructor(config, { transcribe, onCues, onError, onLanguage = () => {} }) {
     this.config = config;
     this.transcribe = transcribe;
     this.onCues = onCues;
     this.onError = onError;
+    this.onLanguage = onLanguage;
+    this.lock = new LanguageLock(config.language);
     this.reset();
   }
 
@@ -73,14 +76,17 @@ export class LookaheadTranscriber {
       return true;
     }
 
-    let segments;
+    let result;
     try {
-      ({ segments = [] } = await this.transcribe(samples));
+      result = await this.transcribe(samples, this.lock.request);
     } catch (err) {
       this.onError(err);
       return false;
     }
     if (gen !== this.gen) return true;
+    if (this.lock.observe(result)) this.onLanguage(this.lock.current);
+    const segments = result.segments ?? [];
+    const language = this.lock.current;
 
     const winLen = we - ws;
     const toVideo = (s) => ({ start: ws + s.start * rate, end: ws + s.end * rate, text: s.text });
@@ -93,11 +99,11 @@ export class LookaheadTranscriber {
 
     const cues = [];
     for (const seg of accepted.map(toVideo)) {
-      const scripted = this.config.language === 'sr' ? applyScript(seg.text, this.config.script) : seg.text;
+      const scripted = language === 'sr' ? applyScript(seg.text, this.config.script) : seg.text;
       const text = this.transcript.append(cleanText(scripted));
       if (!text) continue;
       for (const cue of splitCue({ ...seg, text })) {
-        cues.push({ ...cue, src: translationSource(cue.text, this.config.language) });
+        cues.push({ ...cue, src: translationSource(cue.text, language) });
       }
     }
     this.commit(gen, ws, commitT, cues);
@@ -134,7 +140,7 @@ function decodeInt16Base64(data) {
 }
 
 export class LookaheadSession {
-  constructor(mainTabId, config) {
+  constructor(mainTabId, config, { onLanguage = () => {} } = {}) {
     this.mainTabId = mainTabId;
     this.config = config;
     this.scoutTabId = null;
@@ -146,8 +152,9 @@ export class LookaheadSession {
     this.focusReturned = false;
     this.stopped = false;
     this.transcriber = new LookaheadTranscriber(config, {
-      transcribe: (samples) => transcribe(config, samples, { verbose: true }),
+      transcribe: (samples, language) => transcribe(config, samples, { verbose: true, language }),
       onCues: (cues, from, to) => this.emit(cues, from, to),
+      onLanguage,
       onError: (err) => this.toMain({ type: 'status', error: err.message }),
     });
   }
@@ -232,6 +239,7 @@ export class LookaheadSession {
       this.videoId = main.videoId;
       this.coverage = new Coverage();
       this.transcriber.reset();
+      this.transcriber.lock.reset();
       chrome.tabs.update(this.scoutTabId, { url: watchUrl(main.videoId, main.time) }).catch(() => {});
       this.hold(5000);
       return;

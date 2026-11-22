@@ -2,6 +2,7 @@ import { RingBuffer, rms } from './audio.js';
 import { SAMPLE_RATE, transcribe } from './whisper.js';
 import { Transcript, applyScript, cleanText, translationSource } from './text.js';
 import { isLocalUrl } from './settings.js';
+import { LanguageLock } from './detect.js';
 
 const TICK_MS = 250;
 
@@ -61,6 +62,7 @@ async function start(streamId, config) {
     capture,
     ring,
     transcript: new Transcript(),
+    lock: new LanguageLock(config.language),
     lastEnd: 0,
     busy: false,
     abort: null,
@@ -101,12 +103,16 @@ function tick() {
   s.busy = true;
   const controller = new AbortController();
   s.abort = controller;
-  transcribe(config, samples, { signal: controller.signal })
-    .then(({ text: raw = '' }) => {
+  const { lock } = s;
+  transcribe(config, samples, { signal: controller.signal, verbose: lock.detecting, language: lock.request })
+    .then((result) => {
       if (session !== s) return;
-      const scripted = config.language === 'sr' ? applyScript(raw, config.script) : raw;
+      if (lock.observe(result)) send({ type: 'language', language: lock.current });
+      const raw = result.text ?? '';
+      const language = lock.current;
+      const scripted = language === 'sr' ? applyScript(raw, config.script) : raw;
       const text = s.transcript.append(cleanText(scripted));
-      if (text) send({ type: 'caption', text, src: translationSource(text, config.language) });
+      if (text) send({ type: 'caption', text, src: translationSource(text, language) });
       const lag = (ring.total - end) / SAMPLE_RATE;
       send({ type: 'status', lag, delayed: lag > config.lagThresholdSec, error: null });
     })

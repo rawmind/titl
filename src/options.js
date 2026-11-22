@@ -14,7 +14,7 @@ function fill(settings) {
 }
 
 function syncScriptRow() {
-  $('scriptRow').hidden = $('language').value !== 'sr';
+  $('scriptRow').hidden = !['sr', 'auto'].includes($('language').value);
 }
 
 function syncEngineRows() {
@@ -74,7 +74,8 @@ $('test').addEventListener('click', async () => {
 
 $('prepareTranslation').addEventListener('click', async () => {
   const out = $('translationResult');
-  const language = $('language').value.trim();
+  const chosen = $('language').value.trim();
+  const language = chosen === 'auto' ? 'sr' : chosen;
   const target = $('translateTo').value;
   if (!target) return say(out, t('chooseTarget'), false);
   if ($('translationEngine').value === 'llm') return testLlm(out, language, target);
@@ -117,6 +118,7 @@ async function testLlm(out, language, target) {
 }
 
 localizePage();
+$('language').add(new Option(t('detectLanguage'), 'auto'));
 for (const { code, label } of languageOptions(uiLocale())) $('language').add(new Option(label, code));
 for (const { code, label } of translationOptions(uiLocale())) $('translateTo').add(new Option(label, code));
 fill(await loadSettings());

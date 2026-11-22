@@ -92,7 +92,7 @@ test('finish flushes a short final window', async () => {
 
 test('Cyrillic cues carry Latin source text for the translator', async () => {
   const t = new LookaheadTranscriber(
-    { ...DEFAULTS, script: 'cyrillic' },
+    { ...DEFAULTS, language: 'sr', script: 'cyrillic' },
     {
       transcribe: async () => ({ segments: [{ start: 0, end: 2, text: 'Dobar dan.' }] }),
       onCues: (cues) => {
@@ -124,4 +124,29 @@ test('splitCue keeps short cues and splits long ones proportionally', () => {
   assert.ok(parts.every((p) => p.text.length <= 84));
   assert.equal(parts[0].start, 0);
   assert.equal(parts.at(-1).end, 10);
+});
+
+test('auto language: detected Serbian gets the chosen script and is sent until locked', async () => {
+  const requested = [];
+  const detected = [];
+  const emitted = [];
+  const t = new LookaheadTranscriber(
+    { ...DEFAULTS, language: 'auto', script: 'latin' },
+    {
+      transcribe: async (_samples, language) => {
+        requested.push(language);
+        return { language: 'serbian', segments: [{ start: 0, end: 2, text: 'Добар дан.' }] };
+      },
+      onCues: (cues) => emitted.push(...cues),
+      onError: (err) => assert.fail(err),
+      onLanguage: (language) => detected.push(language),
+    },
+  );
+  for (let i = 0; i < 40; i++) {
+    t.addAudio({ t0: i, rate: 1, samples: loud(1) });
+    await flush();
+  }
+  assert.deepEqual(requested.slice(0, 4), ['auto', 'auto', 'auto', 'sr']);
+  assert.deepEqual(detected, ['sr']);
+  assert.equal(emitted[0].text, 'Dobar dan.');
 });

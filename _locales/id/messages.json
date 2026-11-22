@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "Bahasa lisan"
   },
+  "detectLanguage": {
+    "message": "Deteksi otomatis"
+  },
+  "detectedLanguage": {
+    "message": "$1 (terdeteksi)"
+  },
   "serbianScript": {
     "message": "Aksara Serbia"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "Pengaturan"
-  },
-  "autoStartLabel": {
-    "message": "mulai otomatis"
   },
   "preparingSubtitles": {
     "message": "Menyiapkan subtitel…"

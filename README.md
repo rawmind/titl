@@ -57,7 +57,7 @@ Most live-caption tools show each line **after** it's spoken, upload your audio 
 
 ### 🎯 Accurate
 - `large-v3-turbo` on Metal or CUDA (`small` on CPU)
-- ~100 spoken languages, picked from a list with native names
+- ~100 spoken languages, **detected automatically** or picked from a list with native names
 - **Serbian:** always Latin or always Cyrillic, never a mix
 
 </td>
@@ -218,8 +218,8 @@ Open them from the popup's **Settings** link, or right-click the icon and choose
 | Mode | Lookahead | Live streams always use live mode. |
 | Show early by | 0.3 s | Lookahead: how far before its timestamp a line appears. |
 | Pause until ready | 3 s | Lookahead: pause until this much is transcribed ahead. 0 never pauses. |
-| Language | `sr` | Any Whisper language code. |
-| Serbian script | Latin | Latin, Cyrillic, or as returned (may mix). Only used for `sr`. |
+| Language | Detect automatically | Detect automatically, or any Whisper language code. |
+| Serbian script | Latin | Latin, Cyrillic, or as returned (may mix). Only used when the language is Serbian, chosen or detected. |
 | Translate to | Off | Target language. |
 | Translator | Chrome's built-in | Chrome's on-device translator, or a local LLM through an OpenAI-compatible API. See [Translation](#translation). |
 | Model API URL | `http://127.0.0.1:8081/v1` | Local LLM only. A server root, a `/v1` base or the full `/v1/chat/completions` URL. Must be on 127.0.0.1 or localhost. |
@@ -287,13 +287,15 @@ Memory in use is the server's resident memory: the model weights plus the cache.
 
 ## Languages
 
-Set any language Whisper supports (`en`, `ru`, `de`, `hr`, …). A few parts are tuned for Serbian:
+By default Titl detects the spoken language. Whisper guesses the language of each stretch of speech, and Titl uses the most frequent guess so far. Once one language has been detected 3 times, Titl keeps it for the rest of the video and stops asking. In lookahead mode it starts over on the next video. In live mode it keeps the language until you stop subtitles. The popup shows the detected language.
 
-- Script conversion only applies to `sr`.
+Detection can mix up close languages such as Serbian, Croatian and Bosnian, especially in the first seconds. If you know the language, pick it in **Options → Spoken language** (`en`, `ru`, `de`, `hr`, …), which is also slightly faster.
+
+A few parts are tuned for Serbian:
+
+- Script conversion only applies to Serbian, chosen or detected.
 - The filter for phrases Whisper tends to invent (e.g. "Hvala na pažnji" over music) only lists Serbian phrases.
 - In live mode, duplicate removal splits words on spaces, so it works poorly for Chinese or Japanese. Lookahead mode doesn't depend on it.
-
-Automatic language detection isn't supported yet.
 
 ## Troubleshooting
 

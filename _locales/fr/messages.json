@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "Langue parlée"
   },
+  "detectLanguage": {
+    "message": "Détecter automatiquement"
+  },
+  "detectedLanguage": {
+    "message": "$1 (détectée)"
+  },
   "serbianScript": {
     "message": "Alphabet serbe"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "Options"
-  },
-  "autoStartLabel": {
-    "message": "démarrage auto"
   },
   "preparingSubtitles": {
     "message": "Préparation des sous-titres…"

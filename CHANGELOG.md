@@ -2,6 +2,14 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Added
+- **Automatic language detection**, now the default. Options → Spoken language → Detect automatically lets whisper.cpp recognise the language, then keeps it once it has been detected 3 times. Serbian script, Chrome's translator and the local LLM follow the detected language, and the popup shows it. Settings you saved earlier keep their language.
+
+### Changed
+- The popup shows the spoken language (chosen or detected) and the translation target instead of the server address.
+
 ## [0.1.17](https://github.com/rawmind/titl/releases/tag/v0.1.17) - 2026-11-22
 
 ### Changed

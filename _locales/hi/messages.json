@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "बोली जाने वाली भाषा"
   },
+  "detectLanguage": {
+    "message": "अपने आप पहचानें"
+  },
+  "detectedLanguage": {
+    "message": "$1 (पहचानी गई)"
+  },
   "serbianScript": {
     "message": "सर्बियाई लिपि"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "सेटिंग्स"
-  },
-  "autoStartLabel": {
-    "message": "ऑटो-स्टार्ट"
   },
   "preparingSubtitles": {
     "message": "उपशीर्षक तैयार हो रहे हैं…"

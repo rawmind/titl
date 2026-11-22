@@ -1,7 +1,7 @@
 export const DEFAULTS = {
   serverUrl: 'http://127.0.0.1:8080/inference',
   autoStartServer: true,
-  language: 'sr',
+  language: 'auto',
   script: 'latin',
   translateTo: '',
   translationEngine: 'chrome',
@@ -40,7 +40,7 @@ export function isLocalUrl(url) {
 
 export function validateSettings(s) {
   if (!isLocalUrl(s.serverUrl)) return 'Server URL must be http://127.0.0.1 or http://localhost';
-  if (!/^[a-z]{2,3}$/.test(s.language)) return 'Language must be a Whisper language code, e.g. "sr"';
+  if (!/^([a-z]{2,3}|auto)$/.test(s.language)) return 'Language must be a Whisper language code, e.g. "sr"';
   if (!['latin', 'cyrillic', 'original'].includes(s.script)) return 'Unknown script';
   if (!['lookahead', 'live'].includes(s.mode)) return 'Unknown mode';
   if (!/^([a-z]{2,3}(-[A-Za-z]{2,4})?)?$/.test(s.translateTo)) return 'Unknown translation language';
