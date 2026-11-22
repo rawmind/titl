@@ -86,7 +86,7 @@ export function render(template, lang, strings) {
   });
 }
 
-export function build(out = join(root, '_site')) {
+export function build(out = join(root, 'dist', 'site')) {
   const template = readFileSync(join(here, 'template.html'), 'utf8');
   const strings = loadStrings();
   rmSync(out, { recursive: true, force: true });
