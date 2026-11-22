@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "Prvo otvorite YouTube video."
   },
+  "helperMissing": {
+    "message": "Titl pomoćnik nije instaliran na ovom računaru."
+  },
+  "downloadHelper": {
+    "message": "Preuzmite ga"
+  },
   "startSubtitles": {
     "message": "Pokreni titlove"
   },

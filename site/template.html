@@ -113,6 +113,9 @@
     </section>
 
     <section id="install">
+      <span class="anchor" id="installation_macos"></span>
+      <span class="anchor" id="installation_windows"></span>
+      <span class="anchor" id="installation_linux"></span>
       <h2>{{installTitle}}</h2>
       <ol class="steps">
         <li>
@@ -265,8 +268,19 @@
         select(next, true);
       });
     }
-    const os = /Win/.test(navigator.platform) ? 'win' : /Linux/.test(navigator.platform) ? 'linux' : 'mac';
-    select(document.getElementById(`tab-${os}`));
+    const anchors = { mac: 'installation_macos', win: 'installation_windows', linux: 'installation_linux' };
+    const linkedOs = () => Object.keys(anchors).find((os) => location.hash === `#${anchors[os]}`);
+    const showLinked = () => {
+      const os = linkedOs();
+      if (os) select(document.getElementById(`tab-${os}`));
+      return Boolean(os);
+    };
+    for (const tab of tabs) tab.addEventListener('click', () => history.replaceState(null, '', `#${anchors[tab.dataset.os]}`));
+    window.addEventListener('hashchange', showLinked);
+    if (!showLinked()) {
+      const os = /Win/.test(navigator.platform) ? 'win' : /Linux/.test(navigator.platform) ? 'linux' : 'mac';
+      select(document.getElementById(`tab-${os}`));
+    }
   </script>
 </body>
 </html>

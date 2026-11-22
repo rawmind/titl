@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "Ouvrez d’abord une vidéo YouTube."
   },
+  "helperMissing": {
+    "message": "L'assistant Titl n'est pas installé sur cet ordinateur."
+  },
+  "downloadHelper": {
+    "message": "Le télécharger"
+  },
   "startSubtitles": {
     "message": "Activer les sous-titres"
   },

@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "Buka video YouTube terlebih dahulu."
   },
+  "helperMissing": {
+    "message": "Helper Titl belum terpasang di komputer ini."
+  },
+  "downloadHelper": {
+    "message": "Unduh"
+  },
   "startSubtitles": {
     "message": "Mulai subtitel"
   },

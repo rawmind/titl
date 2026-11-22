@@ -306,7 +306,7 @@ A few parts are tuned for Serbian:
 | Windows: "Windows protected your PC" | The helper isn't code-signed. Click **More info → Run anyway**, or install with the [PowerShell line](#windows), which doesn't show this warning. |
 | Windows: Microsoft Defender blocks or removes `titl.exe` | A false positive on the unsigned helper. Restore it in **Windows Security → Protection history**, and report the file to Microsoft at [wdsi/filesubmission](https://www.microsoft.com/en-us/wdsi/filesubmission) ("Incorrectly detected"). |
 | Popup: "Helper update failed: …" | The download or checksum check failed, and the installed helper was left as it was. Try again later, or run `titl update` in a terminal to see more. |
-| "auto-start helper is not installed" | Run `titl install`, then try again. |
+| "The Titl helper isn't installed on this computer" | Click **Download it** in the popup, or run `titl install`, then try again. |
 | "whisper-server exited…" or "did not start" | Check `server.log` in the helper's folder. Run `titl status`: a path marked "(missing!)" means re-run `install`. |
 | "Cannot reach whisper-server" | The server URL or port is wrong, or auto-start is off. Use **Test connection** in Options. |
 | Stuck on "Preparing subtitles…" | Expand the **Titl** tab group and look at the hidden tab: it may be showing an ad, a consent page or a sign-in prompt. Fix it there, or switch to live mode. |

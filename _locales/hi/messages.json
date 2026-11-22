@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "पहले कोई YouTube वीडियो खोलें।"
   },
+  "helperMissing": {
+    "message": "इस कंप्यूटर पर Titl हेल्पर इंस्टॉल नहीं है।"
+  },
+  "downloadHelper": {
+    "message": "डाउनलोड करें"
+  },
   "startSubtitles": {
     "message": "उपशीर्षक शुरू करें"
   },
