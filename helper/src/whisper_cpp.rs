@@ -62,8 +62,35 @@ pub fn matchers(os: &str, arch: &str, nvidia: bool) -> Vec<Matcher> {
     list
 }
 
+#[cfg(windows)]
+pub fn native_arch() -> &'static str {
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn GetCurrentProcess() -> isize;
+        fn IsWow64Process2(process: isize, process_machine: *mut u16, native_machine: *mut u16) -> i32;
+    }
+    const IMAGE_FILE_MACHINE_ARM64: u16 = 0xAA64;
+    const IMAGE_FILE_MACHINE_AMD64: u16 = 0x8664;
+    let (mut process, mut native) = (0u16, 0u16);
+    let ok = unsafe { IsWow64Process2(GetCurrentProcess(), &mut process, &mut native) } != 0;
+    match (ok, native) {
+        (true, IMAGE_FILE_MACHINE_ARM64) => "aarch64",
+        (true, IMAGE_FILE_MACHINE_AMD64) => "x86_64",
+        _ => env::consts::ARCH,
+    }
+}
+
+#[cfg(not(windows))]
+pub fn native_arch() -> &'static str {
+    env::consts::ARCH
+}
+
+pub fn wrong_arch_build(os: &str, arch: &str, server: &Path) -> bool {
+    os == "windows" && arch == "aarch64" && server.to_string_lossy().contains("-x64")
+}
+
 pub fn supported() -> bool {
-    !matchers(env::consts::OS, env::consts::ARCH, false).is_empty()
+    !matchers(env::consts::OS, native_arch(), false).is_empty()
 }
 
 pub fn choose(releases: &Value, matchers: &[Matcher]) -> Vec<Asset> {
@@ -260,7 +287,7 @@ pub fn download(cpu_only: bool) -> Result<Installed, String> {
         return Err("on macOS, install whisper.cpp with Homebrew: brew install whisper.cpp".into());
     }
     let nvidia = !cpu_only && nvidia_present();
-    let matchers = matchers(env::consts::OS, env::consts::ARCH, nvidia);
+    let matchers = matchers(env::consts::OS, native_arch(), nvidia);
     let mut candidates = match fetch_releases() {
         Ok(releases) => choose(&releases, &matchers),
         Err(e) => {
@@ -277,7 +304,7 @@ pub fn download(cpu_only: bool) -> Result<Installed, String> {
         return Err(format!(
             "no prebuilt whisper.cpp for {}/{}: build it (https://github.com/ggml-org/whisper.cpp) and pass --server PATH",
             env::consts::OS,
-            env::consts::ARCH
+            native_arch()
         ));
     }
     let mut last_error = String::new();
@@ -391,5 +418,21 @@ mod tests {
         fs::write(&server, "").unwrap();
         assert_eq!(find_server_in(&root), Some(server));
         fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[test]
+    fn an_x64_build_on_arm64_windows_is_replaced() {
+        let x64 = Path::new(r"C:\Users\u\AppData\Local\titl\whisper\b5907-whisper-bin-x64_zip\Release\whisper-server.exe");
+        let arm = Path::new(r"C:\Users\u\AppData\Local\titl\whisper\b5907-whisper-bin-win-cpu-arm64_zip\Release\whisper-server.exe");
+        assert!(wrong_arch_build("windows", "aarch64", x64));
+        assert!(!wrong_arch_build("windows", "aarch64", arm));
+        assert!(!wrong_arch_build("windows", "x86_64", x64));
+        assert!(!wrong_arch_build("linux", "aarch64", x64));
+    }
+
+    #[test]
+    fn arm64_windows_gets_the_native_cpu_build() {
+        let releases = json!([release("b5907", &["whisper-bin-x64.zip", "whisper-bin-win-cpu-arm64.zip", "whisper-bin-win-cuda-13.5-arm64.zip"])]);
+        assert_eq!(picked(&choose(&releases, &matchers("windows", "aarch64", false))), vec![("b5907".into(), "whisper-bin-win-cpu-arm64.zip".into(), Build::Cpu)]);
     }
 }

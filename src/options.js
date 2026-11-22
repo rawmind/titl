@@ -221,6 +221,8 @@ async function collectDebugInfo() {
     ['Helper', [
       ['problem', helper.problem],
       ['version', helper.version],
+      ['processor', helper.arch],
+      ['helper build', helper.helper_arch && helper.helper_arch !== helper.arch ? `${helper.helper_arch} (emulated)` : null],
       ['runs on', helper.backend ?? (helper.version ? 'unknown (start subtitles once)' : estimateBackend(state?.timing))],
       ['threads', helper.threads],
       ['whisper-server', helper.server],

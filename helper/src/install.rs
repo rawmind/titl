@@ -178,6 +178,13 @@ fn resolve_server(opts: &Options) -> Result<(PathBuf, Option<Build>), String> {
         return download();
     }
     match find_server(opts.server.as_deref()) {
+        Ok(server)
+            if opts.server.is_none()
+                && whisper_cpp::wrong_arch_build(env::consts::OS, whisper_cpp::native_arch(), &server) =>
+        {
+            println!("This is ARM64 Windows, but whisper.cpp is the x64 build; switching to the faster native ARM64 build.");
+            download()
+        }
         Ok(server) => Ok((server, None)),
         Err(_) if opts.server.is_none() && whisper_cpp::supported() => {
             println!("whisper-server not found; downloading a prebuilt whisper.cpp.");

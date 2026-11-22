@@ -2,6 +2,11 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Changed
+- **Native whisper.cpp on ARM64 Windows**, for example Windows on a Snapdragon laptop or in UTM or Parallels on an Apple Silicon Mac. The Windows helper is an x64 program, so it used to download the x64 build of whisper.cpp, which then ran through Windows' x64 emulation. It now asks Windows for the real processor and uses the native ARM64 build. `titl install` replaces an x64 build it finds on ARM64 Windows. Debug info shows the processor, and whether the helper itself runs emulated.
+
 ## [0.1.19](https://github.com/rawmind/titl/releases/tag/v0.1.19) - 2026-11-22
 
 ### Added
