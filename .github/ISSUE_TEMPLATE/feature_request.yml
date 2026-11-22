@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an idea or an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you're trying to do
+      description: The situation or problem behind the idea.
+      placeholder: I watch Croatian podcasts and the detected language keeps switching to Serbian.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How you'd like Titl to handle it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: Workarounds or other tools, if any.
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Mockups, screenshots or links.
