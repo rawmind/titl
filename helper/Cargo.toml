@@ -3,7 +3,7 @@ name = "titl"
 version = "0.1.18"
 edition = "2021"
 license = "MIT"
-description = "Installs and runs whisper-server for the Chrome Transcriber extension"
+description = "Installs and runs whisper-server for the Titl extension"
 
 [dependencies]
 flate2 = "1"

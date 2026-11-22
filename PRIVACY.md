@@ -1,8 +1,8 @@
 # Privacy policy for Titl
 
-_Last updated: 2026-11-20_
+_Last updated: 2026-11-22_
 
-Titl (the "Chrome Transcriber" project) creates subtitles for YouTube videos on your own computer. It is built so that your data never leaves your device.
+Titl creates subtitles for YouTube videos on your own computer. It is built so that your data never leaves your device.
 
 ## What Titl processes
 

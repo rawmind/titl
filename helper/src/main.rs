@@ -3,6 +3,7 @@ mod diagnostics;
 mod extension;
 mod host;
 mod install;
+mod migrate;
 mod model;
 mod paths;
 mod registry;

@@ -5,26 +5,37 @@ pub const HOST_NAME: &str = "com.chrome_transcriber.host";
 pub const UNPACKED_EXTENSION_ID: &str = "fehpgpahkmanekioejihbpihpbacdjgb";
 pub const STORE_EXTENSION_IDS: &[&str] = &["bpapgchpopccpbgbkfldmdmfmddgoeme"];
 pub const FORMULA_NAMES: &[&str] = &["titl", "chrome-transcriber"];
-const APP_DIR: &str = "chrome-transcriber";
+const APP_DIR: &str = "titl";
+const LEGACY_APP_DIR: &str = "chrome-transcriber";
 
 pub fn home() -> PathBuf {
     env::home_dir().unwrap_or_else(|| PathBuf::from("."))
 }
 
-pub fn data_dir() -> PathBuf {
+fn data_root() -> PathBuf {
     if cfg!(target_os = "macos") {
-        home().join("Library/Application Support").join(APP_DIR)
+        home().join("Library/Application Support")
     } else if cfg!(windows) {
-        env::var_os("LOCALAPPDATA")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| home().join("AppData/Local"))
-            .join(APP_DIR)
+        env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(|| home().join("AppData/Local"))
     } else {
-        env::var_os("XDG_DATA_HOME")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| home().join(".local/share"))
-            .join(APP_DIR)
+        env::var_os("XDG_DATA_HOME").map(PathBuf::from).unwrap_or_else(|| home().join(".local/share"))
     }
+}
+
+pub fn new_data_dir() -> PathBuf {
+    data_root().join(APP_DIR)
+}
+
+pub fn legacy_data_dir() -> PathBuf {
+    data_root().join(LEGACY_APP_DIR)
+}
+
+pub fn choose_data_dir(new: PathBuf, legacy: PathBuf) -> PathBuf {
+    if !new.exists() && legacy.is_dir() { legacy } else { new }
+}
+
+pub fn data_dir() -> PathBuf {
+    choose_data_dir(new_data_dir(), legacy_data_dir())
 }
 
 pub fn exe_name(base: &str) -> String {
@@ -126,5 +137,23 @@ pub fn browsers() -> Vec<Browser> {
                 user_data: root.join(dir),
             })
             .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn uses_the_old_folder_only_until_the_new_one_exists() {
+        let root = env::temp_dir().join(format!("ct-paths-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let (new, old) = (root.join("titl"), root.join("chrome-transcriber"));
+        assert_eq!(choose_data_dir(new.clone(), old.clone()), new);
+        std::fs::create_dir_all(&old).unwrap();
+        assert_eq!(choose_data_dir(new.clone(), old.clone()), old);
+        std::fs::create_dir_all(&new).unwrap();
+        assert_eq!(choose_data_dir(new.clone(), old.clone()), new);
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

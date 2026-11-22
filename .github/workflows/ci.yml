@@ -133,14 +133,14 @@ jobs:
         run: |
           sed -i 's/^version = ".*"/version = "99.0.0"/' helper/Cargo.toml
           cargo build --release --manifest-path helper/Cargo.toml
-          python scripts/update-smoke.py "$LOCALAPPDATA/chrome-transcriber/titl.exe" helper/target/release/titl.exe 99.0.0
+          python scripts/update-smoke.py "$LOCALAPPDATA/titl/titl.exe" helper/target/release/titl.exe 99.0.0
 
       - name: Server log on failure
         if: failure()
         run: |
-          ls -R ~/.local/share/chrome-transcriber 2>/dev/null | head -50 || true
-          cat ~/.local/share/chrome-transcriber/server.log 2>/dev/null || true
-          cat "$LOCALAPPDATA/chrome-transcriber/server.log" 2>/dev/null || true
+          ls -R ~/.local/share/titl 2>/dev/null | head -50 || true
+          cat ~/.local/share/titl/server.log 2>/dev/null || true
+          cat "$LOCALAPPDATA/titl/server.log" 2>/dev/null || true
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')

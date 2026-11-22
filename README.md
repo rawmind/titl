@@ -132,7 +132,7 @@ Or by hand: from the [latest release](https://github.com/rawmind/titl/releases/l
 
 **Updates:** once a day, when you open Titl's popup, the helper checks GitHub for a newer release. If there is one, the popup shows what it fixes and an **Update** button; the new helper is downloaded, checked against `SHA256SUMS` and used from the next Start. `titl update` does the same in a terminal. Helpers older than 0.1.15 can't update themselves: install 0.1.15 once with the PowerShell line above.
 
-Either way, the helper downloads whisper.cpp (the CUDA build if you have an NVIDIA GPU, otherwise the CPU build) and a matching model, then registers with Chrome, Edge and Brave. It copies itself to `%LOCALAPPDATA%\chrome-transcriber\`, so you can delete the download afterwards.
+Either way, the helper downloads whisper.cpp (the CUDA build if you have an NVIDIA GPU, otherwise the CPU build) and a matching model, then registers with Chrome, Edge and Brave. It copies itself to `%LOCALAPPDATA%\titl\`, so you can delete the download afterwards.
 
 ### Linux (x64)
 
@@ -191,9 +191,11 @@ Use the source code, not the `titl-x.y.z.zip` file attached to releases. That fi
 | `titl uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
 
 Per-user files (config, downloaded models, `server.log`, and on Windows the daily update check in `update.json`) live in:
-- macOS: `~/Library/Application Support/chrome-transcriber/`
-- Linux: `~/.local/share/chrome-transcriber/`
-- Windows: `%LOCALAPPDATA%\chrome-transcriber\`
+- macOS: `~/Library/Application Support/titl/`
+- Linux: `~/.local/share/titl/`
+- Windows: `%LOCALAPPDATA%\titl\`
+
+Helpers before 0.1.19 used a folder named `chrome-transcriber` in the same place. They keep working from it, and the next `titl install` moves it to `titl`, keeping the downloaded models and whisper.cpp.
 
 ## Usage
 

@@ -127,7 +127,7 @@ fn install_self() -> Result<PathBuf, String> {
 pub fn manifest(exe: &Path, ids: &[String]) -> serde_json::Value {
     json!({
         "name": paths::HOST_NAME,
-        "description": "Starts whisper-server for Chrome Transcriber",
+        "description": "Starts whisper-server for Titl",
         "path": exe,
         "type": "stdio",
         "allowed_origins": ids.iter().map(|id| format!("chrome-extension://{id}/")).collect::<Vec<_>>(),
@@ -180,6 +180,13 @@ pub fn default_model(macos: bool, build: Option<Build>, nvidia: bool) -> &'stati
 }
 
 pub fn install(opts: Options) -> Result<(), String> {
+    match crate::migrate::legacy_data_dir() {
+        crate::migrate::Outcome::Moved { from, to } => println!("Moved {} to {}.", from.display(), to.display()),
+        crate::migrate::Outcome::Kept { dir, reason } => {
+            println!("Keeping {} (could not move it to the new titl folder: {reason}).", dir.display())
+        }
+        crate::migrate::Outcome::NothingToDo => {}
+    }
     let (server, build) = resolve_server(&opts)?;
     let model = match (opts.model, opts.download_model) {
         (Some(path), _) => stable(&path)?,
