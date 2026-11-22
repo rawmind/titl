@@ -227,6 +227,12 @@
   "downloadingTranslation": {
     "message": "अनुवाद मॉडल डाउनलोड हो रहा है… $1%"
   },
+  "installingTranslation": {
+    "message": "भाषा पैक इंस्टॉल हो रहा है…"
+  },
+  "translationStalled": {
+    "message": "⚠ Chrome ने भाषा पैक डाउनलोड कर लिया, पर उसे इंस्टॉल पूरा नहीं किया। Chrome फिर से शुरू करें और दोबारा कोशिश करें।"
+  },
   "translationUnavailable": {
     "message": "⚠ अनुवाद उपलब्ध नहीं: $1"
   },

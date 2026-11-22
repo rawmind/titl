@@ -227,6 +227,12 @@
   "downloadingTranslation": {
     "message": "جارٍ تنزيل نموذج الترجمة… $1%"
   },
+  "installingTranslation": {
+    "message": "جارٍ تثبيت حزمة اللغة…"
+  },
+  "translationStalled": {
+    "message": "⚠ نزّل Chrome حزمة اللغة لكنه لم يُكمل تثبيتها. أعد تشغيل Chrome وحاول مرة أخرى."
+  },
   "translationUnavailable": {
     "message": "⚠ الترجمة غير متاحة: $1"
   },

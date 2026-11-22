@@ -227,6 +227,12 @@
   "downloadingTranslation": {
     "message": "Preuzimam model za prevod… $1%"
   },
+  "installingTranslation": {
+    "message": "Instalira se jezički paket…"
+  },
+  "translationStalled": {
+    "message": "⚠ Chrome je preuzeo jezički paket, ali nije završio instalaciju. Ponovo pokrenite Chrome i pokušajte opet."
+  },
   "translationUnavailable": {
     "message": "⚠ Prevod nije dostupan: $1"
   },

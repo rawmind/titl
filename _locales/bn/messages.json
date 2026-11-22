@@ -227,6 +227,12 @@
   "downloadingTranslation": {
     "message": "অনুবাদ মডেল ডাউনলোড হচ্ছে… $1%"
   },
+  "installingTranslation": {
+    "message": "ভাষা প্যাক ইনস্টল হচ্ছে…"
+  },
+  "translationStalled": {
+    "message": "⚠ Chrome ভাষা প্যাক ডাউনলোড করেছে, কিন্তু ইনস্টল শেষ করেনি। Chrome আবার চালু করে আবার চেষ্টা করুন।"
+  },
   "translationUnavailable": {
     "message": "⚠ অনুবাদ উপলব্ধ নয়: $1"
   },

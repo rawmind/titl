@@ -2,6 +2,11 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Fixed
+- Downloading a translation model no longer sits at "Downloading… 100%". Titl now says it's installing the language pack, and if Chrome hasn't finished within a minute, or the sample translation takes over 10 seconds, it says so and suggests restarting Chrome. The same applies on the YouTube page.
+
 ## [0.1.18](https://github.com/rawmind/titl/releases/tag/v0.1.18) - 2026-11-22
 
 ### Added

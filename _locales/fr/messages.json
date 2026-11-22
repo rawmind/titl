@@ -227,6 +227,12 @@
   "downloadingTranslation": {
     "message": "Téléchargement du modèle de traduction… $1 %"
   },
+  "installingTranslation": {
+    "message": "Installation du pack de langue…"
+  },
+  "translationStalled": {
+    "message": "⚠ Chrome a téléchargé le pack de langue sans terminer son installation. Redémarrez Chrome et réessayez."
+  },
   "translationUnavailable": {
     "message": "⚠ Traduction indisponible : $1"
   },

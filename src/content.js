@@ -11,6 +11,7 @@
   const LLM_CONTEXT_BEFORE = 4;
   const LLM_CONTEXT_AFTER = 2;
   const CHROME_TRANSLATE_TIMEOUT_MS = 10000;
+  const TRANSLATOR_INSTALL_TIMEOUT_MS = 60000;
   const REVEAL_KEY = 'v';
   const AUTO = 'auto';
   const t = (key, ...subs) => chrome.i18n.getMessage(key, subs.map(String)) || key;
@@ -262,14 +263,20 @@
 
   async function createTranslator({ sourceLanguage, targetLanguage }) {
     const opts = options;
+    const stall = new AbortController();
+    let stallTimer = null;
     try {
       setTranslationNotice(t('preparingTranslation'));
       const created = await Translator.create({
         sourceLanguage,
         targetLanguage,
+        signal: stall.signal,
         monitor(m) {
           m.addEventListener('downloadprogress', (e) => {
-            setTranslationNotice(t('downloadingTranslation', Math.round(e.loaded * 100)));
+            if (options !== opts) return;
+            if (e.loaded < 1) return setTranslationNotice(t('downloadingTranslation', Math.round(e.loaded * 100)));
+            setTranslationNotice(t('installingTranslation'));
+            stallTimer ??= setTimeout(() => stall.abort(), TRANSLATOR_INSTALL_TIMEOUT_MS);
           });
         },
       });
@@ -278,7 +285,10 @@
       setTranslationNotice('');
       translateCues();
     } catch (err) {
-      if (options === opts) setTranslationNotice(t('translationUnavailable', err.message));
+      if (options !== opts) return;
+      setTranslationNotice(stall.signal.aborted ? t('translationStalled') : t('translationUnavailable', err.message));
+    } finally {
+      clearTimeout(stallTimer);
     }
   }
 

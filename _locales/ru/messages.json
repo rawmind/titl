@@ -227,6 +227,12 @@
   "downloadingTranslation": {
     "message": "Загрузка модели перевода… $1%"
   },
+  "installingTranslation": {
+    "message": "Устанавливается языковой пакет…"
+  },
+  "translationStalled": {
+    "message": "⚠ Chrome скачал языковой пакет, но не закончил его установку. Перезапустите Chrome и попробуйте снова."
+  },
   "translationUnavailable": {
     "message": "⚠ Перевод недоступен: $1"
   },

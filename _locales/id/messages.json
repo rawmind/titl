@@ -227,6 +227,12 @@
   "downloadingTranslation": {
     "message": "Mengunduh model terjemahan… $1%"
   },
+  "installingTranslation": {
+    "message": "Memasang paket bahasa…"
+  },
+  "translationStalled": {
+    "message": "⚠ Chrome sudah mengunduh paket bahasa, tetapi belum selesai memasangnya. Mulai ulang Chrome lalu coba lagi."
+  },
   "translationUnavailable": {
     "message": "⚠ Terjemahan tidak tersedia: $1"
   },

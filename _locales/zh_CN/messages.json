@@ -227,6 +227,12 @@
   "downloadingTranslation": {
     "message": "正在下载翻译模型… $1%"
   },
+  "installingTranslation": {
+    "message": "正在安装语言包…"
+  },
+  "translationStalled": {
+    "message": "⚠ Chrome 已下载语言包，但未完成安装。请重启 Chrome 后重试。"
+  },
   "translationUnavailable": {
     "message": "⚠ 翻译不可用：$1"
   },

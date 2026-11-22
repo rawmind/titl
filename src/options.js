@@ -4,6 +4,8 @@ import { localizePage, t, uiLocale } from './i18n.js';
 import { translateWithLlm } from './llm.js';
 
 const $ = (id) => document.getElementById(id);
+const INSTALL_TIMEOUT_MS = 60_000;
+const SAMPLE_TIMEOUT_MS = 10_000;
 const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'translationEngine', 'llmUrl', 'llmModel', 'showOriginal', 'blurTranslation', 'subtitleSize', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
 
 function fill(settings) {
@@ -91,14 +93,36 @@ $('prepareTranslation').addEventListener('click', async () => {
     }
     if (!pair) return say(out, t('cannotTranslatePair', language, target), false);
     say(out, t('preparing'), true);
-    const translator = await Translator.create({
-      ...pair,
-      monitor(m) {
-        m.addEventListener('downloadprogress', (e) => say(out, t('downloading', Math.round(e.loaded * 100)), true));
-      },
-    });
-    const sample = await translator.translate('Dobar dan, kako ste?');
-    translator.destroy();
+    const stall = new AbortController();
+    let stallTimer = null;
+    let translator;
+    try {
+      translator = await Translator.create({
+        ...pair,
+        signal: stall.signal,
+        monitor(m) {
+          m.addEventListener('downloadprogress', (e) => {
+            if (e.loaded < 1) return say(out, t('downloading', Math.round(e.loaded * 100)), true);
+            say(out, t('installingTranslation'), true);
+            stallTimer ??= setTimeout(() => stall.abort(), INSTALL_TIMEOUT_MS);
+          });
+        },
+      });
+    } catch (err) {
+      if (stall.signal.aborted) return say(out, t('translationStalled'), false);
+      throw err;
+    } finally {
+      clearTimeout(stallTimer);
+    }
+    let sample;
+    try {
+      sample = await translator.translate('Dobar dan, kako ste?', { signal: AbortSignal.timeout(SAMPLE_TIMEOUT_MS) });
+    } catch (err) {
+      if (err.name === 'TimeoutError') return say(out, t('translationStalled'), false);
+      throw err;
+    } finally {
+      translator.destroy();
+    }
     say(out, t('ready', pair.sourceLanguage, pair.targetLanguage, 'Dobar dan, kako ste?', sample), true);
   } catch (err) {
     say(out, t('failed', err.message), false);
