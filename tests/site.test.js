@@ -29,7 +29,7 @@ test('Arabic renders right to left', () => {
 test('every page renders with no placeholder left', () => {
   for (const lang of LANGUAGES) {
     const html = render(template, lang, strings[lang.slug]);
-    assert.doesNotMatch(html, /\{\{\w+\}\}|\{(store|release|guide|privacy|kofi|video)\}/, lang.slug);
+    assert.doesNotMatch(html, /\{\{\w+\}\}|\{(store|release|guide|llmGuide|privacy|kofi|video)\}/, lang.slug);
     assert.match(html, new RegExp(`<html lang="${lang.htmlLang}"`));
     assert.match(html, /hreflang="ru" href="https:\/\/rawmind\.github\.io\/titl\/ru\/"/);
   }

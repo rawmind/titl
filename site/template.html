@@ -56,9 +56,10 @@
     <section class="hero">
       <h1>{{heroTitle}}</h1>
       <p class="lead">{{heroLead}}</p>
+      <p class="cta-label">{{ctaSteps}}</p>
       <div class="cta-row">
-        <a class="button primary" href="{{store}}">{{ctaAdd}}</a>
-        <a class="button" href="#install">{{ctaHelper}}</a>
+        <a class="button primary" href="{{store}}"><span class="num" aria-hidden="true">1</span> {{ctaAdd}}</a>
+        <a class="button" href="#install"><span class="num" aria-hidden="true">2</span> {{ctaHelper}}</a>
       </div>
       <p class="small">{{heroBrowsers}}</p>
       <figure class="shot">
@@ -85,7 +86,7 @@
         </article>
         <article>
           <h3><span aria-hidden="true">🌍</span> {{f3Title}}</h3>
-          <ul><li>{{f3a}}</li><li>{{f3b}}</li><li>{{f3c}}</li></ul>
+          <ul><li>{{f3a}}</li><li>{{f3d}}</li><li>{{f3b}}</li><li>{{f3c}}</li></ul>
         </article>
         <article>
           <h3><span aria-hidden="true">🎯</span> {{f4Title}}</h3>
@@ -144,6 +145,10 @@
           <h3>{{s3Title}}</h3>
           <p>{{s3Text}}</p>
         </li>
+        <li class="optional">
+          <h3>{{optTitle}} <span class="tag">{{optTag}}</span></h3>
+          <p>{{optText}}</p>
+        </li>
       </ol>
       <p class="small">{{installNote}}</p>
     </section>
@@ -154,6 +159,7 @@
       <details><summary>{{q2}}</summary><p>{{a2}}</p></details>
       <details><summary>{{q3}}</summary><p>{{a3}}</p></details>
       <details><summary>{{q6}}</summary><p>{{a6}}</p></details>
+      <details><summary>{{q7}}</summary><p>{{a7}}</p></details>
       <details><summary>{{q4}}</summary><p>{{a4}}</p></details>
       <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
     </section>

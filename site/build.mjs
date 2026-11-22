@@ -27,6 +27,7 @@ const LINKS = {
   release: `${REPO}/releases/latest`,
   winExe: `${REPO}/releases/latest/download/titl-windows-x64.exe`,
   guide: `${REPO}#install`,
+  llmGuide: `${REPO}#local-llm`,
   changelog: `${REPO}/blob/master/CHANGELOG.md`,
   privacy: `${REPO}/blob/master/PRIVACY.md`,
   security: `${REPO}/blob/master/SECURITY.md`,
