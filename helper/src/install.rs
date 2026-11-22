@@ -104,19 +104,29 @@ pub fn homebrew_opt_path(exe: &Path) -> Option<PathBuf> {
     })
 }
 
-fn install_self() -> Result<PathBuf, String> {
-    let current = env::current_exe().map_err(|e| e.to_string())?;
-    if let Some(opt) = absolute(&current).ok().and_then(|p| homebrew_opt_path(&p)) {
-        if opt.is_file() {
-            return Ok(opt);
-        }
+fn homebrew_exe(current: &Path) -> Option<PathBuf> {
+    absolute(current).ok().and_then(|p| homebrew_opt_path(&p)).filter(|opt| opt.is_file())
+}
+
+fn reregister_after_move(current: &Path) {
+    let exe = homebrew_exe(current).or_else(|| Some(paths::installed_exe()).filter(|p| p.is_file()));
+    let Some(exe) = exe else { return };
+    let extra = Config::load().map(|c| c.extension_ids).unwrap_or_default();
+    if let Err(e) = register(&exe, &config::extension_ids(&extra)) {
+        println!("Could not register the helper from its new folder yet: {e}");
+    }
+}
+
+fn install_self(current: &Path) -> Result<PathBuf, String> {
+    if let Some(opt) = homebrew_exe(current) {
+        return Ok(opt);
     }
     let target = paths::installed_exe();
-    if absolute(&current).ok() == absolute(&target).ok() {
+    if absolute(current).ok() == absolute(&target).ok() {
         return Ok(target);
     }
     let tmp = target.with_extension("new");
-    fs::copy(&current, &tmp).map_err(|e| format!("cannot copy helper to {}: {e}", tmp.display()))?;
+    fs::copy(current, &tmp).map_err(|e| format!("cannot copy helper to {}: {e}", tmp.display()))?;
     fs::rename(&tmp, &target).map_err(|e| {
         format!("cannot replace {}: {e} (quit Chrome and try again)", target.display())
     })?;
@@ -179,11 +189,21 @@ pub fn default_model(macos: bool, build: Option<Build>, nvidia: bool) -> &'stati
     if gpu { model::DEFAULT_MODEL } else { model::CPU_MODEL }
 }
 
-pub fn install(opts: Options) -> Result<(), String> {
+pub fn install(mut opts: Options) -> Result<(), String> {
+    let mut current = env::current_exe().map_err(|e| e.to_string())?;
     match crate::migrate::legacy_data_dir() {
-        crate::migrate::Outcome::Moved { from, to } => println!("Moved {} to {}.", from.display(), to.display()),
+        crate::migrate::Outcome::Moved { from, to } => {
+            println!("Moved {} to {}.", from.display(), to.display());
+            current = crate::migrate::remap(&current, &from, &to);
+            opts.server = opts.server.map(|p| crate::migrate::remap(&p, &from, &to));
+            opts.model = opts.model.map(|p| crate::migrate::remap(&p, &from, &to));
+            reregister_after_move(&current);
+        }
         crate::migrate::Outcome::Kept { dir, reason } => {
             println!("Keeping {} (could not move it to the new titl folder: {reason}).", dir.display())
+        }
+        crate::migrate::Outcome::BothExist { old, new } => {
+            println!("Titl uses {}. {} is left over from an older helper and can be deleted.", new.display(), old.display())
         }
         crate::migrate::Outcome::NothingToDo => {}
     }
@@ -213,10 +233,7 @@ pub fn install(opts: Options) -> Result<(), String> {
         }
     }
     let ids = config::extension_ids(&extra_ids);
-    let extension_dir = env::current_exe()
-        .ok()
-        .and_then(|e| absolute(&e).ok())
-        .and_then(|e| extension::find_dir(&e));
+    let extension_dir = absolute(&current).ok().and_then(|e| extension::find_dir(&e));
     Config {
         server: server.clone(),
         model: model.clone(),
@@ -225,7 +242,7 @@ pub fn install(opts: Options) -> Result<(), String> {
         extension_ids: extra_ids,
     }
     .save()?;
-    let exe = install_self()?;
+    let exe = install_self(&current)?;
     let registered = register(&exe, &ids)?;
 
     println!("whisper-server: {}", server.display());
@@ -289,6 +306,11 @@ pub fn uninstall(purge: bool) -> Result<(), String> {
     if purge {
         let _ = fs::remove_dir_all(&data);
         println!("Removed {} including downloaded models.", data.display());
+        let legacy = paths::legacy_data_dir();
+        if legacy != data && legacy.is_dir() {
+            let _ = fs::remove_dir_all(&legacy);
+            println!("Removed {}.", legacy.display());
+        }
     } else {
         for path in [
             paths::installed_exe(),

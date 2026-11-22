@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 
 pub enum Outcome {
     NothingToDo,
+    BothExist { old: PathBuf, new: PathBuf },
     Moved { from: PathBuf, to: PathBuf },
     Kept { dir: PathBuf, reason: String },
 }
@@ -15,8 +16,11 @@ pub fn legacy_data_dir() -> Outcome {
 }
 
 pub fn move_dir(old: &Path, new: &Path) -> Outcome {
-    if new.exists() || !old.is_dir() {
+    if !old.is_dir() {
         return Outcome::NothingToDo;
+    }
+    if new.exists() {
+        return Outcome::BothExist { old: old.to_path_buf(), new: new.to_path_buf() };
     }
     if let Some(parent) = new.parent() {
         let _ = fs::create_dir_all(parent);
@@ -30,15 +34,25 @@ pub fn move_dir(old: &Path, new: &Path) -> Outcome {
     }
 }
 
+pub fn remap(path: &Path, from: &Path, to: &Path) -> PathBuf {
+    path.strip_prefix(from).map(|rest| to.join(rest)).unwrap_or_else(|_| path.to_path_buf())
+}
+
+fn rewrite_value(value: &mut Value, old: &Path, new: &Path) {
+    match value {
+        Value::String(text) if Path::new(text.as_str()).starts_with(old) => {
+            *text = remap(Path::new(text.as_str()), old, new).display().to_string();
+        }
+        Value::Array(items) => items.iter_mut().for_each(|item| rewrite_value(item, old, new)),
+        _ => {}
+    }
+}
+
 fn rewrite_config(path: &Path, old: &Path, new: &Path) {
     let Ok(text) = fs::read_to_string(path) else { return };
     let Ok(mut value) = serde_json::from_str::<Value>(&text) else { return };
     let Some(fields) = value.as_object_mut() else { return };
-    for field in fields.values_mut() {
-        if let Some(moved) = field.as_str().and_then(|s| Path::new(s).strip_prefix(old).ok()).map(|rest| new.join(rest)) {
-            *field = Value::String(moved.display().to_string());
-        }
-    }
+    fields.values_mut().for_each(|field| rewrite_value(field, old, new));
     if let Ok(text) = serde_json::to_string_pretty(&value) {
         let _ = fs::write(path, text + "\n");
     }
@@ -65,7 +79,7 @@ mod tests {
             "server": old.join("whisper/b1/whisper-server").display().to_string(),
             "model": old.join("models/ggml-small.bin").display().to_string(),
             "extension": "/opt/homebrew/opt/titl/share/titl/extension",
-            "args": ["-t", "8"],
+            "args": ["-t", "8", "--vad-model", old.join("models/vad.bin").display().to_string()],
         });
         fs::write(old.join("config.json"), config.to_string()).unwrap();
 
@@ -76,7 +90,7 @@ mod tests {
         assert_eq!(moved["server"], new.join("whisper/b1/whisper-server").display().to_string());
         assert_eq!(moved["model"], new.join("models/ggml-small.bin").display().to_string());
         assert_eq!(moved["extension"], "/opt/homebrew/opt/titl/share/titl/extension");
-        assert_eq!(moved["args"], serde_json::json!(["-t", "8"]));
+        assert_eq!(moved["args"], serde_json::json!(["-t", "8", "--vad-model", new.join("models/vad.bin").display().to_string()]));
         let _ = fs::remove_dir_all(&root);
     }
 
@@ -87,8 +101,16 @@ mod tests {
         assert!(matches!(move_dir(&old, &new), Outcome::NothingToDo));
         fs::create_dir_all(&old).unwrap();
         fs::create_dir_all(&new).unwrap();
-        assert!(matches!(move_dir(&old, &new), Outcome::NothingToDo));
+        assert!(matches!(move_dir(&old, &new), Outcome::BothExist { .. }));
         assert!(old.exists() && new.exists());
         let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn remaps_only_paths_inside_the_moved_folder() {
+        let (old, new) = (Path::new("/data/chrome-transcriber"), Path::new("/data/titl"));
+        assert_eq!(remap(&old.join("titl"), old, new), new.join("titl"));
+        assert_eq!(remap(Path::new("/opt/homebrew/bin/titl"), old, new), PathBuf::from("/opt/homebrew/bin/titl"));
+        assert_eq!(remap(Path::new("/data/chrome-transcriber-old/titl"), old, new), PathBuf::from("/data/chrome-transcriber-old/titl"));
     }
 }

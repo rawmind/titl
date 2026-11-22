@@ -8,12 +8,8 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 - **Debug info** at the bottom of Options: Titl and browser versions, your settings, the helper's whisper.cpp build and model, whether whisper.cpp runs on the **CPU or GPU** and with how many threads, the last request's duration, and whether Chrome's translator is available. **Copy** puts it on the clipboard for a bug report. `titl status` also shows CPU or GPU and the thread count. With an older helper, Debug info estimates CPU or GPU from the speed of the last request and says so.
 
 ### Changed
-- The helper's folder is now called `titl` instead of `chrome-transcriber` (`%LOCALAPPDATA%\titl`, `~/Library/Application Support/titl`, `~/.local/share/titl`). Existing installs keep working from the old folder. The next `titl install` moves it, keeping the downloaded models and whisper.cpp, and registers the helper again from there. If the folder can't be moved, for example while Chrome is using it on Windows, the helper keeps using the old one and says so.
-
-## Unreleased
-
-### Changed
 - **Faster on slow computers.** Whisper always encodes 30 seconds of audio, even for an 8-second window. When a request takes more than half as long as the audio it covers, Titl asks whisper.cpp to encode only the window plus a second for the rest of the session. That was about 3.5 times faster on a 4-thread CPU, with the same words. Fast machines keep the full context, because the short one makes timestamps less exact.
+- The helper's folder is now called `titl` instead of `chrome-transcriber` (`%LOCALAPPDATA%\titl`, `~/Library/Application Support/titl`, `~/.local/share/titl`). Existing installs keep working from the old folder. The next `titl install` moves it, keeping the downloaded models and whisper.cpp, and registers the helper again from there. If the folder can't be moved, for example while Chrome is using it on Windows, the helper keeps using the old one and says so.
 
 ### Fixed
 - Downloading a translation model no longer sits at "Downloading… 100%". Titl now says it's installing the language pack, and if Chrome hasn't finished within a minute, or the sample translation takes over 10 seconds, it says so and suggests restarting Chrome. The same applies on the YouTube page.
