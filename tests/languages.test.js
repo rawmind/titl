@@ -30,9 +30,13 @@ test('options are sorted by English name and the default detects the language', 
   assert.ok(languageOptions().some((o) => o.code === 'sr'));
 });
 
-test('translation targets keep their popularity order and are valid settings', () => {
-  assert.deepEqual(translationOptions().map((o) => o.code), TRANSLATION_TARGETS);
-  assert.deepEqual(TRANSLATION_TARGETS.slice(0, 4), ['en', 'zh', 'hi', 'es']);
+test('translation targets are sorted by name, off by default, and are valid settings', () => {
+  const names = translationOptions().map((o) => o.name);
+  assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b, 'en')));
+  assert.deepEqual(translationOptions().map((o) => o.code).sort(), [...TRANSLATION_TARGETS].sort());
+  const russian = translationOptions('ru').map((o) => o.name);
+  assert.deepEqual(russian, [...russian].sort((a, b) => a.localeCompare(b, 'ru')));
+  assert.equal(DEFAULTS.translateTo, '');
   assert.equal(new Set(TRANSLATION_TARGETS).size, TRANSLATION_TARGETS.length);
   for (const code of TRANSLATION_TARGETS) {
     assert.equal(validateSettings({ ...DEFAULTS, translateTo: code }), null, code);

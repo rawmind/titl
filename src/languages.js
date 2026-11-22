@@ -41,5 +41,7 @@ export function languageOptions(locale = 'en') {
 }
 
 export function translationOptions(locale = 'en') {
-  return TRANSLATION_TARGETS.map((code) => ({ code, label: languageLabel(code, locale) }));
+  return TRANSLATION_TARGETS.map((code) => ({ code, label: languageLabel(code, locale), name: languageName(code, locale) })).sort((a, b) =>
+    a.name.localeCompare(b.name, locale),
+  );
 }

@@ -1,5 +1,5 @@
 import { loadSettings } from './settings.js';
-import { languageName } from './languages.js';
+import { languageName, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
 import { HELPER_MISSING, HOST_NAME } from './server.js';
 import { installUrl } from './site.js';
@@ -81,7 +81,6 @@ function spokenLanguage(state) {
 
 function renderLanguages(state) {
   $('spoken').textContent = spokenLanguage(state);
-  $('target').textContent = settings.translateTo ? languageName(settings.translateTo, uiLocale()) : t('off');
 }
 
 async function checkHelperUpdate() {
@@ -116,6 +115,18 @@ async function updateHelper() {
     button.disabled = false;
   }
 }
+
+async function changeTranslateTo() {
+  const translateTo = $('target').value;
+  const stored = await loadSettings();
+  await chrome.storage.local.set({ settings: { ...stored, translateTo } });
+  settings.translateTo = translateTo;
+  await chrome.runtime.sendMessage({ target: 'background', type: 'translate-to', translateTo }).catch(() => {});
+}
+
+for (const { code, name } of translationOptions(uiLocale())) $('target').add(new Option(name, code));
+$('target').value = settings.translateTo;
+$('target').addEventListener('change', changeTranslateTo);
 
 $('updateButton').addEventListener('click', updateHelper);
 checkHelperUpdate();

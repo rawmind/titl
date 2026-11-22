@@ -146,6 +146,12 @@ async function handle(msg, sender) {
     case 'language':
       return announceLanguage(msg.language);
 
+    case 'translate-to': {
+      const { tabId, status } = await getState();
+      if (status === 'running') await sendToTab(tabId, { type: 'translate-to', translateTo: msg.translateTo });
+      return;
+    }
+
     case 'caption': {
       const { tabId } = await getState();
       return sendToTab(tabId, { type: 'caption', text: msg.text, src: msg.src });
