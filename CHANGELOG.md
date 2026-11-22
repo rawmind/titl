@@ -2,6 +2,15 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.1.17](https://github.com/rawmind/titl/releases/tag/v0.1.17) - 2026-11-22
+
+### Changed
+- The extension's homepage link in `chrome://extensions` opens the [Titl website](https://rawmind.github.io/titl/) instead of the GitHub repository.
+
+### Upgrade
+- Chrome updates the extension from the Chrome Web Store. 0.1.17 also brings everything in 0.1.16 below.
+- The helper only changes its version number, so updating it is optional.
+
 ## [0.1.16](https://github.com/rawmind/titl/releases/tag/v0.1.16) - 2026-11-22
 
 ### Added
