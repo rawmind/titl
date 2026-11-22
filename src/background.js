@@ -2,6 +2,7 @@ import { loadSettings, validateSettings } from './settings.js';
 import { LookaheadSession } from './lookahead.js';
 import { resolveServer } from './server.js';
 import { translateWithLlm } from './llm.js';
+import { AUTO } from './detect.js';
 
 const OFFSCREEN_URL = 'src/offscreen.html';
 
@@ -42,6 +43,11 @@ async function ensureOffscreen() {
   });
 }
 
+async function announceLanguage(language) {
+  const { tabId } = await setState({ language });
+  return sendToTab(tabId, { type: 'language', language });
+}
+
 async function startLive(tabId, config) {
   const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
   await ensureOffscreen();
@@ -56,7 +62,7 @@ async function start(tabId) {
   const invalid = validateSettings(config);
   if (invalid) throw new Error(invalid);
 
-  await setState({ status: 'starting' });
+  await setState({ status: 'starting', language: null });
   try {
     config.serverUrl = await resolveServer(config);
   } catch (err) {
@@ -83,7 +89,7 @@ async function start(tabId) {
     },
   });
   if (mode === 'lookahead') {
-    lookahead = new LookaheadSession(tabId, config);
+    lookahead = new LookaheadSession(tabId, config, { onLanguage: announceLanguage });
     await lookahead.start(info);
   } else {
     await startLive(tabId, config);
@@ -93,6 +99,7 @@ async function start(tabId) {
     mode,
     scoutTabId: lookahead?.scoutTabId ?? null,
     serverUrl: config.serverUrl,
+    ...(config.language === AUTO ? {} : { language: config.language }),
     status: 'running',
     lag: 0,
     delayed: false,
@@ -111,7 +118,7 @@ async function stop() {
     await chrome.runtime.sendMessage({ target: 'offscreen', type: 'stop' }).catch(() => {});
     await chrome.offscreen.closeDocument().catch(() => {});
   }
-  await setState({ tabId: null, scoutTabId: null, mode: null, status: 'idle', lag: 0, delayed: false, error: null });
+  await setState({ tabId: null, scoutTabId: null, mode: null, language: null, status: 'idle', lag: 0, delayed: false, error: null });
   await sendToTab(tabId, { type: 'overlay-stop' });
 }
 
@@ -130,8 +137,14 @@ async function handle(msg, sender) {
       return { restarted: true };
     }
 
-    case 'llm-translate':
-      return { translation: await translateWithLlm(await loadSettings(), msg) };
+    case 'llm-translate': {
+      const settings = await loadSettings();
+      const language = msg.source ?? settings.language;
+      return { translation: await translateWithLlm({ ...settings, language }, msg) };
+    }
+
+    case 'language':
+      return announceLanguage(msg.language);
 
     case 'caption': {
       const { tabId } = await getState();

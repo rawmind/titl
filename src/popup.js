@@ -57,11 +57,15 @@ $('options').addEventListener('click', (e) => {
 
 const settings = await loadSettings();
 
-function renderServer(state) {
-  const url = state?.status === 'running' && state.serverUrl ? state.serverUrl : null;
-  const where = url ? new URL(url).host : settings.autoStartServer ? t('autoStartLabel') : new URL(settings.serverUrl).host;
-  $('server').textContent = `${where} · ${languageName(settings.language, uiLocale())}`;
-  $('server').title = url ?? settings.serverUrl;
+function spokenLanguage(state) {
+  if (settings.language !== 'auto') return languageName(settings.language, uiLocale());
+  const detected = state?.status === 'running' ? state.language : null;
+  return detected ? t('detectedLanguage', languageName(detected, uiLocale())) : t('detectLanguage');
+}
+
+function renderLanguages(state) {
+  $('spoken').textContent = spokenLanguage(state);
+  $('target').textContent = settings.translateTo ? languageName(settings.translateTo, uiLocale()) : t('off');
 }
 
 async function checkHelperUpdate() {
@@ -102,10 +106,10 @@ checkHelperUpdate();
 
 const initial = (await chrome.storage.session.get('state')).state;
 render(initial);
-renderServer(initial);
+renderLanguages(initial);
 chrome.storage.session.onChanged.addListener((changes) => {
   if (changes.state) {
     render(changes.state.newValue);
-    renderServer(changes.state.newValue);
+    renderLanguages(changes.state.newValue);
   }
 });

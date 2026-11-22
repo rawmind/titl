@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "اللغة المنطوقة"
   },
+  "detectLanguage": {
+    "message": "اكتشاف تلقائي"
+  },
+  "detectedLanguage": {
+    "message": "$1 (تم اكتشافها)"
+  },
   "serbianScript": {
     "message": "الأبجدية الصربية"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "الإعدادات"
-  },
-  "autoStartLabel": {
-    "message": "تشغيل تلقائي"
   },
   "preparingSubtitles": {
     "message": "جارٍ تحضير الترجمة النصية…"

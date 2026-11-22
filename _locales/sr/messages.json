@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "Jezik govora"
   },
+  "detectLanguage": {
+    "message": "Prepoznaj automatski"
+  },
+  "detectedLanguage": {
+    "message": "$1 (prepoznat)"
+  },
   "serbianScript": {
     "message": "Srpsko pismo"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "Podešavanja"
-  },
-  "autoStartLabel": {
-    "message": "automatski"
   },
   "preparingSubtitles": {
     "message": "Pripremam titlove…"

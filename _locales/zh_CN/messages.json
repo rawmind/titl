@@ -74,6 +74,12 @@
   "spokenLanguage": {
     "message": "口语语言"
   },
+  "detectLanguage": {
+    "message": "自动检测"
+  },
+  "detectedLanguage": {
+    "message": "$1（已检测）"
+  },
   "serbianScript": {
     "message": "塞尔维亚语文字"
   },
@@ -187,9 +193,6 @@
   },
   "settings": {
     "message": "设置"
-  },
-  "autoStartLabel": {
-    "message": "自动启动"
   },
   "preparingSubtitles": {
     "message": "正在准备字幕…"

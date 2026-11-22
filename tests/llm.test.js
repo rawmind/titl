@@ -98,3 +98,8 @@ test('hidden local LLM fields never block saving with the Chrome translator', ()
   assert.equal(validateSettings({ ...DEFAULTS, translationEngine: 'chrome', llmUrl: 'not a url', llmModel: 'bad model' }), null);
   assert.match(validateSettings({ ...DEFAULTS, translationEngine: 'llm', llmModel: 'bad model' }), /Model name/);
 });
+
+test('before the spoken language is detected, the prompt names only the target', () => {
+  const [system] = buildMessages({ text: 'Hola', source: 'auto', target: 'en' });
+  assert.match(system.content, /^You translate video subtitles to English\./);
+});

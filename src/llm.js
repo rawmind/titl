@@ -11,10 +11,10 @@ export function chatUrl(base) {
 }
 
 export function buildMessages({ text, before = [], after = [], source, target }) {
-  const from = languageName(source);
+  const from = source && source !== 'auto' ? languageName(source) : null;
   const to = languageName(target);
   const system = [
-    `You translate video subtitles from ${from} to ${to}.`,
+    from ? `You translate video subtitles from ${from} to ${to}.` : `You translate video subtitles to ${to}.`,
     'The lines are fragments of continuous speech transcribed automatically, so a line may start or end mid-sentence and may contain recognition errors.',
     'Use the surrounding lines to get the meaning, grammar, gender and names right, and keep terms consistent with the earlier translations.',
     `Reply with the ${to} translation of the current line only, without quotes, notes or explanations.`,
