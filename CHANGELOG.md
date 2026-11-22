@@ -2,7 +2,7 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
-## Unreleased
+## [0.1.18](https://github.com/rawmind/titl/releases/tag/v0.1.18) - 2026-11-22
 
 ### Added
 - **Automatic language detection, now the default.** Titl recognises the spoken language by itself: whisper.cpp guesses the language of each stretch of speech, and once the same language has come up 3 times Titl keeps it for the rest of the video. Serbian script, Chrome's translator and the local LLM follow the detected language, and the popup shows it, e.g. "Serbian (detected)". Close languages such as Serbian, Croatian and Bosnian can be mixed up, so pick yours in **Options → Spoken language** if you know it. Settings you saved earlier keep their language.
