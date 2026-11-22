@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "请先打开一个 YouTube 视频。"
   },
+  "helperMissing": {
+    "message": "此电脑尚未安装 Titl 助手。"
+  },
+  "downloadHelper": {
+    "message": "下载"
+  },
   "startSubtitles": {
     "message": "开启字幕"
   },

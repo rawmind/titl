@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "Abra primeiro um vídeo do YouTube."
   },
+  "helperMissing": {
+    "message": "O assistente do Titl não está instalado neste computador."
+  },
+  "downloadHelper": {
+    "message": "Baixar"
+  },
   "startSubtitles": {
     "message": "Ativar legendas"
   },

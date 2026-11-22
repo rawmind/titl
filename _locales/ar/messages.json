@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "افتح فيديو على YouTube أولًا."
   },
+  "helperMissing": {
+    "message": "مساعد Titl غير مثبّت على هذا الكمبيوتر."
+  },
+  "downloadHelper": {
+    "message": "نزّله"
+  },
   "startSubtitles": {
     "message": "تشغيل الترجمة النصية"
   },

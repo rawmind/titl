@@ -112,6 +112,12 @@ section {
   padding: 56px 0 8px;
 }
 
+.anchor {
+  display: block;
+  position: relative;
+  top: -56px;
+}
+
 h1,
 h2,
 h3 {

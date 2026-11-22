@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "Open a YouTube video first."
   },
+  "helperMissing": {
+    "message": "The Titl helper isn't installed on this computer."
+  },
+  "downloadHelper": {
+    "message": "Download it"
+  },
   "startSubtitles": {
     "message": "Start subtitles"
   },

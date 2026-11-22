@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "Сначала откройте видео на YouTube."
   },
+  "helperMissing": {
+    "message": "Помощник Titl не установлен на этом компьютере."
+  },
+  "downloadHelper": {
+    "message": "Скачать"
+  },
   "startSubtitles": {
     "message": "Включить субтитры"
   },

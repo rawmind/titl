@@ -67,3 +67,7 @@ test('Google Analytics loads only after consent', () => {
   assert.match(html, /const GA_ID = 'G-EDP0HX0XPS';/);
   assert.match(html, /if \(readConsent\(\) === 'yes'\) loadAnalytics\(\);/);
 });
+
+test('each OS has an install anchor that opens its tab', () => {
+  for (const anchor of ['installation_macos', 'installation_windows', 'installation_linux']) assert.match(template, new RegExp(anchor));
+});

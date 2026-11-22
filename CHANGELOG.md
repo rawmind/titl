@@ -9,6 +9,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 
 ### Changed
 - The popup shows the spoken language (chosen or detected) and the translation target instead of the server address.
+- When the helper isn't installed, the popup says so and links to the download instructions on the website.
 
 ## [0.1.17](https://github.com/rawmind/titl/releases/tag/v0.1.17) - 2026-11-22
 

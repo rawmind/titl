@@ -185,6 +185,12 @@
   "openYouTubeFirst": {
     "message": "আগে একটি YouTube ভিডিও খুলুন।"
   },
+  "helperMissing": {
+    "message": "এই কম্পিউটারে Titl হেল্পার ইনস্টল করা নেই।"
+  },
+  "downloadHelper": {
+    "message": "ডাউনলোড করুন"
+  },
   "startSubtitles": {
     "message": "সাবটাইটেল চালু করুন"
   },

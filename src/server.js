@@ -1,4 +1,5 @@
 export const HOST_NAME = 'com.chrome_transcriber.host';
+export const HELPER_MISSING = 'helper-missing';
 const START_TIMEOUT_MS = 120_000;
 
 let port = null;
@@ -61,8 +62,6 @@ function connect() {
 
 function disconnectReason() {
   const err = chrome.runtime.lastError?.message ?? '';
-  if (/not found/i.test(err)) {
-    return 'whisper-server is not running and the auto-start helper is not installed (run `titl install`)';
-  }
+  if (/not found/i.test(err)) return HELPER_MISSING;
   return `Auto-start helper stopped: ${err || 'unknown error'}`;
 }

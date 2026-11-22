@@ -1,7 +1,8 @@
 import { loadSettings } from './settings.js';
 import { languageName } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
-import { HOST_NAME } from './server.js';
+import { HELPER_MISSING, HOST_NAME } from './server.js';
+import { installUrl } from './site.js';
 
 localizePage();
 
@@ -30,6 +31,20 @@ function showError(text) {
   $('statusText').textContent = text;
 }
 
+async function showHelperMissing() {
+  $('status').classList.add('error');
+  const { os } = await chrome.runtime.getPlatformInfo();
+  const link = Object.assign(document.createElement('a'), {
+    href: installUrl(chrome.runtime.getManifest().homepage_url, uiLocale(), os),
+    textContent: t('downloadHelper'),
+  });
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: link.href });
+  });
+  $('statusText').replaceChildren(`${t('helperMissing')} `, link);
+}
+
 async function toggle() {
   $('toggle').disabled = true;
   try {
@@ -43,7 +58,8 @@ async function toggle() {
       return;
     }
     const res = await chrome.runtime.sendMessage({ target: 'background', type: 'start', tabId: tab.id });
-    if (!res?.ok) showError(t('errorPrefix', res?.error ?? 'unknown'));
+    if (res?.error === HELPER_MISSING) await showHelperMissing();
+    else if (!res?.ok) showError(t('errorPrefix', res?.error ?? 'unknown'));
   } finally {
     $('toggle').disabled = false;
   }
