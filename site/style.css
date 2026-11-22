@@ -294,6 +294,16 @@ figcaption {
   margin: 0 0 8px;
 }
 
+.step-notes {
+  margin: 10px 0 0;
+  padding-inline-start: 20px;
+  color: var(--muted);
+}
+
+.step-notes li + li {
+  margin-top: 6px;
+}
+
 .tabs {
   display: flex;
   gap: 6px;
