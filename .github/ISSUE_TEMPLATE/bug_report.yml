@@ -1,0 +1,158 @@
+name: Bug report
+description: Something doesn't work as it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a problem. A few minutes here saves a lot of back-and-forth.
+
+        Security problems: please **don't** open a public issue, see [SECURITY.md](https://github.com/rawmind/titl/blob/master/SECURITY.md).
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I'm on the latest extension and helper (`titl update` on Windows, `brew upgrade rawmind/tap/titl` on macOS)
+          required: true
+        - label: I checked [Troubleshooting](https://github.com/rawmind/titl#troubleshooting) and [existing issues](https://github.com/rawmind/titl/issues?q=is%3Aissue)
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where does the problem show up?
+      options:
+        - Subtitles (wrong, missing, late or out of sync)
+        - Stuck on "Preparing subtitles…"
+        - Translation with Chrome's built-in translator
+        - Translation with a local LLM
+        - Helper install, update or auto-start
+        - Popup or Options page
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - Lookahead
+        - Live
+        - Both
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows x64
+        - Windows ARM64
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Edge
+        - Brave
+        - Chromium
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, including the exact text of any error message.
+      placeholder: After a seek, subtitles stopped and the popup showed "Cannot reach whisper-server".
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      placeholder: Subtitles continue from the new position.
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the YouTube link if the problem happens on a particular video, and the spoken language.
+      placeholder: |
+        1. Open https://www.youtube.com/watch?v=…
+        2. Click Titl → Start subtitles
+        3. Seek to 05:00
+        4. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug
+    attributes:
+      label: Debug info
+      description: |
+        Open **Options → Debug info** (at the bottom of the page), click **Copy**, and paste it **between the two ``` lines** below. It stays folded in the issue so it doesn't get in the way.
+      value: |
+        <details>
+        <summary>Debug info</summary>
+
+        ```text
+        Paste here
+        ```
+
+        </details>
+    validations:
+      required: true
+
+  - type: textarea
+    id: status
+    attributes:
+      label: Output of `titl status`
+      description: Run `titl status` in a terminal and paste the output between the ``` lines. Skip if you can't run it.
+      value: |
+        <details>
+        <summary>titl status</summary>
+
+        ```text
+        Paste here
+        ```
+
+        </details>
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Optional, but helpful for helper or server problems: the end of `server.log` from the helper's folder (`~/Library/Application Support/titl/` on macOS, `%LOCALAPPDATA%\titl\` on Windows, `~/.local/share/titl/` on Linux), and any errors from the YouTube tab's console (F12 → Console).
+      value: |
+        <details>
+        <summary>Logs</summary>
+
+        ```text
+        Paste here
+        ```
+
+        </details>
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, a screen recording, or when it started happening. Drag files here to attach them.
