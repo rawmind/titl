@@ -5,6 +5,11 @@ use std::path::{Path, PathBuf};
 
 pub const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
 pub const CPU_MODEL: &str = "small";
+pub const SERBIAN_MODEL: &str = "small-sr-distill";
+const SERBIAN_MODEL_LANGUAGES: &[&str] = &["sr", "hr"];
+const WHISPER_CPP_MODELS: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main";
+const SERBIAN_MODELS: &str =
+    "https://huggingface.co/rawmind/whisper-small-sr-distill/resolve/d41b58e2f86b8fd716cfacabace4eefbfd5b7fea";
 pub const PREFERRED_MODELS: &[&str] = &["large-v3-turbo", "large-v3-turbo-q8_0", "large-v3-turbo-q5_0"];
 
 pub fn file_name(name: &str) -> String {
@@ -12,7 +17,25 @@ pub fn file_name(name: &str) -> String {
 }
 
 pub fn url(name: &str) -> String {
-    format!("https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{}", file_name(name))
+    let base = if name == SERBIAN_MODEL { SERBIAN_MODELS } else { WHISPER_CPP_MODELS };
+    format!("{base}/{}", file_name(name))
+}
+
+pub fn is_small(path: &Path) -> bool {
+    path.file_name().is_some_and(|n| n == file_name(CPU_MODEL).as_str())
+}
+
+pub fn serbian_in(dir: &Path) -> Option<PathBuf> {
+    Some(dir.join(file_name(SERBIAN_MODEL))).filter(|p| p.is_file())
+}
+
+pub fn for_language(configured: &Path, language: &str, models_dir: &Path) -> PathBuf {
+    if SERBIAN_MODEL_LANGUAGES.contains(&language) && is_small(configured) {
+        if let Some(serbian) = serbian_in(models_dir) {
+            return serbian;
+        }
+    }
+    configured.to_path_buf()
 }
 
 pub fn valid_name(name: &str) -> bool {
@@ -90,6 +113,36 @@ mod tests {
             url("large-v3-turbo-q5_0"),
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin"
         );
+    }
+
+    #[test]
+    fn serbian_model_comes_from_its_own_pinned_repo() {
+        assert_eq!(
+            url(SERBIAN_MODEL),
+            "https://huggingface.co/rawmind/whisper-small-sr-distill/resolve/d41b58e2f86b8fd716cfacabace4eefbfd5b7fea/ggml-small-sr-distill.bin"
+        );
+        assert_eq!(url(CPU_MODEL), "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin");
+    }
+
+    #[test]
+    fn serbian_model_is_used_only_for_serbian_and_croatian_with_small() {
+        let dir = std::env::temp_dir().join(format!("titl-model-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let small = dir.join(file_name(CPU_MODEL));
+        let turbo = dir.join(file_name("large-v3-turbo"));
+        for language in SERBIAN_MODEL_LANGUAGES {
+            assert_eq!(for_language(&small, language, &dir), small);
+        }
+        let serbian = dir.join(file_name(SERBIAN_MODEL));
+        fs::write(&serbian, "model").unwrap();
+        for language in SERBIAN_MODEL_LANGUAGES {
+            assert_eq!(for_language(&small, language, &dir), serbian);
+            assert_eq!(for_language(&turbo, language, &dir), turbo);
+        }
+        for other in ["auto", "bs", "sl", "en", ""] {
+            assert_eq!(for_language(&small, other, &dir), small);
+        }
+        fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]

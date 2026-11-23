@@ -1,11 +1,13 @@
 use crate::config::Config;
 use crate::diagnostics;
+use crate::model;
 use crate::paths;
 use crate::update;
 use serde_json::{json, Value};
 use std::fs::OpenOptions;
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
+use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -82,6 +84,7 @@ impl Failure {
 struct Server {
     child: Option<Child>,
     port: Option<u16>,
+    model: Option<PathBuf>,
 }
 
 impl Server {
@@ -89,7 +92,7 @@ impl Server {
         self.child.as_mut().is_some_and(|c| matches!(c.try_wait(), Ok(None)))
     }
 
-    fn start(&mut self, host: &str, requested: Option<u16>) -> Value {
+    fn start(&mut self, host: &str, requested: Option<u16>, language: &str) -> Value {
         if host != "127.0.0.1" && host != "localhost" {
             return error("Only 127.0.0.1/localhost is allowed");
         }
@@ -97,12 +100,14 @@ impl Server {
             if reachable(port) {
                 return ready(port);
             }
-            return match self.launch(port) {
+            return match self.launch(port, language) {
                 Ok(()) => ready(port),
                 Err(f) => error(f.message()),
             };
         }
-        if let Some(port) = self.port.filter(|_| self.running()) {
+        let wanted = Config::load().ok().map(|c| model::for_language(&c.model, language, &paths::models_dir()));
+        let same_model = wanted.is_none() || self.model == wanted;
+        if let Some(port) = self.port.filter(|_| same_model && self.running()) {
             return match self.wait_ready(port) {
                 Ok(()) => ready(port),
                 Err(f) => error(f.message()),
@@ -112,7 +117,7 @@ impl Server {
             let Some(port) = pick_port() else {
                 return error("no free port between 10000 and 65535");
             };
-            match self.launch(port) {
+            match self.launch(port, language) {
                 Ok(()) => return ready(port),
                 Err(Failure::Exited(_)) if attempt < START_ATTEMPTS => continue,
                 Err(f) => return error(f.message()),
@@ -121,15 +126,16 @@ impl Server {
         error("whisper-server could not start")
     }
 
-    fn launch(&mut self, port: u16) -> Result<(), Failure> {
+    fn launch(&mut self, port: u16, language: &str) -> Result<(), Failure> {
         self.stop();
-        self.spawn(port).map_err(Failure::Other)?;
+        self.spawn(port, language).map_err(Failure::Other)?;
         self.port = Some(port);
         self.wait_ready(port)
     }
 
-    fn spawn(&mut self, port: u16) -> Result<(), String> {
+    fn spawn(&mut self, port: u16, language: &str) -> Result<(), String> {
         let config = Config::load()?;
+        let model = model::for_language(&config.model, language, &paths::models_dir());
         let log_path = paths::log_path();
         let mut log = OpenOptions::new()
             .create(true)
@@ -142,7 +148,7 @@ impl Server {
         let mut command = Command::new(&config.server);
         command
             .arg("-m")
-            .arg(&config.model)
+            .arg(&model)
             .args(["--host", "127.0.0.1", "--port", &port.to_string()])
             .args(&config.args)
             .stdin(Stdio::null())
@@ -160,6 +166,7 @@ impl Server {
             .spawn()
             .map_err(|e| format!("cannot start {}: {e}", config.server.display()))?;
         self.child = Some(child);
+        self.model = Some(model);
         Ok(())
     }
 
@@ -193,22 +200,24 @@ impl Server {
             let _ = child.wait();
         }
         self.port = None;
+        self.model = None;
     }
 }
 
 pub fn run() {
     let mut stdin = io::stdin().lock();
     let mut stdout = io::stdout().lock();
-    let mut server = Server { child: None, port: None };
+    let mut server = Server { child: None, port: None, model: None };
     update::cleanup();
     while let Ok(Some(message)) = read_message(&mut stdin) {
         let reply = match message.get("cmd").and_then(Value::as_str) {
             Some("start") => {
                 let host = message.get("host").and_then(Value::as_str).unwrap_or("127.0.0.1");
+                let language = message.get("language").and_then(Value::as_str).unwrap_or("");
                 match message.get("port").and_then(Value::as_u64).filter(|p| *p != 0) {
-                    None => server.start(host, None),
+                    None => server.start(host, None, language),
                     Some(port) => match u16::try_from(port) {
-                        Ok(port) => server.start(host, Some(port)),
+                        Ok(port) => server.start(host, Some(port), language),
                         Err(_) => error("invalid port"),
                     },
                 }
@@ -255,8 +264,8 @@ mod tests {
 
     #[test]
     fn refuses_non_local_hosts() {
-        let mut server = Server { child: None, port: None };
-        assert_eq!(server.start("example.com", None)["status"], "error");
+        let mut server = Server { child: None, port: None, model: None };
+        assert_eq!(server.start("example.com", None, "sr")["status"], "error");
     }
 
     #[test]

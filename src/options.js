@@ -227,6 +227,7 @@ async function collectDebugInfo() {
       ['threads', helper.threads],
       ['whisper-server', helper.server],
       ['model', helper.model],
+      ['Serbian model', helper.serbian_model],
       ['extra flags', helper.args?.join(' ')],
       ['setup problem', helper.config_error],
       ['log', helper.log],

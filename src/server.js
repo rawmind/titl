@@ -18,7 +18,7 @@ const LEGACY_HELPER_PORT = 8080;
 export async function resolveServer(config) {
   if (config.autoStartServer) {
     try {
-      return await startWithHelper();
+      return await startWithHelper(config.language);
     } catch (err) {
       if (await isServerUp(config.serverUrl)) return config.serverUrl;
       throw err;
@@ -28,7 +28,7 @@ export async function resolveServer(config) {
   throw new Error(`Cannot reach whisper-server at ${config.serverUrl}`);
 }
 
-async function startWithHelper() {
+async function startWithHelper(language) {
   port ??= connect();
   const reply = await new Promise((resolve, reject) => {
     const timer = setTimeout(() => done(reject, new Error('whisper-server did not start in time')), START_TIMEOUT_MS);
@@ -42,7 +42,7 @@ async function startWithHelper() {
     }
     port.onMessage.addListener(onMessage);
     port.onDisconnect.addListener(onDisconnect);
-    port.postMessage({ cmd: 'start', host: '127.0.0.1' });
+    port.postMessage({ cmd: 'start', host: '127.0.0.1', language });
   });
   if (reply.status !== 'ready') throw new Error(reply.error ?? 'whisper-server failed to start');
   return serverUrlFor(reply.port ?? LEGACY_HELPER_PORT);

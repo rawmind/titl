@@ -17,6 +17,7 @@ pub struct Options {
     pub extension_ids: Vec<String>,
     pub update_server: bool,
     pub cpu_only: bool,
+    pub serbian: bool,
 }
 
 pub fn parse(args: &[String]) -> Result<Options, String> {
@@ -30,6 +31,7 @@ pub fn parse(args: &[String]) -> Result<Options, String> {
             "--download-model" => opts.download_model = Some(value()?),
             "--update-server" => opts.update_server = true,
             "--cpu" => opts.cpu_only = true,
+            "--serbian" => opts.serbian = true,
             "--extension-id" => {
                 let id = value()?;
                 if !config::valid_extension_id(&id) {
@@ -230,6 +232,12 @@ pub fn install(mut opts: Options) -> Result<(), String> {
             }
         },
     };
+    if opts.serbian {
+        model::download(model::SERBIAN_MODEL)?;
+        if !model::is_small(&model) {
+            println!("Note: the Serbian model is only used together with {}.", model::CPU_MODEL);
+        }
+    }
 
     let data = paths::data_dir();
     fs::create_dir_all(&data).map_err(|e| format!("cannot create {}: {e}", data.display()))?;
@@ -435,7 +443,8 @@ mod tests {
     #[test]
     fn parses_server_download_flags() {
         let opts = parse(&["--update-server".to_string(), "--cpu".to_string()]).unwrap();
-        assert!(opts.update_server && opts.cpu_only);
+        assert!(opts.update_server && opts.cpu_only && !opts.serbian);
+        assert!(parse(&["--serbian".to_string()]).unwrap().serbian);
     }
 
     #[test]

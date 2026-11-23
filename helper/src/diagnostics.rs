@@ -53,6 +53,10 @@ pub fn info_reply() -> Value {
             reply["server"] = json!(c.server.display().to_string());
             reply["model"] = json!(c.model.display().to_string());
             reply["args"] = json!(c.args);
+            if crate::model::is_small(&c.model) {
+                let serbian = crate::model::serbian_in(&crate::paths::models_dir());
+                reply["serbian_model"] = json!(serbian.map(|p| p.display().to_string()));
+            }
         }
         Err(e) => reply["config_error"] = json!(e),
     }
