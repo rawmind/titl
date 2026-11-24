@@ -6,7 +6,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 
 ### Added
 - **Speech detection, off by default:** `titl install --vad` downloads a 0.9 MB Silero model, and whisper-server then uses it to skip audio without speech, so silence no longer produces made-up subtitles. It may also skip singing. It needs whisper.cpp 1.9.6: 1.9.5 can crash on audio without speech. Set the spoken language too: with auto-detect, music or noise without speech counts as English. The choice is remembered; `titl install --no-vad` turns it off. Debug info shows whether it is on.
-- `titl status` and Debug info show the whisper.cpp version.
+- `titl status` and Debug info show the whisper.cpp version, and the flags Titl adds to whisper-server.
 
 ### Changed
 - **whisper.cpp is pinned** to build `b5907` on Windows and Linux, with its SHA-256 in the helper. That is whisper.cpp 1.9.6 without one later commit, which only changes a CMake file. `titl install` used to take the newest release, and fell back to build `b5454`, which is whisper.cpp 1.9.5. Newer releases are now only tried if the pinned build doesn't run.

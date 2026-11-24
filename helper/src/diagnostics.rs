@@ -53,6 +53,12 @@ fn describe_server(config: &Config) -> String {
     format!("{} (whisper.cpp {version}, {})", config.server.display(), speech_detection(config))
 }
 
+pub fn server_flags(config: &Config) -> Vec<String> {
+    let mut flags = config.args.clone();
+    flags.extend(model::vad_args(&config.args, config.vad, &paths::models_dir()));
+    flags
+}
+
 pub fn info_reply() -> Value {
     let run = server_run();
     let mut reply = json!({
@@ -68,7 +74,7 @@ pub fn info_reply() -> Value {
     match Config::load() {
         Ok(c) => {
             reply["model"] = json!(c.model.display().to_string());
-            reply["args"] = json!(c.args);
+            reply["args"] = json!(server_flags(&c));
             reply["server"] = json!(describe_server(&c));
         }
         Err(e) => reply["config_error"] = json!(e),

@@ -360,9 +360,8 @@ pub fn status() -> Result<(), String> {
             println!("server:   {} {}", c.server.display(), if c.server.is_file() { "" } else { "(missing!)" });
             println!("whisper:  {}", whisper_cpp::version(&c.server).as_deref().unwrap_or("unknown version"));
             println!("model:    {} {}", c.model.display(), if c.model.is_file() { "" } else { "(missing!)" });
-            if !c.args.is_empty() {
-                println!("args:     {}", c.args.join(" "));
-            }
+            let flags = crate::diagnostics::server_flags(&c);
+            println!("flags:    {}", if flags.is_empty() { "none added".into() } else { flags.join(" ") });
             if let Some(run) = crate::diagnostics::server_run() {
                 println!("runs on:  {}", run.backend.as_deref().unwrap_or("unknown (start subtitles once)"));
                 if let Some(threads) = run.threads {
