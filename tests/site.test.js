@@ -106,7 +106,7 @@ test('structured data is valid JSON, describes the page and claims no rating', (
     assert.equal(data.inLanguage, lang.htmlLang);
     assert.equal(data.offers.price, 0);
     assert.equal('aggregateRating' in data, false);
-    assert.match(html, new RegExp(`<link rel="canonical" href="${data.url}">`));
+    assert.ok(html.includes(`<link rel="canonical" href="${data.url}">`), lang.slug);
   }
 });
 
