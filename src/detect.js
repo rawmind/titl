@@ -53,7 +53,6 @@ export class LanguageLock {
 
   observe(result) {
     if (!this.detecting) return false;
-    if (Array.isArray(result?.segments) && !result.segments.length) return false;
     const code = detectedLanguage(result);
     if (!code) return false;
     const before = this.current;

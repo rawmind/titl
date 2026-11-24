@@ -49,13 +49,3 @@ test('reset starts detecting again', () => {
   assert.equal(lock.request, AUTO);
   assert.equal(lock.current, null);
 });
-
-test('a reply without speech is not a vote for its language', () => {
-  const lock = new LanguageLock('auto');
-  for (let i = 0; i < 5; i++) assert.equal(lock.observe({ language: 'english', text: '', segments: [] }), false);
-  assert.equal(lock.detecting, true);
-  assert.equal(lock.current, null);
-  for (let i = 0; i < 3; i++) lock.observe({ language: 'serbian', segments: [{ start: 0, end: 1, text: 'Da.' }] });
-  assert.equal(lock.current, 'sr');
-  assert.equal(lock.detecting, false);
-});
