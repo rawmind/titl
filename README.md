@@ -268,6 +268,8 @@ A local model translates each line together with the 4 lines before it (and thei
 2. **Options → Translator → Local LLM**, check the **Model API URL**, and click **Test connection**. For Ollama use `http://127.0.0.1:11434/v1` and a model name such as `gemma3:12b`; for LM Studio, `http://127.0.0.1:1234/v1`.
 3. **Save**.
 
+<img src="store/screenshot-5-local-llm.png" alt="Titl options for translating with a local LLM" width="640">
+
 Lines are translated one at a time, nearest to the playhead first. In lookahead mode, **Pause until ready** also waits for the translation, so lines don't show untranslated; set it to 0 to never pause. In live mode the translation appears a moment after the original.
 
 #### Which model
