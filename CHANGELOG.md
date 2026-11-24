@@ -5,7 +5,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 ## Unreleased
 
 ### Added
-- **Better Serbian and Croatian on CPU:** `titl install --serbian` also downloads [`small-sr-distill`](https://huggingface.co/rawmind/whisper-small-sr-distill) (488 MB), a `small` tuned for Serbian with the same speed. In our tests of parliament and clean read speech it made 22% and 35% fewer word errors in Serbian, and 11% and 32% fewer in Croatian. In Croatian it now and then writes a Serbian form. Titl uses it instead of `small` when the spoken language is set to Serbian or Croatian. Other languages, auto-detect and larger models are unaffected.
+- **Better Serbian and Croatian on CPU:** `titl install --serbian` also downloads [`small-sr-distill`](https://huggingface.co/rawmind/whisper-small-sr-distill) (q8_0, 264 MB), a `small` tuned for Serbian. On CPU it ran about 2.6 times as fast as `small` on an Apple M4 Max; Intel and AMD are untested. In our tests of parliament and clean read speech it made 22% and 36% fewer word errors in Serbian, and 11% and 32% fewer in Croatian. In Croatian it now and then writes a Serbian form. Titl uses it instead of `small` when the spoken language is set to Serbian or Croatian. Other languages, auto-detect and larger models are unaffected.
 
 ### Upgrade
 - Needs both the new helper and the new extension. Other combinations keep working with the model you have.

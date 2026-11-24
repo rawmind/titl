@@ -5,11 +5,11 @@ use std::path::{Path, PathBuf};
 
 pub const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
 pub const CPU_MODEL: &str = "small";
-pub const SERBIAN_MODEL: &str = "small-sr-distill";
+pub const SERBIAN_MODEL: &str = "small-sr-distill-q8_0";
 const SERBIAN_MODEL_LANGUAGES: &[&str] = &["sr", "hr"];
 const WHISPER_CPP_MODELS: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main";
 const SERBIAN_MODELS: &str =
-    "https://huggingface.co/rawmind/whisper-small-sr-distill/resolve/d41b58e2f86b8fd716cfacabace4eefbfd5b7fea";
+    "https://huggingface.co/rawmind/whisper-small-sr-distill/resolve/9aacd8317e855946ed779f0558ceb7b34a463b8d";
 pub const PREFERRED_MODELS: &[&str] = &["large-v3-turbo", "large-v3-turbo-q8_0", "large-v3-turbo-q5_0"];
 
 pub fn file_name(name: &str) -> String {
@@ -119,7 +119,7 @@ mod tests {
     fn serbian_model_comes_from_its_own_pinned_repo() {
         assert_eq!(
             url(SERBIAN_MODEL),
-            "https://huggingface.co/rawmind/whisper-small-sr-distill/resolve/d41b58e2f86b8fd716cfacabace4eefbfd5b7fea/ggml-small-sr-distill.bin"
+            "https://huggingface.co/rawmind/whisper-small-sr-distill/resolve/9aacd8317e855946ed779f0558ceb7b34a463b8d/ggml-small-sr-distill-q8_0.bin"
         );
         assert_eq!(url(CPU_MODEL), "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin");
     }

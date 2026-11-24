@@ -33,7 +33,7 @@ install         Find whisper-server and a model (downloading one if needed), cop
 --model         Path to a ggml model file. Default: large-v3-turbo with a GPU, small without.
 --download-model
                 Download a model by name, e.g. large-v3-turbo, large-v3-turbo-q5_0, small.
---serbian       Also download small-sr-distill, a small tuned for Serbian (488 MB). It replaces small
+--serbian       Also download small-sr-distill (q8_0, 264 MB), a small tuned for Serbian. It replaces small
                 when the spoken language is set to Serbian or Croatian; larger models are not replaced.
 --extension-id  Also accept this extension ID (e.g. a Chrome Web Store build). Remembered.
 uninstall       Unregister and remove the helper. --purge also deletes downloaded models.
