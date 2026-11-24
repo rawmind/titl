@@ -98,7 +98,7 @@ export function render(template, lang, strings) {
     languageName: lang.name,
     langsJson: JSON.stringify(LANGUAGES.map(({ slug, match }) => ({ slug, match }))),
   };
-  for (const key of ['title', 'metaDesc', 'shotAlt', 'scrYoutubeAlt', 'scrPopupAlt', 'scrOptionsAlt', 'scrLlmAlt', 'language', 's2Title']) {
+  for (const key of ['title', 'metaDesc', 'shotAlt', 'scrYoutubeAlt', 'scrPopupAlt', 'scrOptionsAlt', 'scrLlmAlt', 'close', 'language', 's2Title']) {
     values[key] = escapeAttr(strings[key]);
   }
   return template.replace(/\{\{(\w+)\}\}/g, (m, key) => {

@@ -117,7 +117,7 @@ test('every site file a page refers to is in the built site', () => {
     for (const lang of LANGUAGES) {
       const dir = lang.slug === 'en' ? out : join(out, lang.slug);
       const html = readFileSync(join(dir, 'index.html'), 'utf8');
-      const tags = html.match(/<(?:img|link rel="(?:icon|stylesheet)")[^>]*>/g);
+      const tags = html.match(/<(?:img src|a class="zoom"|link rel="(?:icon|stylesheet)")[^>]*>/g);
       const files = tags.flatMap((tag) => [
         ...[...tag.matchAll(/ (?:src|href)="([^"]+)"/g)].map((m) => m[1]),
         ...[...tag.matchAll(/ srcset="([^"]+)"/g)].flatMap((m) => m[1].split(',').map((c) => c.trim().split(' ')[0])),
@@ -145,5 +145,16 @@ test('WebP screenshots match the store screenshots they were made from', () => {
     for (const width of [640, 1280]) {
       assert.ok(existsSync(new URL(`../site/img/${name.replace('.png', `-${width}.webp`)}`, import.meta.url)), help);
     }
+  }
+});
+
+test('every screenshot opens its full-size image', () => {
+  for (const lang of LANGUAGES) {
+    const html = render(template, lang, strings[lang.slug]);
+    const links = [...html.matchAll(/<a class="zoom" href="([^"]+)"><img src="([^"]+)"[^>]* alt="[^"]+"><\/a>/g)];
+    assert.equal(links.length, 5, lang.slug);
+    for (const [, href, src] of links) assert.equal(href, src, lang.slug);
+    assert.equal(html.match(/<img src="[^"]*screenshot-/g).length, links.length, lang.slug);
+    assert.ok(html.includes(`<button type="button" aria-label="${strings[lang.slug].close}">`), lang.slug);
   }
 });
