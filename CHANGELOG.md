@@ -6,7 +6,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 
 ### Changed
 - **whisper.cpp is pinned** to build `b5907` on Windows and Linux, with its SHA-256 in the helper. That is whisper.cpp 1.9.6 without one later commit, which only changes a CMake file. `titl install` used to take the newest release, and fell back to build `b5454`, which is whisper.cpp 1.9.5. Newer releases are now only tried if the pinned build doesn't run.
-- whisper.cpp 1.9.5 makes more mistakes when the audio context is shortened, as Titl does on slow computers. In tests with a Serbian `small` model it made 33.0% word errors on FLEURS, against 27.9% with 1.9.6, and 32.4% against 22.4% on parliament speech (100 clips each, built from source on macOS). Full-length audio was about the same.
+- whisper.cpp 1.9.5 makes more mistakes when the audio context is shortened, as Titl does on slow computers. In tests with a Serbian `small` model it made 33.0% word errors on FLEURS, against 27.9% with 1.9.6, and 32.4% against 22.4% on parliament speech (100 clips each, built from source on macOS). At full length 1.9.5 was also slightly worse, by 0.6 to 1.5 points on those FLEURS clips.
 
 ### Upgrade
 - Windows and Linux: update the helper, then run `titl install --update-server` once if you installed whisper.cpp with an older helper.
