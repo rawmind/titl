@@ -358,6 +358,7 @@ pub fn status() -> Result<(), String> {
                 println!("extension folder: {}", dir.display());
             }
             println!("server:   {} {}", c.server.display(), if c.server.is_file() { "" } else { "(missing!)" });
+            println!("whisper:  {}", whisper_cpp::version(&c.server).as_deref().unwrap_or("unknown version"));
             println!("model:    {} {}", c.model.display(), if c.model.is_file() { "" } else { "(missing!)" });
             if !c.args.is_empty() {
                 println!("args:     {}", c.args.join(" "));

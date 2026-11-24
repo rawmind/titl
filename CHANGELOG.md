@@ -6,6 +6,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 
 ### Added
 - **Speech detection, off by default:** `titl install --vad` downloads a 0.9 MB Silero model, and whisper-server then uses it to skip audio without speech, so silence no longer produces made-up subtitles. It may also skip singing. The choice is remembered; `titl install --no-vad` turns it off. Debug info shows whether it is on.
+- `titl status` shows the whisper.cpp version.
 - Automatic language detection ignores replies without speech, which the server always labels English.
 
 ### Changed

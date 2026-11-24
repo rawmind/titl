@@ -212,6 +212,32 @@ pub fn find_server_in(dir: &Path) -> Option<PathBuf> {
     None
 }
 
+fn library_version(name: &str) -> Option<String> {
+    let rest = name.strip_prefix("libwhisper.")?;
+    let version = rest.strip_suffix(".dylib").or_else(|| rest.strip_prefix("so."))?;
+    let full = version.split('.').count() == 3 && version.split('.').all(|n| n.parse::<u32>().is_ok());
+    full.then(|| version.to_string())
+}
+
+pub fn version(server: &Path) -> Option<String> {
+    let server = fs::canonicalize(server).ok()?;
+    let dir = server.parent()?;
+    let mut folders = vec![dir.to_path_buf()];
+    folders.extend(dir.parent().map(|up| up.join("lib")));
+    folders
+        .iter()
+        .filter_map(|folder| fs::read_dir(folder).ok())
+        .flat_map(|entries| entries.flatten())
+        .find_map(|entry| library_version(entry.file_name().to_str()?))
+        .or_else(|| {
+            server.ancestors().find_map(|folder| {
+                let (build, _) = folder.file_name()?.to_str()?.split_once("-whisper-")?;
+                let number = build.strip_prefix('b')?;
+                number.parse::<u32>().is_ok().then(|| build.to_string())
+            })
+        })
+}
+
 pub fn downloaded_server() -> Option<PathBuf> {
     let dir = paths::whisper_dir();
     let mut releases: Vec<PathBuf> = fs::read_dir(&dir).ok()?.flatten().map(|e| e.path()).filter(|p| p.is_dir()).collect();
@@ -432,6 +458,30 @@ mod tests {
         );
         assert_eq!(order(candidates(&Value::Null, &matchers("linux", "x86_64", false))), vec![("b5907".into(), Build::Cpu)]);
         assert!(candidates(&releases, &matchers("macos", "aarch64", false)).is_empty());
+    }
+
+    #[test]
+    fn reads_the_version_from_the_library_or_the_download_folder() {
+        let root = std::env::temp_dir().join(format!("titl-version-{}", std::process::id()));
+        let server = |folder: &str| {
+            let path = root.join(folder).join(paths::exe_name("whisper-server"));
+            fs::create_dir_all(path.parent().unwrap()).unwrap();
+            fs::write(&path, "").unwrap();
+            path
+        };
+        let brew = server("Cellar/bin");
+        fs::create_dir_all(root.join("Cellar/lib")).unwrap();
+        fs::write(root.join("Cellar/lib/libwhisper.1.dylib"), "").unwrap();
+        assert_eq!(version(&brew), None);
+        fs::write(root.join("Cellar/lib/libwhisper.1.9.6.dylib"), "").unwrap();
+        assert_eq!(version(&brew).as_deref(), Some("1.9.6"));
+        let linux = server("linux");
+        fs::write(root.join("linux/libwhisper.so.1.9.5"), "").unwrap();
+        assert_eq!(version(&linux).as_deref(), Some("1.9.5"));
+        assert_eq!(version(&server("b5907-whisper-bin-x64_zip/Release")).as_deref(), Some("b5907"));
+        assert_eq!(version(&server("other/place")), None);
+        assert_eq!(version(&root.join("missing")), None);
+        fs::remove_dir_all(&root).unwrap();
     }
 
     #[test]
