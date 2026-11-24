@@ -1,4 +1,5 @@
 use crate::paths;
+use crate::whisper_cpp;
 use serde_json::{json, Value};
 use std::fs;
 use std::path::PathBuf;
@@ -7,7 +8,7 @@ pub struct Config {
     pub server: PathBuf,
     pub model: PathBuf,
     pub args: Vec<String>,
-    pub vad: bool,
+    pub vad: Option<bool>,
     pub extension: Option<PathBuf>,
     pub extension_ids: Vec<String>,
 }
@@ -50,7 +51,7 @@ impl Config {
                 .and_then(Value::as_array)
                 .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
                 .unwrap_or_default(),
-            vad: value.get("vad").and_then(Value::as_bool).unwrap_or(false),
+            vad: value.get("vad").and_then(Value::as_bool),
             extension: value.get("extension").and_then(Value::as_str).map(PathBuf::from),
             extension_ids: value
                 .get("extensionIds")
@@ -58,6 +59,10 @@ impl Config {
                 .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
                 .unwrap_or_default(),
         })
+    }
+
+    pub fn vad_on(&self) -> bool {
+        self.vad.unwrap_or_else(|| whisper_cpp::handles_vad(whisper_cpp::version(&self.server).as_deref()))
     }
 
     pub fn save(&self) -> Result<(), String> {

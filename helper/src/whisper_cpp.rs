@@ -219,6 +219,15 @@ fn library_version(name: &str) -> Option<String> {
     full.then(|| version.to_string())
 }
 
+pub fn handles_vad(version: Option<&str>) -> bool {
+    let Some(version) = version else { return false };
+    if let Some(build) = version.strip_prefix('b') {
+        return build.parse::<u32>().is_ok_and(|n| n >= 5907);
+    }
+    let numbers: Vec<u32> = version.split('.').filter_map(|n| n.parse().ok()).collect();
+    numbers.len() == 3 && numbers >= vec![1, 9, 6]
+}
+
 pub fn version(server: &Path) -> Option<String> {
     let server = fs::canonicalize(server).ok()?;
     let dir = server.parent()?;
@@ -458,6 +467,16 @@ mod tests {
         );
         assert_eq!(order(candidates(&Value::Null, &matchers("linux", "x86_64", false))), vec![("b5907".into(), Build::Cpu)]);
         assert!(candidates(&releases, &matchers("macos", "aarch64", false)).is_empty());
+    }
+
+    #[test]
+    fn speech_detection_is_only_safe_by_default_from_1_9_6() {
+        for old in [None, Some("1.9.5"), Some("1.8.7"), Some("0.0.0"), Some("b5454"), Some("bxyz"), Some("1.9")] {
+            assert!(!handles_vad(old), "{old:?}");
+        }
+        for new in ["1.9.6", "1.9.10", "1.10.0", "2.0.0", "b5907", "b9999"] {
+            assert!(handles_vad(Some(new)), "{new}");
+        }
     }
 
     #[test]

@@ -5,7 +5,8 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 ## [0.1.21](https://github.com/rawmind/titl/releases/tag/v0.1.21) - 2026-11-24
 
 ### Added
-- **Speech detection, off by default:** `titl install --vad` downloads a 0.9 MB Silero model, and whisper-server then uses it to skip audio without speech, so silence no longer produces made-up subtitles. It may also skip singing. It needs whisper.cpp 1.9.6: 1.9.5 can crash on audio without speech. Set the spoken language too: with auto-detect, music or noise without speech counts as English. The choice is remembered; `titl install --no-vad` turns it off. Debug info shows whether it is on.
+- **Speech detection:** with whisper.cpp 1.9.6 or newer, `titl install` also downloads a 0.9 MB Silero model, and whisper-server then skips audio without speech, so silence no longer produces made-up subtitles. It may also skip singing. With older versions it stays off, because 1.9.5 can crash on audio without speech; `titl install --vad` turns it on anyway. `titl install --no-vad` turns it off. Both are remembered. If whisper-server can't start with it, Titl runs it without. `titl status` and Debug info show the setting.
+- Automatic language detection ignores replies without speech, which whisper-server labels English when speech detection is on.
 - `titl status` and Debug info show the whisper.cpp version, and the flags Titl adds to whisper-server.
 
 ### Changed
@@ -15,7 +16,8 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 ### Upgrade
 - Windows and Linux: new installs get the pinned build. If an older helper downloaded your whisper.cpp, update the helper and run `titl install --update-server` once. It picks the default model again, so if you chose another one, add `--download-model NAME` or `--model PATH`. Skip this if you built whisper.cpp yourself: it would replace your build with the prebuilt one.
 - macOS: `brew upgrade whisper.cpp`.
-- The extension's code is unchanged; only its version number changes.
+- Speech detection starts after the next `titl install` with whisper.cpp 1.9.6 or newer. Use `titl install --no-vad` to leave it off.
+- Update the extension too: without its part of this release, automatic language detection can settle on English during music or noise. Chrome updates it from the Chrome Web Store.
 
 ## [0.1.20](https://github.com/rawmind/titl/releases/tag/v0.1.20) - 2026-11-22
 

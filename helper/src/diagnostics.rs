@@ -40,10 +40,11 @@ pub fn server_run() -> Option<ServerRun> {
 
 fn speech_detection(config: &Config) -> &'static str {
     let dir = paths::models_dir();
-    match model::vad_args(&config.args, config.vad, &dir).is_empty() {
+    match model::vad_args(&config.args, config.vad_on(), &dir).is_empty() {
         false => "speech detection on",
-        true if !config.vad => "speech detection off",
-        true if model::vad_in(&dir).is_none() => "speech detection not installed, run titl install --vad",
+        true if config.vad == Some(false) => "speech detection off",
+        true if !config.vad_on() => "speech detection off, needs whisper.cpp 1.9.6",
+        true if model::vad_in(&dir).is_none() => "speech detection not installed, run titl install",
         true => "speech detection set in extra flags",
     }
 }
@@ -55,7 +56,7 @@ fn describe_server(config: &Config) -> String {
 
 pub fn server_flags(config: &Config) -> Vec<String> {
     let mut flags = config.args.clone();
-    flags.extend(model::vad_args(&config.args, config.vad, &paths::models_dir()));
+    flags.extend(model::vad_args(&config.args, config.vad_on(), &paths::models_dir()));
     flags
 }
 
