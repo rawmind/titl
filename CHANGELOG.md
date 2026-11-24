@@ -2,7 +2,7 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
-## Unreleased
+## [0.1.21](https://github.com/rawmind/titl/releases/tag/v0.1.21) - 2026-11-24
 
 ### Added
 - **Speech detection, off by default:** `titl install --vad` downloads a 0.9 MB Silero model, and whisper-server then uses it to skip audio without speech, so silence no longer produces made-up subtitles. It may also skip singing. It needs whisper.cpp 1.9.6: 1.9.5 can crash on audio without speech. Set the spoken language too: with auto-detect, music or noise without speech counts as English. The choice is remembered; `titl install --no-vad` turns it off. Debug info shows whether it is on.
@@ -15,6 +15,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 ### Upgrade
 - Windows and Linux: new installs get the pinned build. If an older helper downloaded your whisper.cpp, update the helper and run `titl install --update-server` once. It picks the default model again, so if you chose another one, add `--download-model NAME` or `--model PATH`. Skip this if you built whisper.cpp yourself: it would replace your build with the prebuilt one.
 - macOS: `brew upgrade whisper.cpp`.
+- The extension's code is unchanged; only its version number changes.
 
 ## [0.1.20](https://github.com/rawmind/titl/releases/tag/v0.1.20) - 2026-11-22
 
