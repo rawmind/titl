@@ -1,10 +1,16 @@
 use crate::paths;
+use crate::whisper_cpp;
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 pub const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
 pub const CPU_MODEL: &str = "small";
+pub const VAD_FILE: &str = "ggml-silero-v6.2.0.bin";
+const VAD_URL: &str =
+    "https://huggingface.co/ggml-org/whisper-vad/resolve/9ffd54a1e1ee413ddf265af9913beaf518d1639b/ggml-silero-v6.2.0.bin";
+const VAD_SIZE: u64 = 885_098;
+const VAD_SHA256: &str = "2aa269b785eeb53a82983a20501ddf7c1d9c48e33ab63a41391ac6c9f7fb6987";
 pub const PREFERRED_MODELS: &[&str] = &["large-v3-turbo", "large-v3-turbo-q8_0", "large-v3-turbo-q5_0"];
 
 pub fn file_name(name: &str) -> String {
@@ -13,6 +19,35 @@ pub fn file_name(name: &str) -> String {
 
 pub fn url(name: &str) -> String {
     format!("https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{}", file_name(name))
+}
+
+pub fn vad_in(dir: &Path) -> Option<PathBuf> {
+    Some(dir.join(VAD_FILE)).filter(|p| fs::metadata(p).is_ok_and(|m| m.is_file() && m.len() == VAD_SIZE))
+}
+
+pub fn vad_args(configured: &[String], enabled: bool, dir: &Path) -> Vec<String> {
+    let chosen_by_user = configured.iter().any(|a| matches!(a.as_str(), "--vad" | "-vm" | "--vad-model"));
+    match vad_in(dir) {
+        Some(path) if enabled && !chosen_by_user => {
+            vec!["--vad".into(), "--vad-model".into(), path.to_string_lossy().into_owned()]
+        }
+        _ => Vec::new(),
+    }
+}
+
+pub fn download_vad() -> Result<PathBuf, String> {
+    let dir = paths::models_dir();
+    if let Some(path) = vad_in(&dir) {
+        return Ok(path);
+    }
+    let dest = dir.join(VAD_FILE);
+    fetch(VAD_URL, &dest)?;
+    let sha = whisper_cpp::sha256_of(&dest)?;
+    if sha != VAD_SHA256 {
+        let _ = fs::remove_file(&dest);
+        return Err(format!("{VAD_FILE} has an unexpected checksum: {sha}"));
+    }
+    Ok(dest)
 }
 
 pub fn valid_name(name: &str) -> bool {
@@ -90,6 +125,22 @@ mod tests {
             url("large-v3-turbo-q5_0"),
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin"
         );
+    }
+
+    #[test]
+    fn speech_detection_needs_an_intact_model_and_can_be_turned_off() {
+        let dir = std::env::temp_dir().join(format!("titl-vad-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        assert!(vad_args(&[], true, &dir).is_empty());
+        fs::write(dir.join(VAD_FILE), "partial").unwrap();
+        assert!(vad_args(&[], true, &dir).is_empty());
+        fs::write(dir.join(VAD_FILE), vec![0; VAD_SIZE as usize]).unwrap();
+        let path = dir.join(VAD_FILE).to_string_lossy().into_owned();
+        assert_eq!(vad_args(&[], true, &dir), ["--vad", "--vad-model", path.as_str()]);
+        assert!(vad_args(&[], false, &dir).is_empty());
+        assert!(vad_args(&["--vad-model".into(), "/mine.bin".into()], true, &dir).is_empty());
+        assert!(!vad_args(&["-t".into(), "8".into()], true, &dir).is_empty());
+        fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]

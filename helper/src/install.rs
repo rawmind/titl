@@ -17,6 +17,7 @@ pub struct Options {
     pub extension_ids: Vec<String>,
     pub update_server: bool,
     pub cpu_only: bool,
+    pub vad: Option<bool>,
 }
 
 pub fn parse(args: &[String]) -> Result<Options, String> {
@@ -30,6 +31,8 @@ pub fn parse(args: &[String]) -> Result<Options, String> {
             "--download-model" => opts.download_model = Some(value()?),
             "--update-server" => opts.update_server = true,
             "--cpu" => opts.cpu_only = true,
+            "--vad" => opts.vad = Some(true),
+            "--no-vad" => opts.vad = Some(false),
             "--extension-id" => {
                 let id = value()?;
                 if !config::valid_extension_id(&id) {
@@ -234,6 +237,12 @@ pub fn install(mut opts: Options) -> Result<(), String> {
     let data = paths::data_dir();
     fs::create_dir_all(&data).map_err(|e| format!("cannot create {}: {e}", data.display()))?;
     let previous = Config::load().ok();
+    let vad = opts.vad.or(previous.as_ref().map(|c| c.vad)).unwrap_or(false);
+    if vad {
+        if let Err(e) = model::download_vad() {
+            println!("Continuing without speech detection: {e}");
+        }
+    }
     let args = previous.as_ref().map(|c| c.args.clone()).unwrap_or_default();
     let mut extra_ids = previous.map(|c| c.extension_ids).unwrap_or_default();
     for id in opts.extension_ids {
@@ -247,6 +256,7 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         server: server.clone(),
         model: model.clone(),
         args,
+        vad,
         extension: extension_dir.clone(),
         extension_ids: extra_ids,
     }
@@ -436,6 +446,9 @@ mod tests {
     fn parses_server_download_flags() {
         let opts = parse(&["--update-server".to_string(), "--cpu".to_string()]).unwrap();
         assert!(opts.update_server && opts.cpu_only);
+        assert_eq!(opts.vad, None);
+        assert_eq!(parse(&["--no-vad".to_string()]).unwrap().vad, Some(false));
+        assert_eq!(parse(&["--vad".to_string()]).unwrap().vad, Some(true));
     }
 
     #[test]

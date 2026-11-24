@@ -17,7 +17,7 @@ use std::process::ExitCode;
 const HELP: &str = "titl: installs and runs whisper-server for the Titl Chrome extension
 
 USAGE:
-  titl install [--server PATH | --update-server [--cpu]] [--model PATH | --download-model NAME] [--extension-id ID]
+  titl install [--server PATH | --update-server [--cpu]] [--model PATH | --download-model NAME] [--vad | --no-vad] [--extension-id ID]
   titl uninstall [--purge]
   titl status
   titl update
@@ -33,6 +33,8 @@ install         Find whisper-server and a model (downloading one if needed), cop
 --model         Path to a ggml model file. Default: large-v3-turbo with a GPU, small without.
 --download-model
                 Download a model by name, e.g. large-v3-turbo, large-v3-turbo-q5_0, small.
+--vad           Skip audio without speech, using a 0.9 MB Silero model. Off unless you ask for it; remembered.
+--no-vad        Turn it off again.
 --extension-id  Also accept this extension ID (e.g. a Chrome Web Store build). Remembered.
 uninstall       Unregister and remove the helper. --purge also deletes downloaded models.
 status          Show the configuration and where the helper is registered.

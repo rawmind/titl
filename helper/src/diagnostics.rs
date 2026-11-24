@@ -53,6 +53,13 @@ pub fn info_reply() -> Value {
             reply["server"] = json!(c.server.display().to_string());
             reply["model"] = json!(c.model.display().to_string());
             reply["args"] = json!(c.args);
+            let dir = crate::paths::models_dir();
+            reply["vad"] = json!(match crate::model::vad_args(&c.args, c.vad, &dir).is_empty() {
+                false => "on",
+                true if !c.vad => "off",
+                true if crate::model::vad_in(&dir).is_none() => "not installed (run titl install --vad)",
+                true => "set in extra flags",
+            });
         }
         Err(e) => reply["config_error"] = json!(e),
     }
