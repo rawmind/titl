@@ -51,6 +51,7 @@ pub fn info_reply() -> Value {
     match Config::load() {
         Ok(c) => {
             reply["server"] = json!(c.server.display().to_string());
+            reply["whisper_version"] = json!(crate::whisper_cpp::version(&c.server));
             reply["model"] = json!(c.model.display().to_string());
             reply["args"] = json!(c.args);
             let dir = crate::paths::models_dir();
