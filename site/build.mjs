@@ -33,6 +33,7 @@ const LINKS = {
   security: `${REPO}/blob/master/SECURITY.md`,
   kofi: 'https://ko-fi.com/rwmnd',
   video: 'https://www.youtube.com/watch?v=uu_h3BTFQjA',
+  whisperCpp: 'https://github.com/ggml-org/whisper.cpp',
 };
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -50,10 +51,29 @@ const urlFor = (slug) => (slug === 'en' ? SITE : `${SITE}${slug}/`);
 const withLinks = (text) => text.replace(/\{(\w+)\}/g, (m, key) => LINKS[key] ?? m);
 const escapeAttr = (text) => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
+const jsonLd = (lang, strings) =>
+  JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Titl',
+    description: strings.metaDesc,
+    url: urlFor(lang.slug),
+    inLanguage: lang.htmlLang,
+    applicationCategory: 'BrowserApplication',
+    operatingSystem: 'macOS, Windows, Linux',
+    image: `${SITE}icons/icon128.png`,
+    screenshot: `${SITE}store/screenshot-1-subtitles.png`,
+    installUrl: LINKS.store,
+    license: `${REPO}/blob/master/LICENSE`,
+    isAccessibleForFree: true,
+    sameAs: [LINKS.github, LINKS.store],
+    offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' },
+  }).replace(/</g, '\\u003c');
+
 export function render(template, lang, strings) {
   const base = lang.slug === 'en' ? '' : '../';
   const alternates = [
-    ...LANGUAGES.map((l) => `  <link rel="alternate" hreflang="${l.htmlLang}" href="${urlFor(l.slug)}">`),
+    ...LANGUAGES.map((l) => `  <link rel="alternate" hreflang="${l.slug}" href="${urlFor(l.slug)}">`),
     `  <link rel="alternate" hreflang="x-default" href="${SITE}">`,
   ].join('\n');
   const languageLinks = LANGUAGES.map((l) => {
@@ -73,11 +93,12 @@ export function render(template, lang, strings) {
     gaId: GA_ID,
     base,
     alternates,
+    jsonLd: jsonLd(lang, strings),
     languageLinks,
     languageName: lang.name,
     langsJson: JSON.stringify(LANGUAGES.map(({ slug, match }) => ({ slug, match }))),
   };
-  for (const key of ['title', 'metaDesc', 'shotAlt', 'scrYoutubeAlt', 'scrPopupAlt', 'scrOptionsAlt', 'language', 's2Title']) {
+  for (const key of ['title', 'metaDesc', 'shotAlt', 'scrYoutubeAlt', 'scrPopupAlt', 'scrOptionsAlt', 'scrLlmAlt', 'close', 'language', 's2Title']) {
     values[key] = escapeAttr(strings[key]);
   }
   return template.replace(/\{\{(\w+)\}\}/g, (m, key) => {
@@ -101,6 +122,7 @@ export function build(out = join(root, 'dist', 'site')) {
   for (const f of readdirSync(join(root, 'store')).filter((f) => f.endsWith('.png'))) {
     cpSync(join(root, 'store', f), join(out, 'store', f));
   }
+  cpSync(join(here, 'img'), join(out, 'img'), { recursive: true });
   for (const f of readdirSync(join(root, 'icons')).filter((f) => f.endsWith('.png') || f === 'icon.svg')) {
     cpSync(join(root, 'icons', f), join(out, 'icons', f));
   }

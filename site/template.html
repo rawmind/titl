@@ -10,12 +10,18 @@
 {{alternates}}
   <link rel="icon" type="image/png" sizes="32x32" href="{{base}}icons/icon32.png">
   <link rel="icon" type="image/svg+xml" href="{{base}}icons/icon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Titl">
   <meta property="og:title" content="{{title}}">
   <meta property="og:description" content="{{metaDesc}}">
   <meta property="og:image" content="{{site}}store/screenshot-1-subtitles.png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="800">
+  <meta property="og:image:alt" content="{{shotAlt}}">
   <meta property="og:url" content="{{url}}">
   <meta property="og:locale" content="{{ogLocale}}">
   <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{{jsonLd}}</script>
   <link rel="stylesheet" href="{{base}}style.css">
   <script>
     (() => {
@@ -63,7 +69,7 @@
       </div>
       <p class="small">{{heroBrowsers}}</p>
       <figure class="shot">
-        <img src="{{base}}store/screenshot-1-subtitles.png" width="1280" height="800" alt="{{shotAlt}}">
+        <a class="zoom" href="{{base}}img/screenshot-1-subtitles-1280.webp"><img src="{{base}}img/screenshot-1-subtitles-1280.webp" srcset="{{base}}img/screenshot-1-subtitles-640.webp 640w, {{base}}img/screenshot-1-subtitles-1280.webp 1280w" sizes="(max-width: 1080px) calc(100vw - 32px), 1048px" fetchpriority="high" width="1280" height="800" alt="{{shotAlt}}"></a>
         <figcaption>{{shotCaption}}</figcaption>
       </figure>
     </section>
@@ -106,9 +112,10 @@
     <section class="screens">
       <h2>{{seeTitle}}</h2>
       <div class="screens-row">
-        <figure><img src="{{base}}store/screenshot-2-on-youtube.png" loading="lazy" width="1280" height="800" alt="{{scrYoutubeAlt}}"><figcaption>{{scrYoutube}}</figcaption></figure>
-        <figure><img src="{{base}}store/screenshot-3-popup.png" loading="lazy" width="1280" height="800" alt="{{scrPopupAlt}}"><figcaption>{{scrPopup}}</figcaption></figure>
-        <figure><img src="{{base}}store/screenshot-4-options.png" loading="lazy" width="1280" height="800" alt="{{scrOptionsAlt}}"><figcaption>{{scrOptions}}</figcaption></figure>
+        <figure><a class="zoom" href="{{base}}img/screenshot-2-on-youtube-1280.webp"><img src="{{base}}img/screenshot-2-on-youtube-1280.webp" srcset="{{base}}img/screenshot-2-on-youtube-640.webp 640w, {{base}}img/screenshot-2-on-youtube-1280.webp 1280w" sizes="(max-width: 743px) calc(100vw - 32px), (max-width: 1080px) calc(50vw - 24px), 516px" loading="lazy" width="1280" height="800" alt="{{scrYoutubeAlt}}"></a><figcaption>{{scrYoutube}}</figcaption></figure>
+        <figure><a class="zoom" href="{{base}}img/screenshot-3-popup-1280.webp"><img src="{{base}}img/screenshot-3-popup-1280.webp" srcset="{{base}}img/screenshot-3-popup-640.webp 640w, {{base}}img/screenshot-3-popup-1280.webp 1280w" sizes="(max-width: 743px) calc(100vw - 32px), (max-width: 1080px) calc(50vw - 24px), 516px" loading="lazy" width="1280" height="800" alt="{{scrPopupAlt}}"></a><figcaption>{{scrPopup}}</figcaption></figure>
+        <figure><a class="zoom" href="{{base}}img/screenshot-4-options-1280.webp"><img src="{{base}}img/screenshot-4-options-1280.webp" srcset="{{base}}img/screenshot-4-options-640.webp 640w, {{base}}img/screenshot-4-options-1280.webp 1280w" sizes="(max-width: 743px) calc(100vw - 32px), (max-width: 1080px) calc(50vw - 24px), 516px" loading="lazy" width="1280" height="800" alt="{{scrOptionsAlt}}"></a><figcaption>{{scrOptions}}</figcaption></figure>
+        <figure><a class="zoom" href="{{base}}img/screenshot-5-local-llm-1280.webp"><img src="{{base}}img/screenshot-5-local-llm-1280.webp" srcset="{{base}}img/screenshot-5-local-llm-640.webp 640w, {{base}}img/screenshot-5-local-llm-1280.webp 1280w" sizes="(max-width: 743px) calc(100vw - 32px), (max-width: 1080px) calc(50vw - 24px), 516px" loading="lazy" width="1280" height="800" alt="{{scrLlmAlt}}"></a><figcaption>{{scrLlm}}</figcaption></figure>
       </div>
     </section>
 
@@ -163,11 +170,13 @@
 
     <section id="faq">
       <h2>{{faqTitle}}</h2>
+      <details><summary>{{q8}}</summary><p>{{a8}}</p></details>
       <details><summary>{{q1}}</summary><p>{{a1}}</p></details>
       <details><summary>{{q2}}</summary><p>{{a2}}</p></details>
       <details><summary>{{q3}}</summary><p>{{a3}}</p></details>
       <details><summary>{{q6}}</summary><p>{{a6}}</p></details>
       <details><summary>{{q7}}</summary><p>{{a7}}</p></details>
+      <details><summary>{{q9}}</summary><p>{{a9}}</p></details>
       <details><summary>{{q4}}</summary><p>{{a4}}</p></details>
       <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
     </section>
@@ -188,6 +197,11 @@
     </p>
     <p class="small">{{footerFree}}</p>
   </footer>
+
+  <dialog class="zoomed" id="zoomed">
+    <button type="button" aria-label="{{close}}"><span aria-hidden="true">×</span></button>
+    <img alt="">
+  </dialog>
 
   <div class="consent" id="consent" role="region" aria-label="{{cookieSettings}}" hidden>
     <p>{{consentText}}</p>
@@ -243,6 +257,22 @@
         } catch {}
       });
     }
+    const zoomed = document.getElementById('zoomed');
+    const zoomedImage = zoomed.querySelector('img');
+    for (const link of document.querySelectorAll('.zoom')) {
+      link.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !zoomed.showModal) return;
+        e.preventDefault();
+        const { alt, width, height } = link.querySelector('img');
+        zoomedImage.src = link.href;
+        zoomedImage.alt = alt;
+        zoomed.style.setProperty('--ratio', width / height);
+        zoomed.setAttribute('aria-label', alt);
+        zoomed.showModal();
+        zoomed.scrollLeft = ((zoomed.scrollWidth - zoomed.clientWidth) / 2) * (document.dir === 'rtl' ? -1 : 1);
+      });
+    }
+    zoomed.addEventListener('click', () => zoomed.close());
     const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
     const select = (tab, focus = false) => {
       for (const t of tabs) {

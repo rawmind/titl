@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-support%20Titl-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/rwmnd)
 
-[**Add to Chrome**](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) · [Install the helper](#install) · [Changelog](CHANGELOG.md) · [Privacy](PRIVACY.md) · [♥ Support](https://ko-fi.com/rwmnd)
+[**Add to Chrome**](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) · [Website](https://rawmind.github.io/titl/) · [Install the helper](#install) · [Changelog](CHANGELOG.md) · [Privacy](PRIVACY.md) · [♥ Support](https://ko-fi.com/rwmnd)
 
 <img src="store/screenshot-1-subtitles.png" alt="Titl showing Serbian subtitles with an English translation on a TEDx talk" width="820">
 
@@ -267,6 +267,8 @@ A local model translates each line together with the 4 lines before it (and thei
    The first start downloads the model. `--swa-full -c 2048 -np 1` matters: Titl's prompts stay under 300 tokens, and without `--swa-full` llama.cpp reprocesses Gemma's prompt on every line, which makes it about 3× slower. With `--swa-full` and Gemma's default 128k context, the cache doesn't fit in memory.
 2. **Options → Translator → Local LLM**, check the **Model API URL**, and click **Test connection**. For Ollama use `http://127.0.0.1:11434/v1` and a model name such as `gemma3:12b`; for LM Studio, `http://127.0.0.1:1234/v1`.
 3. **Save**.
+
+<img src="store/screenshot-5-local-llm.png" alt="Titl options for translating with a local LLM" width="640">
 
 Lines are translated one at a time, nearest to the playhead first. In lookahead mode, **Pause until ready** also waits for the translation, so lines don't show untranslated; set it to 0 to never pause. In live mode the translation appears a moment after the original.
 
