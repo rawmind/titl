@@ -28,7 +28,7 @@ install         Find whisper-server and a model (downloading one if needed), cop
 --server        Path to whisper-server (default: PATH and common whisper.cpp build folders).
                 On Windows and Linux, if none is found, a prebuilt whisper.cpp is downloaded
                 (CUDA build with an NVIDIA GPU, otherwise CPU).
---update-server Download the newest prebuilt whisper.cpp even if one is installed.
+--update-server Download the pinned prebuilt whisper.cpp even if one is installed.
 --cpu           Use the CPU build even if an NVIDIA GPU is present.
 --model         Path to a ggml model file. Default: large-v3-turbo with a GPU, small without.
 --download-model
