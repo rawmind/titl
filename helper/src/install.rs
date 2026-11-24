@@ -237,8 +237,8 @@ pub fn install(mut opts: Options) -> Result<(), String> {
     let data = paths::data_dir();
     fs::create_dir_all(&data).map_err(|e| format!("cannot create {}: {e}", data.display()))?;
     let previous = Config::load().ok();
-    let vad = opts.vad.or(previous.as_ref().map(|c| c.vad)).unwrap_or(false);
-    if vad {
+    let vad = opts.vad.or(previous.as_ref().and_then(|c| c.vad));
+    if vad.unwrap_or_else(|| whisper_cpp::handles_vad(whisper_cpp::version(&server).as_deref())) {
         if let Err(e) = model::download_vad() {
             println!("Continuing without speech detection: {e}");
         }

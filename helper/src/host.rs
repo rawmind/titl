@@ -140,7 +140,7 @@ impl Server {
 
     fn spawn(&mut self, port: u16) -> Result<bool, String> {
         let config = Config::load()?;
-        let vad = model::vad_args(&config.args, config.vad && !self.vad_failed, &paths::models_dir());
+        let vad = model::vad_args(&config.args, config.vad_on() && !self.vad_failed, &paths::models_dir());
         let log_path = paths::log_path();
         let mut log = OpenOptions::new()
             .create(true)
