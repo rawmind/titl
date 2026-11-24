@@ -7,6 +7,7 @@ pub struct Config {
     pub server: PathBuf,
     pub model: PathBuf,
     pub args: Vec<String>,
+    pub vad: bool,
     pub extension: Option<PathBuf>,
     pub extension_ids: Vec<String>,
 }
@@ -49,6 +50,7 @@ impl Config {
                 .and_then(Value::as_array)
                 .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
                 .unwrap_or_default(),
+            vad: value.get("vad").and_then(Value::as_bool).unwrap_or(false),
             extension: value.get("extension").and_then(Value::as_str).map(PathBuf::from),
             extension_ids: value
                 .get("extensionIds")
@@ -64,6 +66,7 @@ impl Config {
             "server": self.server,
             "model": self.model,
             "args": self.args,
+            "vad": self.vad,
             "extension": self.extension,
             "extensionIds": self.extension_ids,
         });

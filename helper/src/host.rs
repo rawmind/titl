@@ -1,5 +1,6 @@
 use crate::config::Config;
 use crate::diagnostics;
+use crate::model;
 use crate::paths;
 use crate::update;
 use serde_json::{json, Value};
@@ -82,6 +83,7 @@ impl Failure {
 struct Server {
     child: Option<Child>,
     port: Option<u16>,
+    vad_failed: bool,
 }
 
 impl Server {
@@ -123,13 +125,22 @@ impl Server {
 
     fn launch(&mut self, port: u16) -> Result<(), Failure> {
         self.stop();
-        self.spawn(port).map_err(Failure::Other)?;
+        let with_vad = self.spawn(port).map_err(Failure::Other)?;
         self.port = Some(port);
-        self.wait_ready(port)
+        match self.wait_ready(port) {
+            Err(Failure::Exited(_)) if with_vad => {
+                self.vad_failed = true;
+                self.spawn(port).map_err(Failure::Other)?;
+                self.port = Some(port);
+                self.wait_ready(port)
+            }
+            result => result,
+        }
     }
 
-    fn spawn(&mut self, port: u16) -> Result<(), String> {
+    fn spawn(&mut self, port: u16) -> Result<bool, String> {
         let config = Config::load()?;
+        let vad = model::vad_args(&config.args, config.vad && !self.vad_failed, &paths::models_dir());
         let log_path = paths::log_path();
         let mut log = OpenOptions::new()
             .create(true)
@@ -145,6 +156,7 @@ impl Server {
             .arg(&config.model)
             .args(["--host", "127.0.0.1", "--port", &port.to_string()])
             .args(&config.args)
+            .args(&vad)
             .stdin(Stdio::null())
             .stdout(log)
             .stderr(log_err);
@@ -160,7 +172,7 @@ impl Server {
             .spawn()
             .map_err(|e| format!("cannot start {}: {e}", config.server.display()))?;
         self.child = Some(child);
-        Ok(())
+        Ok(!vad.is_empty())
     }
 
     fn wait_ready(&mut self, port: u16) -> Result<(), Failure> {
@@ -199,7 +211,7 @@ impl Server {
 pub fn run() {
     let mut stdin = io::stdin().lock();
     let mut stdout = io::stdout().lock();
-    let mut server = Server { child: None, port: None };
+    let mut server = Server { child: None, port: None, vad_failed: false };
     update::cleanup();
     while let Ok(Some(message)) = read_message(&mut stdin) {
         let reply = match message.get("cmd").and_then(Value::as_str) {
@@ -255,7 +267,7 @@ mod tests {
 
     #[test]
     fn refuses_non_local_hosts() {
-        let mut server = Server { child: None, port: None };
+        let mut server = Server { child: None, port: None, vad_failed: false };
         assert_eq!(server.start("example.com", None)["status"], "error");
     }
 

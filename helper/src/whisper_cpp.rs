@@ -13,12 +13,12 @@ use std::time::{Duration, Instant};
 const RELEASES_URL: &str = "https://api.github.com/repos/ggml-org/whisper.cpp/releases?per_page=30";
 const DOWNLOAD_PREFIX: &str = "https://github.com/ggml-org/whisper.cpp/releases/download/";
 const RELEASES_PER_BUILD: usize = 2;
-const KNOWN_GOOD: &[(&str, &str, &str)] = &[
-    ("b5454", "whisper-bin-x64.zip", "6ba69e3482d7826214f90a6a9c84ca07782aec1e1d0c6a7c30c994fd5d816ccb"),
-    ("b5454", "whisper-bin-win-cuda-12.4.0-x64.zip", "afef0b881c500958921c3f5523b50e59ee2ec9b6f5cbd25b324c51ed308a957a"),
-    ("b5454", "whisper-bin-win-cpu-arm64.zip", "28c37e7b598c3d9bbfef94f3bd67f2ee6f12b7c86f3da5edcf5e4308d615ff6d"),
-    ("b5454", "whisper-bin-ubuntu-x64.tar.gz", "a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c"),
-    ("b5454", "whisper-bin-ubuntu-arm64.tar.gz", "6b95ebfc60447df48e70ef00a73bdc3f41679ed2d01ef465827206a2ff325149"),
+const PINNED: &[(&str, &str, &str)] = &[
+    ("b5907", "whisper-bin-x64.zip", "ecca07b277d943e9b9f4712856a144b857271a6b333104e511e1988e80db582b"),
+    ("b5907", "whisper-bin-win-cuda-12.4.0-x64.zip", "34f872ce724ca1ff0a4afca481853e5ee74250f8cb22153e499f953562846039"),
+    ("b5907", "whisper-bin-win-cpu-arm64.zip", "4e522946827dcbc517d3cd7ee8d6cfe760e8143076924ac8513622694aa3ccfd"),
+    ("b5907", "whisper-bin-ubuntu-x64.tar.gz", "a6199027fe5b4239c84171d2bca4c0ff44ec86a515494d5a39b237b212d429bd"),
+    ("b5907", "whisper-bin-ubuntu-arm64.tar.gz", "da2e86ac058e1db0281167355428665b82c0d92e4506d186a3894bec55ceefef"),
 ];
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -127,9 +127,9 @@ pub fn choose(releases: &Value, matchers: &[Matcher]) -> Vec<Asset> {
     chosen
 }
 
-pub fn known_good() -> Value {
+pub fn pinned() -> Value {
     let mut releases: Vec<Value> = Vec::new();
-    for (tag, name, sha) in KNOWN_GOOD {
+    for (tag, name, sha) in PINNED {
         let asset = json!({
             "name": name,
             "browser_download_url": format!("{DOWNLOAD_PREFIX}{tag}/{name}"),
@@ -157,6 +157,17 @@ pub fn nvidia_present() -> bool {
         .stderr(Stdio::null())
         .status()
         .is_ok_and(|s| s.success())
+}
+
+fn candidates(releases: &Value, matchers: &[Matcher]) -> Vec<Asset> {
+    let mut list = choose(&pinned(), matchers);
+    for asset in choose(releases, matchers) {
+        if !list.iter().any(|c| c.url == asset.url) {
+            list.push(asset);
+        }
+    }
+    list.sort_by_key(|a| matchers.iter().position(|(build, _)| *build == a.build));
+    list
 }
 
 fn remove_other_versions(keep: &Path) {
@@ -199,6 +210,32 @@ pub fn find_server_in(dir: &Path) -> Option<PathBuf> {
         }
     }
     None
+}
+
+fn library_version(name: &str) -> Option<String> {
+    let rest = name.strip_prefix("libwhisper.")?;
+    let version = rest.strip_suffix(".dylib").or_else(|| rest.strip_prefix("so."))?;
+    let full = version.split('.').count() == 3 && version.split('.').all(|n| n.parse::<u32>().is_ok());
+    full.then(|| version.to_string())
+}
+
+pub fn version(server: &Path) -> Option<String> {
+    let server = fs::canonicalize(server).ok()?;
+    let dir = server.parent()?;
+    let mut folders = vec![dir.to_path_buf()];
+    folders.extend(dir.parent().map(|up| up.join("lib")));
+    folders
+        .iter()
+        .filter_map(|folder| fs::read_dir(folder).ok())
+        .flat_map(|entries| entries.flatten())
+        .find_map(|entry| library_version(entry.file_name().to_str()?))
+        .or_else(|| {
+            server.ancestors().find_map(|folder| {
+                let (build, _) = folder.file_name()?.to_str()?.split_once("-whisper-")?;
+                let number = build.strip_prefix('b')?;
+                number.parse::<u32>().is_ok().then(|| build.to_string())
+            })
+        })
 }
 
 pub fn downloaded_server() -> Option<PathBuf> {
@@ -288,18 +325,11 @@ pub fn download(cpu_only: bool) -> Result<Installed, String> {
     }
     let nvidia = !cpu_only && nvidia_present();
     let matchers = matchers(env::consts::OS, native_arch(), nvidia);
-    let mut candidates = match fetch_releases() {
-        Ok(releases) => choose(&releases, &matchers),
-        Err(e) => {
-            println!("{e}; using the built-in known-good build.");
-            Vec::new()
-        }
-    };
-    for asset in choose(&known_good(), &matchers) {
-        if !candidates.iter().any(|c| c.url == asset.url) {
-            candidates.push(asset);
-        }
-    }
+    let releases = fetch_releases().unwrap_or_else(|e| {
+        println!("{e}; only the pinned build is available.");
+        Value::Null
+    });
+    let candidates = candidates(&releases, &matchers);
     if candidates.is_empty() {
         return Err(format!(
             "no prebuilt whisper.cpp for {}/{}: build it (https://github.com/ggml-org/whisper.cpp) and pass --server PATH",
@@ -400,14 +430,58 @@ mod tests {
     }
 
     #[test]
-    fn known_good_build_covers_every_supported_platform() {
+    fn pinned_build_covers_every_supported_platform() {
         for (os, arch, nvidia) in [("windows", "x86_64", true), ("windows", "x86_64", false), ("windows", "aarch64", false), ("linux", "x86_64", false), ("linux", "aarch64", false)] {
-            let chosen = choose(&known_good(), &matchers(os, arch, nvidia));
+            let chosen = choose(&pinned(), &matchers(os, arch, nvidia));
             assert!(!chosen.is_empty(), "{os}/{arch}");
             assert!(chosen.iter().all(|a| a.sha256.as_ref().is_some_and(|s| s.len() == 64)), "{os}/{arch}");
         }
-        let cuda = choose(&known_good(), &matchers("windows", "x86_64", true));
+        let cuda = choose(&pinned(), &matchers("windows", "x86_64", true));
         assert_eq!(cuda.iter().map(|a| a.build).collect::<Vec<_>>(), [Build::Cuda, Build::Cpu]);
+    }
+
+    #[test]
+    fn the_pinned_build_comes_before_newer_and_older_ones() {
+        let releases = json!([
+            release("b9999", &["whisper-bin-x64.zip", "whisper-bin-win-cuda-12.4.0-x64.zip"]),
+            release("b5907", &["whisper-bin-x64.zip", "whisper-bin-win-cuda-12.4.0-x64.zip"]),
+        ]);
+        let order = |list: Vec<Asset>| list.iter().map(|a| (a.release.clone(), a.build)).collect::<Vec<_>>();
+        assert_eq!(
+            order(candidates(&releases, &matchers("windows", "x86_64", true))),
+            vec![
+                ("b5907".into(), Build::Cuda),
+                ("b9999".into(), Build::Cuda),
+                ("b5907".into(), Build::Cpu),
+                ("b9999".into(), Build::Cpu),
+            ]
+        );
+        assert_eq!(order(candidates(&Value::Null, &matchers("linux", "x86_64", false))), vec![("b5907".into(), Build::Cpu)]);
+        assert!(candidates(&releases, &matchers("macos", "aarch64", false)).is_empty());
+    }
+
+    #[test]
+    fn reads_the_version_from_the_library_or_the_download_folder() {
+        let root = std::env::temp_dir().join(format!("titl-version-{}", std::process::id()));
+        let server = |folder: &str| {
+            let path = root.join(folder).join(paths::exe_name("whisper-server"));
+            fs::create_dir_all(path.parent().unwrap()).unwrap();
+            fs::write(&path, "").unwrap();
+            path
+        };
+        let brew = server("Cellar/bin");
+        fs::create_dir_all(root.join("Cellar/lib")).unwrap();
+        fs::write(root.join("Cellar/lib/libwhisper.1.dylib"), "").unwrap();
+        assert_eq!(version(&brew), None);
+        fs::write(root.join("Cellar/lib/libwhisper.1.9.6.dylib"), "").unwrap();
+        assert_eq!(version(&brew).as_deref(), Some("1.9.6"));
+        let linux = server("linux");
+        fs::write(root.join("linux/libwhisper.so.1.9.5"), "").unwrap();
+        assert_eq!(version(&linux).as_deref(), Some("1.9.5"));
+        assert_eq!(version(&server("b5907-whisper-bin-x64_zip/Release")).as_deref(), Some("b5907"));
+        assert_eq!(version(&server("other/place")), None);
+        assert_eq!(version(&root.join("missing")), None);
+        fs::remove_dir_all(&root).unwrap();
     }
 
     #[test]

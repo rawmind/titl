@@ -115,6 +115,7 @@ Titl has two parts: a small **helper** (`titl`) that runs [whisper.cpp](https://
 
 ```bash
 brew install rawmind/tap/titl   # also installs whisper.cpp
+brew upgrade whisper.cpp        # if you already had it: Titl needs 1.9.6 or newer for full accuracy
 titl install
 ```
 
@@ -143,7 +144,7 @@ Either way, the helper downloads whisper.cpp (the CUDA build if you have an NVID
    ```
    This downloads whisper.cpp's CPU build and a model, and registers with Chrome, Chromium, Edge and Brave. For GPU speed, [build whisper.cpp](https://github.com/ggml-org/whisper.cpp#quick-start) with CUDA or Vulkan and pass `--server /path/to/whisper-server`.
 
-**Models:** with a GPU (Metal, CUDA) the default is `large-v3-turbo`, the most accurate. On CPU it's `small` (~470 MB), which keeps up with the video. Choose another with `--download-model NAME` (`base`, `small`, `medium`, `large-v3-turbo`, …). Lookahead mode gives transcription a head start, so a slower model still works, just with longer "Preparing subtitles…" pauses. Windows and Linux are tested in CI with the CPU builds; the CUDA build is not tested yet. If it doesn't run on your PC, `titl install` falls back to the CPU build by itself, and `--cpu` forces it.
+**Models:** with a GPU (Metal, CUDA) the default is `large-v3-turbo`, the most accurate. On CPU it's `small` (~470 MB), which keeps up with the video. Choose another with `--download-model NAME` (`base`, `small`, `medium`, `large-v3-turbo`, …). Lookahead mode gives transcription a head start, so a slower model still works, just with longer "Preparing subtitles…" pauses. Windows and Linux are tested in CI with the CPU builds; the CUDA build is not tested yet. If it doesn't run on your PC, `titl install` falls back to the CPU build by itself, and `--cpu` forces it. **Speech detection** ([Silero](https://huggingface.co/ggml-org/whisper-vad), 0.9 MB) is off by default: `titl install --vad` downloads it and skips audio without speech, so silence no longer produces made-up subtitles, and `titl install --no-vad` turns it off. It may also skip singing. It needs whisper.cpp 1.9.6, and works best with the spoken language set: with auto-detect, music or noise without speech counts as English.
 
 ### From source (any system)
 
@@ -157,7 +158,7 @@ helper/target/release/titl install
 ### What `titl install` does
 
 - finds `whisper-server` (`--server PATH`, `PATH`, common whisper.cpp folders, or a copy it downloaded earlier);
-- on Windows and Linux, if there is none, downloads a prebuilt whisper.cpp from [its releases](https://github.com/ggml-org/whisper.cpp/releases): it checks the file against GitHub's published SHA-256, test-runs it, and falls back to the previous build or the CPU build if it doesn't work. If GitHub can't be reached, it uses a known-good build pinned in the helper;
+- on Windows and Linux, if there is none, downloads a prebuilt whisper.cpp from [its releases](https://github.com/ggml-org/whisper.cpp/releases): build `b5907`, pinned in the helper with its SHA-256. It test-runs the build and, if that doesn't work, tries the newest releases (checked against GitHub's published SHA-256) or the CPU build;
 - finds a model, or downloads one (see Models above);
 - copies itself to a per-user folder and registers with Chrome, Chromium, Edge and Brave (on Windows, through the registry);
 - ends with the steps to load the extension, if it isn't loaded yet.
@@ -186,7 +187,7 @@ Use the source code, not the `titl-x.y.z.zip` file attached to releases. That fi
 |---|---|
 | `titl status` | Show the server, model, which browsers it's registered with, and whether the extension is loaded |
 | `titl install …` | (Re)install; run again after moving whisper.cpp or a model |
-| `titl install --update-server` | Download the newest prebuilt whisper.cpp (Windows, Linux) |
+| `titl install --update-server` | Download the pinned prebuilt whisper.cpp, even if one is installed (Windows, Linux) |
 | `titl update` | Windows: download the newest helper, check it against the release's `SHA256SUMS`, and replace the installed copy |
 | `titl uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
 

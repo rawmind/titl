@@ -1,5 +1,7 @@
 use crate::config::Config;
+use crate::model;
 use crate::paths;
+use crate::whisper_cpp;
 use serde_json::{json, Value};
 use std::fs;
 
@@ -36,6 +38,27 @@ pub fn server_run() -> Option<ServerRun> {
     last_run(&fs::read_to_string(paths::log_path()).ok()?)
 }
 
+fn speech_detection(config: &Config) -> &'static str {
+    let dir = paths::models_dir();
+    match model::vad_args(&config.args, config.vad, &dir).is_empty() {
+        false => "speech detection on",
+        true if !config.vad => "speech detection off",
+        true if model::vad_in(&dir).is_none() => "speech detection not installed, run titl install --vad",
+        true => "speech detection set in extra flags",
+    }
+}
+
+fn describe_server(config: &Config) -> String {
+    let version = whisper_cpp::version(&config.server).unwrap_or_else(|| "unknown version".into());
+    format!("{} (whisper.cpp {version}, {})", config.server.display(), speech_detection(config))
+}
+
+pub fn server_flags(config: &Config) -> Vec<String> {
+    let mut flags = config.args.clone();
+    flags.extend(model::vad_args(&config.args, config.vad, &paths::models_dir()));
+    flags
+}
+
 pub fn info_reply() -> Value {
     let run = server_run();
     let mut reply = json!({
@@ -50,9 +73,9 @@ pub fn info_reply() -> Value {
     });
     match Config::load() {
         Ok(c) => {
-            reply["server"] = json!(c.server.display().to_string());
             reply["model"] = json!(c.model.display().to_string());
-            reply["args"] = json!(c.args);
+            reply["args"] = json!(server_flags(&c));
+            reply["server"] = json!(describe_server(&c));
         }
         Err(e) => reply["config_error"] = json!(e),
     }

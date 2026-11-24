@@ -2,6 +2,20 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Added
+- **Speech detection, off by default:** `titl install --vad` downloads a 0.9 MB Silero model, and whisper-server then uses it to skip audio without speech, so silence no longer produces made-up subtitles. It may also skip singing. It needs whisper.cpp 1.9.6: 1.9.5 can crash on audio without speech. Set the spoken language too: with auto-detect, music or noise without speech counts as English. The choice is remembered; `titl install --no-vad` turns it off. Debug info shows whether it is on.
+- `titl status` and Debug info show the whisper.cpp version, and the flags Titl adds to whisper-server.
+
+### Changed
+- **whisper.cpp is pinned** to build `b5907` on Windows and Linux, with its SHA-256 in the helper. That is whisper.cpp 1.9.6 without one later commit, which only changes a CMake file. `titl install` used to take the newest release, and fell back to build `b5454`, which is whisper.cpp 1.9.5. Newer releases are now only tried if the pinned build doesn't run.
+- whisper.cpp 1.9.5 makes more mistakes when the audio context is shortened, as Titl does on slow computers. In tests with a Serbian `small` model it made 33.0% word errors on FLEURS, against 27.9% with 1.9.6, and 32.4% against 22.4% on parliament speech (100 clips each, built from source on macOS). At full length the difference was small: 25.2% against 24.6% on the same FLEURS clips.
+
+### Upgrade
+- Windows and Linux: new installs get the pinned build. If an older helper downloaded your whisper.cpp, update the helper and run `titl install --update-server` once. It picks the default model again, so if you chose another one, add `--download-model NAME` or `--model PATH`. Skip this if you built whisper.cpp yourself: it would replace your build with the prebuilt one.
+- macOS: `brew upgrade whisper.cpp`.
+
 ## [0.1.20](https://github.com/rawmind/titl/releases/tag/v0.1.20) - 2026-11-22
 
 ### Changed
