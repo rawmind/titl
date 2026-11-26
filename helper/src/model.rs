@@ -1,15 +1,23 @@
 use crate::paths;
+use crate::whisper_cpp;
+use serde_json::{json, Value};
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 pub const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
 pub const CPU_MODEL: &str = "small";
-pub const SERBIAN_MODEL: &str = "small-sr-distill-q8_0";
+pub const SERBIAN_MODEL: &str = "small-sr-distill-v2-q8_0";
 const SERBIAN_MODEL_LANGUAGES: &[&str] = &["sr", "hr"];
 const WHISPER_CPP_MODELS: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main";
 const SERBIAN_MODELS: &str =
-    "https://huggingface.co/rawmind/whisper-small-sr-distill/resolve/9aacd8317e855946ed779f0558ceb7b34a463b8d";
+    "https://huggingface.co/rawmind/whisper-small-sr-distill-v2/resolve/ce069ef8e23e7a0af4addd9fee055c924639135d";
+const SERBIAN_SHA256: &str = "0bd02f68a2dec6d879e975669aaa7f738133eeb868c2d6bae6e1907077d15caa";
+pub const VAD_FILE: &str = "ggml-silero-v6.2.0.bin";
+const VAD_URL: &str =
+    "https://huggingface.co/ggml-org/whisper-vad/resolve/9ffd54a1e1ee413ddf265af9913beaf518d1639b/ggml-silero-v6.2.0.bin";
+const VAD_SIZE: u64 = 885_098;
+const VAD_SHA256: &str = "2aa269b785eeb53a82983a20501ddf7c1d9c48e33ab63a41391ac6c9f7fb6987";
 pub const PREFERRED_MODELS: &[&str] = &["large-v3-turbo", "large-v3-turbo-q8_0", "large-v3-turbo-q5_0"];
 
 pub fn file_name(name: &str) -> String {
@@ -29,6 +37,28 @@ pub fn serbian_in(dir: &Path) -> Option<PathBuf> {
     Some(dir.join(file_name(SERBIAN_MODEL))).filter(|p| p.is_file())
 }
 
+pub fn download_serbian() -> Result<PathBuf, String> {
+    let dir = paths::models_dir();
+    if let Some(path) = serbian_in(&dir) {
+        return Ok(path);
+    }
+    let dest = dir.join(file_name(SERBIAN_MODEL));
+    fetch(&url(SERBIAN_MODEL), &dest)?;
+    let sha = whisper_cpp::sha256_of(&dest)?;
+    if sha != SERBIAN_SHA256 {
+        let _ = fs::remove_file(&dest);
+        return Err(format!("{} has an unexpected checksum: {sha}", file_name(SERBIAN_MODEL)));
+    }
+    Ok(dest)
+}
+
+pub fn download_serbian_reply() -> Value {
+    match download_serbian() {
+        Ok(path) => json!({ "status": "downloaded", "path": path.display().to_string() }),
+        Err(e) => json!({ "status": "error", "error": e }),
+    }
+}
+
 pub fn for_language(configured: &Path, language: &str, models_dir: &Path) -> PathBuf {
     if SERBIAN_MODEL_LANGUAGES.contains(&language) && is_small(configured) {
         if let Some(serbian) = serbian_in(models_dir) {
@@ -36,6 +66,35 @@ pub fn for_language(configured: &Path, language: &str, models_dir: &Path) -> Pat
         }
     }
     configured.to_path_buf()
+}
+
+pub fn vad_in(dir: &Path) -> Option<PathBuf> {
+    Some(dir.join(VAD_FILE)).filter(|p| fs::metadata(p).is_ok_and(|m| m.is_file() && m.len() == VAD_SIZE))
+}
+
+pub fn vad_args(configured: &[String], enabled: bool, dir: &Path) -> Vec<String> {
+    let chosen_by_user = configured.iter().any(|a| matches!(a.as_str(), "--vad" | "-vm" | "--vad-model"));
+    match vad_in(dir) {
+        Some(path) if enabled && !chosen_by_user => {
+            vec!["--vad".into(), "--vad-model".into(), path.to_string_lossy().into_owned()]
+        }
+        _ => Vec::new(),
+    }
+}
+
+pub fn download_vad() -> Result<PathBuf, String> {
+    let dir = paths::models_dir();
+    if let Some(path) = vad_in(&dir) {
+        return Ok(path);
+    }
+    let dest = dir.join(VAD_FILE);
+    fetch(VAD_URL, &dest)?;
+    let sha = whisper_cpp::sha256_of(&dest)?;
+    if sha != VAD_SHA256 {
+        let _ = fs::remove_file(&dest);
+        return Err(format!("{VAD_FILE} has an unexpected checksum: {sha}"));
+    }
+    Ok(dest)
 }
 
 pub fn valid_name(name: &str) -> bool {
@@ -65,7 +124,7 @@ pub fn fetch(url: &str, dest: &Path) -> Result<(), String> {
     if let Some(dir) = dest.parent() {
         fs::create_dir_all(dir).map_err(|e| format!("cannot create {}: {e}", dir.display()))?;
     }
-    println!("Downloading {url}");
+    eprintln!("Downloading {url}");
     let response = ureq::get(url).set("User-Agent", "titl").call().map_err(|e| match e {
         ureq::Error::Status(code, _) => format!("download failed: HTTP {code} for {url}"),
         other => format!("download failed: {other}"),
@@ -119,7 +178,7 @@ mod tests {
     fn serbian_model_comes_from_its_own_pinned_repo() {
         assert_eq!(
             url(SERBIAN_MODEL),
-            "https://huggingface.co/rawmind/whisper-small-sr-distill/resolve/9aacd8317e855946ed779f0558ceb7b34a463b8d/ggml-small-sr-distill-q8_0.bin"
+            "https://huggingface.co/rawmind/whisper-small-sr-distill-v2/resolve/ce069ef8e23e7a0af4addd9fee055c924639135d/ggml-small-sr-distill-v2-q8_0.bin"
         );
         assert_eq!(url(CPU_MODEL), "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin");
     }
@@ -142,6 +201,21 @@ mod tests {
         for other in ["auto", "bs", "sl", "en", ""] {
             assert_eq!(for_language(&small, other, &dir), small);
         }
+    }
+
+    #[test]
+    fn speech_detection_needs_an_intact_model_and_can_be_turned_off() {
+        let dir = std::env::temp_dir().join(format!("titl-vad-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        assert!(vad_args(&[], true, &dir).is_empty());
+        fs::write(dir.join(VAD_FILE), "partial").unwrap();
+        assert!(vad_args(&[], true, &dir).is_empty());
+        fs::write(dir.join(VAD_FILE), vec![0; VAD_SIZE as usize]).unwrap();
+        let path = dir.join(VAD_FILE).to_string_lossy().into_owned();
+        assert_eq!(vad_args(&[], true, &dir), ["--vad", "--vad-model", path.as_str()]);
+        assert!(vad_args(&[], false, &dir).is_empty());
+        assert!(vad_args(&["--vad-model".into(), "/mine.bin".into()], true, &dir).is_empty());
+        assert!(!vad_args(&["-t".into(), "8".into()], true, &dir).is_empty());
         fs::remove_dir_all(&dir).unwrap();
     }
 

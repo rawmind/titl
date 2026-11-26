@@ -7,7 +7,7 @@ use serde_json::{json, Value};
 use std::fs::OpenOptions;
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -85,6 +85,20 @@ struct Server {
     child: Option<Child>,
     port: Option<u16>,
     model: Option<PathBuf>,
+    vad_failed: bool,
+    serbian_failed: bool,
+}
+
+struct Started {
+    vad: bool,
+    serbian: bool,
+}
+
+fn model_for(configured: &Path, language: &str, serbian_failed: bool) -> PathBuf {
+    if serbian_failed {
+        return configured.to_path_buf();
+    }
+    model::for_language(configured, language, &paths::models_dir())
 }
 
 impl Server {
@@ -105,7 +119,7 @@ impl Server {
                 Err(f) => error(f.message()),
             };
         }
-        let wanted = Config::load().ok().map(|c| model::for_language(&c.model, language, &paths::models_dir()));
+        let wanted = Config::load().ok().map(|c| model_for(&c.model, language, self.serbian_failed));
         let same_model = wanted.is_none() || self.model == wanted;
         if let Some(port) = self.port.filter(|_| same_model && self.running()) {
             return match self.wait_ready(port) {
@@ -128,14 +142,21 @@ impl Server {
 
     fn launch(&mut self, port: u16, language: &str) -> Result<(), Failure> {
         self.stop();
-        self.spawn(port, language).map_err(Failure::Other)?;
-        self.port = Some(port);
-        self.wait_ready(port)
+        loop {
+            let started = self.spawn(port, language).map_err(Failure::Other)?;
+            self.port = Some(port);
+            match self.wait_ready(port) {
+                Err(Failure::Exited(_)) if started.serbian => self.serbian_failed = true,
+                Err(Failure::Exited(_)) if started.vad => self.vad_failed = true,
+                result => return result,
+            }
+        }
     }
 
-    fn spawn(&mut self, port: u16, language: &str) -> Result<(), String> {
+    fn spawn(&mut self, port: u16, language: &str) -> Result<Started, String> {
         let config = Config::load()?;
-        let model = model::for_language(&config.model, language, &paths::models_dir());
+        let model = model_for(&config.model, language, self.serbian_failed);
+        let vad = model::vad_args(&config.args, config.vad_on() && !self.vad_failed, &paths::models_dir());
         let log_path = paths::log_path();
         let mut log = OpenOptions::new()
             .create(true)
@@ -151,6 +172,7 @@ impl Server {
             .arg(&model)
             .args(["--host", "127.0.0.1", "--port", &port.to_string()])
             .args(&config.args)
+            .args(&vad)
             .stdin(Stdio::null())
             .stdout(log)
             .stderr(log_err);
@@ -166,8 +188,9 @@ impl Server {
             .spawn()
             .map_err(|e| format!("cannot start {}: {e}", config.server.display()))?;
         self.child = Some(child);
+        let started = Started { vad: !vad.is_empty(), serbian: model != config.model };
         self.model = Some(model);
-        Ok(())
+        Ok(started)
     }
 
     fn wait_ready(&mut self, port: u16) -> Result<(), Failure> {
@@ -207,7 +230,7 @@ impl Server {
 pub fn run() {
     let mut stdin = io::stdin().lock();
     let mut stdout = io::stdout().lock();
-    let mut server = Server { child: None, port: None, model: None };
+    let mut server = Server { child: None, port: None, model: None, vad_failed: false, serbian_failed: false };
     update::cleanup();
     while let Ok(Some(message)) = read_message(&mut stdin) {
         let reply = match message.get("cmd").and_then(Value::as_str) {
@@ -229,6 +252,7 @@ pub fn run() {
             Some("info") => diagnostics::info_reply(),
             Some("checkUpdate") => update::status_reply(),
             Some("update") => update::apply_reply(),
+            Some("downloadSerbianModel") => model::download_serbian_reply(),
             _ => error("unknown command"),
         };
         if write_message(&mut stdout, &reply).is_err() {
@@ -241,6 +265,13 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_serbian_model_that_failed_falls_back_to_the_configured_one() {
+        let small = paths::models_dir().join(model::file_name(model::CPU_MODEL));
+        assert_eq!(model_for(&small, "sr", true), small);
+        assert_eq!(model_for(&small, "en", false), small);
+    }
 
     #[test]
     fn message_round_trip() {
@@ -264,7 +295,7 @@ mod tests {
 
     #[test]
     fn refuses_non_local_hosts() {
-        let mut server = Server { child: None, port: None, model: None };
+        let mut server = Server { child: None, port: None, model: None, vad_failed: false, serbian_failed: false };
         assert_eq!(server.start("example.com", None, "sr")["status"], "error");
     }
 

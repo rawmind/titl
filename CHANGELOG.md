@@ -5,10 +5,27 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 ## Unreleased
 
 ### Added
-- **Better Serbian and Croatian on CPU:** `titl install --serbian` also downloads [`small-sr-distill`](https://huggingface.co/rawmind/whisper-small-sr-distill) (q8_0, 264 MB), a `small` tuned for Serbian. On CPU it ran about 2.6 times as fast as `small` on an Apple M4 Max; Intel and AMD are untested. In our tests of parliament and clean read speech it made 22% and 36% fewer word errors in Serbian, and 11% and 32% fewer in Croatian. In Croatian it now and then writes a Serbian form. Titl uses it instead of `small` when the spoken language is set to Serbian or Croatian. Other languages, auto-detect and larger models are unaffected.
+- **Better Serbian and Croatian on CPU:** when the spoken language is Serbian or Croatian and the helper runs `small`, Options offers to download [`small-sr-distill-v2`](https://huggingface.co/rawmind/whisper-small-sr-distill-v2) (q8_0, 264 MB), a `small` distilled from `large-v3-turbo` for these two languages. `titl install --serbian` downloads it too. It makes about half as many word errors as `small`: 17.4% against 38.1% in Serbian and 17.9% against 35.5% in Croatian on read speech. It's used only with the language set, not with auto-detect or a larger model, and `small` stays the fallback if it's missing or doesn't start. The download is pinned to one commit and checked by SHA-256.
 
 ### Upgrade
 - Needs both the new helper and the new extension. Other combinations keep working with the model you have.
+
+## [0.1.21](https://github.com/rawmind/titl/releases/tag/v0.1.21) - 2026-11-24
+
+### Added
+- **Speech detection:** with whisper.cpp 1.9.6 or newer, `titl install` also downloads a 0.9 MB Silero model, and whisper-server then skips audio without speech, so silence no longer produces made-up subtitles. It may also skip singing. With older versions it stays off, because 1.9.5 can crash on audio without speech; `titl install --vad` turns it on anyway. `titl install --no-vad` turns it off. Both are remembered. If whisper-server can't start with it, Titl runs it without. `titl status` and Debug info show the setting.
+- Automatic language detection ignores replies without speech, which whisper-server labels English when speech detection is on.
+- `titl status` and Debug info show the whisper.cpp version, and the flags Titl adds to whisper-server.
+
+### Changed
+- **whisper.cpp is pinned** to build `b5907` on Windows and Linux, with its SHA-256 in the helper. That is whisper.cpp 1.9.6 without one later commit, which only changes a CMake file. `titl install` used to take the newest release, and fell back to build `b5454`, which is whisper.cpp 1.9.5. Newer releases are now only tried if the pinned build doesn't run.
+- whisper.cpp 1.9.5 makes more mistakes when the audio context is shortened, as Titl does on slow computers. In tests with a Serbian `small` model it made 33.0% word errors on FLEURS, against 27.9% with 1.9.6, and 32.4% against 22.4% on parliament speech (100 clips each, built from source on macOS). At full length the difference was small: 25.2% against 24.6% on the same FLEURS clips.
+
+### Upgrade
+- Windows and Linux: new installs get the pinned build. If an older helper downloaded your whisper.cpp, update the helper and run `titl install --update-server` once. It picks the default model again, so if you chose another one, add `--download-model NAME` or `--model PATH`. Skip this if you built whisper.cpp yourself: it would replace your build with the prebuilt one.
+- macOS: `brew upgrade whisper.cpp`.
+- Speech detection starts after the next `titl install` with whisper.cpp 1.9.6 or newer. Use `titl install --no-vad` to leave it off.
+- Update the extension too: without its part of this release, automatic language detection can settle on English during music or noise. Chrome updates it from the Chrome Web Store.
 
 ## [0.1.20](https://github.com/rawmind/titl/releases/tag/v0.1.20) - 2026-11-22
 

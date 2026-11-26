@@ -18,6 +18,7 @@ pub struct Options {
     pub update_server: bool,
     pub cpu_only: bool,
     pub serbian: bool,
+    pub vad: Option<bool>,
 }
 
 pub fn parse(args: &[String]) -> Result<Options, String> {
@@ -32,6 +33,8 @@ pub fn parse(args: &[String]) -> Result<Options, String> {
             "--update-server" => opts.update_server = true,
             "--cpu" => opts.cpu_only = true,
             "--serbian" => opts.serbian = true,
+            "--vad" => opts.vad = Some(true),
+            "--no-vad" => opts.vad = Some(false),
             "--extension-id" => {
                 let id = value()?;
                 if !config::valid_extension_id(&id) {
@@ -233,7 +236,10 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         },
     };
     if opts.serbian {
-        model::download(model::SERBIAN_MODEL)?;
+        match model::download_serbian() {
+            Ok(path) => println!("Serbian model: {}", path.display()),
+            Err(e) => println!("Continuing with {} only: {e}", model::CPU_MODEL),
+        }
         if !model::is_small(&model) {
             println!("Note: the Serbian model is only used together with {}.", model::CPU_MODEL);
         }
@@ -242,6 +248,12 @@ pub fn install(mut opts: Options) -> Result<(), String> {
     let data = paths::data_dir();
     fs::create_dir_all(&data).map_err(|e| format!("cannot create {}: {e}", data.display()))?;
     let previous = Config::load().ok();
+    let vad = opts.vad.or(previous.as_ref().and_then(|c| c.vad));
+    if vad.unwrap_or_else(|| whisper_cpp::handles_vad(whisper_cpp::version(&server).as_deref())) {
+        if let Err(e) = model::download_vad() {
+            println!("Continuing without speech detection: {e}");
+        }
+    }
     let args = previous.as_ref().map(|c| c.args.clone()).unwrap_or_default();
     let mut extra_ids = previous.map(|c| c.extension_ids).unwrap_or_default();
     for id in opts.extension_ids {
@@ -255,6 +267,7 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         server: server.clone(),
         model: model.clone(),
         args,
+        vad,
         extension: extension_dir.clone(),
         extension_ids: extra_ids,
     }
@@ -356,10 +369,10 @@ pub fn status() -> Result<(), String> {
                 println!("extension folder: {}", dir.display());
             }
             println!("server:   {} {}", c.server.display(), if c.server.is_file() { "" } else { "(missing!)" });
+            println!("whisper:  {}", whisper_cpp::version(&c.server).as_deref().unwrap_or("unknown version"));
             println!("model:    {} {}", c.model.display(), if c.model.is_file() { "" } else { "(missing!)" });
-            if !c.args.is_empty() {
-                println!("args:     {}", c.args.join(" "));
-            }
+            let flags = crate::diagnostics::server_flags(&c);
+            println!("flags:    {}", if flags.is_empty() { "none added".into() } else { flags.join(" ") });
             if let Some(run) = crate::diagnostics::server_run() {
                 println!("runs on:  {}", run.backend.as_deref().unwrap_or("unknown (start subtitles once)"));
                 if let Some(threads) = run.threads {
@@ -445,6 +458,9 @@ mod tests {
         let opts = parse(&["--update-server".to_string(), "--cpu".to_string()]).unwrap();
         assert!(opts.update_server && opts.cpu_only && !opts.serbian);
         assert!(parse(&["--serbian".to_string()]).unwrap().serbian);
+        assert_eq!(opts.vad, None);
+        assert_eq!(parse(&["--no-vad".to_string()]).unwrap().vad, Some(false));
+        assert_eq!(parse(&["--vad".to_string()]).unwrap().vad, Some(true));
     }
 
     #[test]

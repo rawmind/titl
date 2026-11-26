@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-support%20Titl-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/rwmnd)
 
-[**Add to Chrome**](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) · [Install the helper](#install) · [Changelog](CHANGELOG.md) · [Privacy](PRIVACY.md) · [♥ Support](https://ko-fi.com/rwmnd)
+[**Add to Chrome**](https://chromewebstore.google.com/detail/titl/bpapgchpopccpbgbkfldmdmfmddgoeme) · [Website](https://rawmind.github.io/titl/) · [Install the helper](#install) · [Changelog](CHANGELOG.md) · [Privacy](PRIVACY.md) · [♥ Support](https://ko-fi.com/rwmnd)
 
 <img src="store/screenshot-1-subtitles.png" alt="Titl showing Serbian subtitles with an English translation on a TEDx talk" width="820">
 
@@ -115,6 +115,7 @@ Titl has two parts: a small **helper** (`titl`) that runs [whisper.cpp](https://
 
 ```bash
 brew install rawmind/tap/titl   # also installs whisper.cpp
+brew upgrade whisper.cpp        # if you already had it: Titl needs 1.9.6 or newer for full accuracy
 titl install
 ```
 
@@ -143,7 +144,7 @@ Either way, the helper downloads whisper.cpp (the CUDA build if you have an NVID
    ```
    This downloads whisper.cpp's CPU build and a model, and registers with Chrome, Chromium, Edge and Brave. For GPU speed, [build whisper.cpp](https://github.com/ggml-org/whisper.cpp#quick-start) with CUDA or Vulkan and pass `--server /path/to/whisper-server`.
 
-**Models:** with a GPU (Metal, CUDA) the default is `large-v3-turbo`, the most accurate. On CPU it's `small` (~470 MB), which keeps up with the video. Choose another with `--download-model NAME` (`base`, `small`, `medium`, `large-v3-turbo`, …). For **Serbian or Croatian on CPU**, `titl install --serbian` also downloads [`small-sr-distill`](https://huggingface.co/rawmind/whisper-small-sr-distill) (q8_0, 264 MB), a `small` tuned for Serbian. On CPU it ran about 2.6 times as fast as `small` on an Apple M4 Max; Intel and AMD are untested. In our tests of parliament and clean read speech it made 22% and 36% fewer word errors in Serbian, and 11% and 32% fewer in Croatian, where it now and then writes a Serbian form (*predsednik* for *predsjednik*). Titl uses it instead of `small` when the spoken language in Options is set to Serbian or Croatian, not with **auto-detect** or a larger model. Lookahead mode gives transcription a head start, so a slower model still works, just with longer "Preparing subtitles…" pauses. Windows and Linux are tested in CI with the CPU builds; the CUDA build is not tested yet. If it doesn't run on your PC, `titl install` falls back to the CPU build by itself, and `--cpu` forces it.
+**Models:** with a GPU (Metal, CUDA) the default is `large-v3-turbo`, the most accurate. On CPU it's `small` (~470 MB), which keeps up with the video. Choose another with `--download-model NAME` (`base`, `small`, `medium`, `large-v3-turbo`, …). For **Serbian or Croatian on CPU**, Titl can use [`small-sr-distill-v2`](https://huggingface.co/rawmind/whisper-small-sr-distill-v2) (q8_0, 264 MB, pinned to one commit and checked by SHA-256), a `small` distilled from `large-v3-turbo` for these two languages. When the spoken language in Options is Serbian or Croatian and the helper runs `small`, Options offers to download it; `titl install --serbian` downloads it too. Word errors against `small`: 17.4% vs 38.1% in Serbian and 17.9% vs 35.5% in Croatian on read speech (FLEURS), 10.3% vs 28.5% and 15.9% vs 33.1% on parliament speech, where the scores are optimistic because it was also trained on parliament recordings. It's used only with the language set, never with **auto-detect** (its language detection is unusable) or a larger model. `small` stays installed and is the fallback: Titl uses it if the Serbian model is missing or whisper-server can't start with it. The model is CC BY-SA 4.0. Lookahead mode gives transcription a head start, so a slower model still works, just with longer "Preparing subtitles…" pauses. Windows and Linux are tested in CI with the CPU builds; the CUDA build is not tested yet. If it doesn't run on your PC, `titl install` falls back to the CPU build by itself, and `--cpu` forces it. **Speech detection** ([Silero](https://huggingface.co/ggml-org/whisper-vad), 0.9 MB) skips audio without speech, so silence no longer produces made-up subtitles. `titl install` downloads it and turns it on with whisper.cpp 1.9.6 or newer; with older versions it stays off, because 1.9.5 can crash on audio without speech. `titl install --vad` turns it on anyway, and `--no-vad` turns it off. It may also skip singing.
 
 ### From source (any system)
 
@@ -157,7 +158,7 @@ helper/target/release/titl install
 ### What `titl install` does
 
 - finds `whisper-server` (`--server PATH`, `PATH`, common whisper.cpp folders, or a copy it downloaded earlier);
-- on Windows and Linux, if there is none, downloads a prebuilt whisper.cpp from [its releases](https://github.com/ggml-org/whisper.cpp/releases): it checks the file against GitHub's published SHA-256, test-runs it, and falls back to the previous build or the CPU build if it doesn't work. If GitHub can't be reached, it uses a known-good build pinned in the helper;
+- on Windows and Linux, if there is none, downloads a prebuilt whisper.cpp from [its releases](https://github.com/ggml-org/whisper.cpp/releases): build `b5907`, pinned in the helper with its SHA-256. It test-runs the build and, if that doesn't work, tries the newest releases (checked against GitHub's published SHA-256) or the CPU build;
 - finds a model, or downloads one (see Models above);
 - copies itself to a per-user folder and registers with Chrome, Chromium, Edge and Brave (on Windows, through the registry);
 - ends with the steps to load the extension, if it isn't loaded yet.
@@ -186,7 +187,7 @@ Use the source code, not the `titl-x.y.z.zip` file attached to releases. That fi
 |---|---|
 | `titl status` | Show the server, model, which browsers it's registered with, and whether the extension is loaded |
 | `titl install …` | (Re)install; run again after moving whisper.cpp or a model |
-| `titl install --update-server` | Download the newest prebuilt whisper.cpp (Windows, Linux) |
+| `titl install --update-server` | Download the pinned prebuilt whisper.cpp, even if one is installed (Windows, Linux) |
 | `titl update` | Windows: download the newest helper, check it against the release's `SHA256SUMS`, and replace the installed copy |
 | `titl uninstall [--purge]` | Unregister; `--purge` also deletes downloaded models |
 
@@ -266,6 +267,8 @@ A local model translates each line together with the 4 lines before it (and thei
    The first start downloads the model. `--swa-full -c 2048 -np 1` matters: Titl's prompts stay under 300 tokens, and without `--swa-full` llama.cpp reprocesses Gemma's prompt on every line, which makes it about 3× slower. With `--swa-full` and Gemma's default 128k context, the cache doesn't fit in memory.
 2. **Options → Translator → Local LLM**, check the **Model API URL**, and click **Test connection**. For Ollama use `http://127.0.0.1:11434/v1` and a model name such as `gemma3:12b`; for LM Studio, `http://127.0.0.1:1234/v1`.
 3. **Save**.
+
+<img src="store/screenshot-5-local-llm.png" alt="Titl options for translating with a local LLM" width="640">
 
 Lines are translated one at a time, nearest to the playhead first. In lookahead mode, **Pause until ready** also waits for the translation, so lines don't show untranslated; set it to 0 to never pause. In live mode the translation appears a moment after the original.
 

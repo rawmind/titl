@@ -253,7 +253,7 @@ figcaption {
 
 .screens-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 348px), 1fr));
   gap: 16px;
 }
 
@@ -609,4 +609,75 @@ footer p {
   font-size: 13px;
   font-weight: 600;
   vertical-align: middle;
+}
+
+.zoom {
+  display: block;
+  cursor: zoom-in;
+}
+
+.zoom:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--radius);
+}
+
+html:has(.zoomed[open]) {
+  overflow: hidden;
+}
+
+.zoomed {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: auto;
+  cursor: zoom-out;
+}
+
+.zoomed[open] {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+}
+
+.zoomed::backdrop {
+  background: rgba(0, 0, 0, 0.88);
+}
+
+.zoomed img {
+  width: min(96vw, 1280px, 94dvh * var(--ratio, 1.6));
+  aspect-ratio: var(--ratio, 1.6);
+  max-width: none;
+  border-radius: var(--radius);
+}
+
+.zoomed button {
+  position: fixed;
+  top: 12px;
+  inset-inline-end: 12px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-width: 743px) {
+  .zoomed[open] {
+    justify-items: start;
+  }
+
+  .zoomed img {
+    width: max(100vw, 800px);
+    border-radius: 0;
+  }
 }
