@@ -289,5 +289,20 @@
   },
   "copied": {
     "message": "تم النسخ"
+  },
+  "serbianModelOffer": {
+    "message": "يستخدم Titl نموذج Whisper small على هذا الكمبيوتر. نسخة مضبوطة للصربية والكرواتية ترتكب نحو نصف الأخطاء، وهي بالسرعة نفسها أو أسرع."
+  },
+  "downloadSerbianModel": {
+    "message": "تنزيلها (264 ميغابايت)"
+  },
+  "downloadingSerbianModel": {
+    "message": "جارٍ التنزيل… قد يستغرق ذلك بضع دقائق."
+  },
+  "serbianModelReady": {
+    "message": "تم التثبيت. سيستخدمها Titl في المرة القادمة التي تبدأ فيها الترجمة."
+  },
+  "serbianModelFailed": {
+    "message": "فشل التنزيل: $1. سيواصل Titl استخدام Whisper small."
   }
 }

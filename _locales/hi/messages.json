@@ -289,5 +289,20 @@
   },
   "copied": {
     "message": "कॉपी हो गया"
+  },
+  "serbianModelOffer": {
+    "message": "इस कंप्यूटर पर Titl, Whisper small का उपयोग करता है। सर्बियाई और क्रोएशियाई के लिए ट्यून किया गया संस्करण लगभग आधी गलतियाँ करता है, और उतना ही तेज़ या उससे तेज़ है।"
+  },
+  "downloadSerbianModel": {
+    "message": "डाउनलोड करें (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "डाउनलोड हो रहा है… इसमें कुछ मिनट लग सकते हैं।"
+  },
+  "serbianModelReady": {
+    "message": "इंस्टॉल हो गया। अगली बार सबटाइटल शुरू करने पर Titl इसका उपयोग करेगा।"
+  },
+  "serbianModelFailed": {
+    "message": "डाउनलोड विफल: $1. Titl, Whisper small का उपयोग जारी रखेगा।"
   }
 }

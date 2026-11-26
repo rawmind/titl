@@ -289,5 +289,20 @@
   },
   "copied": {
     "message": "Tersalin"
+  },
+  "serbianModelOffer": {
+    "message": "Titl memakai Whisper small di komputer ini. Versi yang disesuaikan untuk bahasa Serbia dan Kroasia membuat sekitar separuh kesalahan, dan sama cepat atau lebih cepat."
+  },
+  "downloadSerbianModel": {
+    "message": "Unduh (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Mengunduh… Ini bisa memakan waktu beberapa menit."
+  },
+  "serbianModelReady": {
+    "message": "Terpasang. Titl akan memakainya saat Anda memulai subtitle berikutnya."
+  },
+  "serbianModelFailed": {
+    "message": "Gagal mengunduh: $1. Titl tetap memakai Whisper small."
   }
 }

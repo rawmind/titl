@@ -163,6 +163,37 @@ fill(await loadSettings());
 syncScriptRow();
 syncEngineRows();
 $('language').addEventListener('change', syncScriptRow);
+$('language').addEventListener('change', syncSerbianOffer);
+$('downloadSerbian').addEventListener('click', downloadSerbianModel);
+
+const SERBIAN_MODEL_LANGUAGES = ['sr', 'hr'];
+let serbianModelMissing = false;
+
+function syncSerbianOffer() {
+  $('serbianOffer').hidden = !(serbianModelMissing && SERBIAN_MODEL_LANGUAGES.includes($('language').value));
+}
+
+async function downloadSerbianModel() {
+  const button = $('downloadSerbian');
+  const out = $('serbianResult');
+  button.disabled = true;
+  say(out, t('downloadingSerbianModel'), true);
+  try {
+    const res = await chrome.runtime.sendNativeMessage(HOST_NAME, { cmd: 'downloadSerbianModel' });
+    if (res?.status !== 'downloaded') throw new Error(res?.error ?? 'no answer');
+    serbianModelMissing = false;
+    button.hidden = true;
+    say(out, t('serbianModelReady'), true);
+  } catch (err) {
+    button.disabled = false;
+    say(out, t('serbianModelFailed', err.message), false);
+  }
+}
+
+helperInfo().then((info) => {
+  serbianModelMissing = 'serbian_model' in info && !info.serbian_model;
+  syncSerbianOffer();
+});
 $('translationEngine').addEventListener('change', syncEngineRows);
 
 async function helperInfo() {

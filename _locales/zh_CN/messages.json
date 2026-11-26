@@ -289,5 +289,20 @@
   },
   "copied": {
     "message": "已复制"
+  },
+  "serbianModelOffer": {
+    "message": "Titl 在这台电脑上使用 Whisper small。针对塞尔维亚语和克罗地亚语调优的版本错误约减少一半，速度相同或更快。"
+  },
+  "downloadSerbianModel": {
+    "message": "下载（264 MB）"
+  },
+  "downloadingSerbianModel": {
+    "message": "正在下载… 可能需要几分钟。"
+  },
+  "serbianModelReady": {
+    "message": "已安装。下次开始字幕时 Titl 会使用它。"
+  },
+  "serbianModelFailed": {
+    "message": "下载失败：$1。Titl 将继续使用 Whisper small。"
   }
 }

@@ -289,5 +289,20 @@
   },
   "copied": {
     "message": "Kopirano"
+  },
+  "serbianModelOffer": {
+    "message": "Titl na ovom računaru koristi Whisper small. Verzija prilagođena srpskom i hrvatskom pravi otprilike upola manje grešaka i jednako je brza ili brža."
+  },
+  "downloadSerbianModel": {
+    "message": "Preuzmi je (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Preuzimanje… Ovo može potrajati nekoliko minuta."
+  },
+  "serbianModelReady": {
+    "message": "Instalirano. Titl će je koristiti kada sledeći put pokrenete titlove."
+  },
+  "serbianModelFailed": {
+    "message": "Preuzimanje nije uspelo: $1. Titl i dalje koristi Whisper small."
   }
 }

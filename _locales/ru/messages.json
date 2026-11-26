@@ -289,5 +289,20 @@
   },
   "copied": {
     "message": "Скопировано"
+  },
+  "serbianModelOffer": {
+    "message": "На этом компьютере Titl использует Whisper small. Версия, настроенная для сербского и хорватского, ошибается примерно вдвое реже и работает так же быстро или быстрее."
+  },
+  "downloadSerbianModel": {
+    "message": "Скачать (264 МБ)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Скачивание… Это может занять несколько минут."
+  },
+  "serbianModelReady": {
+    "message": "Установлено. Titl будет использовать её при следующем запуске субтитров."
+  },
+  "serbianModelFailed": {
+    "message": "Не удалось скачать: $1. Titl продолжит использовать Whisper small."
   }
 }

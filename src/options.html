@@ -76,6 +76,11 @@
       <label><span data-i18n="spokenLanguage">Spoken language</span>
         <select id="language" required></select>
       </label>
+      <div id="serbianOffer" hidden>
+        <p class="hint" data-i18n="serbianModelOffer">Titl uses Whisper small on this computer. A version tuned for Serbian and Croatian makes about half as many mistakes, and is as fast or faster.</p>
+        <button type="button" id="downloadSerbian" class="secondary" data-i18n="downloadSerbianModel">Download it (264 MB)</button>
+        <span id="serbianResult"></span>
+      </div>
       <label id="scriptRow"><span data-i18n="serbianScript">Serbian script</span>
         <select id="script">
           <option value="latin" data-i18n="scriptLatin">Latin (latinica)</option>

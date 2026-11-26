@@ -289,5 +289,20 @@
   },
   "copied": {
     "message": "Copiado"
+  },
+  "serbianModelOffer": {
+    "message": "O Titl usa o Whisper small neste computador. Uma versão ajustada para sérvio e croata comete cerca de metade dos erros e é tão rápida quanto ou mais."
+  },
+  "downloadSerbianModel": {
+    "message": "Baixar (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Baixando… Isso pode levar alguns minutos."
+  },
+  "serbianModelReady": {
+    "message": "Instalado. O Titl vai usá-lo na próxima vez que você iniciar as legendas."
+  },
+  "serbianModelFailed": {
+    "message": "Falha no download: $1. O Titl continua usando o Whisper small."
   }
 }
