@@ -1,8 +1,7 @@
-import { loadSettings, validateSettings } from './settings.js';
+import { AUTO, MODE, loadSettings, validateSettings } from './settings.js';
 import { LookaheadSession } from './lookahead.js';
 import { resolveServer } from './server.js';
 import { translateWithLlm } from './llm.js';
-import { AUTO } from './detect.js';
 import { pushError } from './errors.js';
 
 const OFFSCREEN_URL = 'src/offscreen.html';
@@ -90,7 +89,7 @@ async function start(tabId) {
 
   await ensureContentScript(tabId);
   const info = await chrome.tabs.sendMessage(tabId, { type: 'info' });
-  const mode = config.mode === 'lookahead' && info?.videoId && !info.live ? 'lookahead' : 'live';
+  const mode = config.mode === MODE.LOOKAHEAD && info?.videoId && !info.live ? MODE.LOOKAHEAD : MODE.LIVE;
 
   await sendToTab(tabId, {
     type: 'overlay-start',
@@ -106,7 +105,7 @@ async function start(tabId) {
       subtitleSize: config.subtitleSize,
     },
   });
-  if (mode === 'lookahead') {
+  if (mode === MODE.LOOKAHEAD) {
     lookahead = new LookaheadSession(tabId, config, {
       onLanguage: announceLanguage,
       onTiming: (timing) => setState({ timing }),
@@ -229,7 +228,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 });
 
 getState().then((state) => {
-  if (state.status === 'running' && state.mode === 'lookahead' && !lookahead) stop();
+  if (state.status === 'running' && state.mode === MODE.LOOKAHEAD && !lookahead) stop();
 });
 
 async function closeStrayLookaheadTabs() {

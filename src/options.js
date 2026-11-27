@@ -1,5 +1,5 @@
 import { describeErrors } from './errors.js';
-import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
+import { AUTO, DEFAULTS, ENGINE, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
 import { languageOptions, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
 import { translateWithLlm } from './llm.js';
@@ -25,7 +25,7 @@ function syncScriptRow() {
 
 function syncEngineRows() {
   const engine = $('translationEngine').value;
-  const llm = engine === 'llm';
+  const llm = engine === ENGINE.LLM;
   $('llmRows').hidden = !llm;
   $('llmUrl').disabled = $('llmModel').disabled = !llm;
   $('chromeHint').hidden = llm;
@@ -93,10 +93,10 @@ $('prepareTranslation').addEventListener('click', async () => {
 async function prepareTranslation() {
   const out = $('translationResult');
   const chosen = $('language').value.trim();
-  const language = chosen === 'auto' ? 'sr' : chosen;
+  const language = chosen === AUTO ? 'sr' : chosen;
   const target = $('translateTo').value;
   if (!target) return say(out, t('chooseTarget'), false);
-  if ($('translationEngine').value === 'llm') return testLlm(out, language, target);
+  if ($('translationEngine').value === ENGINE.LLM) return testLlm(out, language, target);
   if (!('Translator' in self)) return say(out, t('translatorUnavailableHere'), false);
   try {
     let pair = null;
@@ -158,7 +158,7 @@ async function testLlm(out, language, target) {
 }
 
 localizePage();
-$('language').add(new Option(t('detectLanguage'), 'auto'));
+$('language').add(new Option(t('detectLanguage'), AUTO));
 for (const { code, label } of languageOptions(uiLocale())) $('language').add(new Option(label, code));
 for (const { code, label } of translationOptions(uiLocale())) $('translateTo').add(new Option(label, code));
 fill(await loadSettings());
@@ -227,8 +227,8 @@ async function helperInfo() {
 
 async function translatorInfo(settings) {
   if (!('Translator' in self)) return 'not available in this browser';
-  if (!settings.translateTo || settings.translationEngine !== 'chrome') return 'not in use';
-  const language = settings.language === 'auto' ? 'sr' : settings.language;
+  if (!settings.translateTo || settings.translationEngine !== ENGINE.CHROME) return 'not in use';
+  const language = settings.language === AUTO ? 'sr' : settings.language;
   const results = [];
   for (const source of [language, TRANSLATOR_SOURCE_FALLBACK[language]]) {
     if (!source || source === settings.translateTo) continue;
@@ -313,7 +313,7 @@ async function collectDebugInfo() {
       ['mode', state?.mode],
       ['server', state?.serverUrl],
       ['server answers', answers],
-      ['detected language', settings.language === 'auto' ? state?.language : null],
+      ['detected language', settings.language === AUTO ? state?.language : null],
       ['last request', describeTiming(state?.timing)],
       ['short audio context', state?.timing ? (state.timing.shortContext ? 'on' : 'off') : null],
       ['error', state?.error],

@@ -1,3 +1,5 @@
+import { MODE } from './settings.js';
+
 export function formatDebugInfo(sections) {
   return sections
     .map(([title, rows]) => {
@@ -53,7 +55,7 @@ function playback({ time, paused, ad }) {
 }
 
 export function describeLookahead(state, info, now = Date.now()) {
-  if (state?.mode !== 'lookahead' || state.status !== 'running') return [];
+  if (state?.mode !== MODE.LOOKAHEAD || state.status !== 'running') return [];
   if (!info) return [['problem', 'the background worker has no lookahead session; stop and start subtitles again']];
   const capture = info.scout?.capture;
   const t = info.transcriber ?? {};

@@ -1,4 +1,6 @@
-export const AUTO = 'auto';
+import { AUTO } from './settings.js';
+
+export { AUTO };
 
 export const VOTES_TO_LOCK = 3;
 
