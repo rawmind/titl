@@ -1,15 +1,16 @@
-import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
+import { describeErrors } from './errors.js';
+import { DEFAULTS, TRANSLATEGEMMA_MODEL, TRANSLATEGEMMA_URL, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, usesLlm, validateSettings } from './settings.js';
 import { languageOptions, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
 import { translateWithLlm } from './llm.js';
-import { HOST_NAME } from './server.js';
-import { browserFromBrands, browserName, describeTiming, estimateBackend, formatDebugInfo } from './debug.js';
+import { HOST_NAME, isServerUp } from './server.js';
+import { browserFromBrands, browserName, describeLookahead, describeTiming, estimateBackend, formatDebugInfo, modelFor, modelName, serbianOffer, translateGemmaOffer } from './debug.js';
 
 const $ = (id) => document.getElementById(id);
 const INSTALL_TIMEOUT_MS = 60_000;
 const SAMPLE_TIMEOUT_MS = 10_000;
 const TRANSLATOR_SETTING_UP = /Unable to create translator|service count exceeded/i;
-const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'translationEngine', 'llmUrl', 'llmModel', 'showOriginal', 'blurTranslation', 'subtitleSize', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
+const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'translationEngine', 'llmUrl', 'llmModel', 'sentenceTranslation', 'showOriginal', 'blurTranslation', 'subtitleSize', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
 
 function fill(settings) {
   for (const f of FIELDS) {
@@ -19,12 +20,18 @@ function fill(settings) {
 }
 
 function syncScriptRow() {
-  $('scriptRow').hidden = !['sr', 'auto'].includes($('language').value);
+  $('scriptRow').hidden = $('language').value !== 'sr';
 }
 
 function syncEngineRows() {
-  const llm = $('translationEngine').value === 'llm';
+  const engine = $('translationEngine').value;
+  const llm = usesLlm(engine);
+  const gemma = engine === 'translategemma';
   $('llmRows').hidden = !llm;
+  $('llmHint').hidden = gemma;
+  $('translateGemmaHint').hidden = !gemma;
+  $('llmModel').placeholder = gemma ? TRANSLATEGEMMA_MODEL : 'gemma3:4b';
+  $('llmUrl').placeholder = gemma ? TRANSLATEGEMMA_URL : DEFAULTS.llmUrl;
   $('llmUrl').disabled = $('llmModel').disabled = !llm;
   $('chromeHint').hidden = llm;
   $('prepareTranslation').textContent = t(llm ? 'testConnection' : 'downloadModel');
@@ -94,7 +101,7 @@ async function prepareTranslation() {
   const language = chosen === 'auto' ? 'sr' : chosen;
   const target = $('translateTo').value;
   if (!target) return say(out, t('chooseTarget'), false);
-  if ($('translationEngine').value === 'llm') return testLlm(out, language, target);
+  if (usesLlm($('translationEngine').value)) return testLlm(out, language, target);
   if (!('Translator' in self)) return say(out, t('translatorUnavailableHere'), false);
   try {
     let pair = null;
@@ -166,35 +173,63 @@ $('language').addEventListener('change', syncScriptRow);
 $('language').addEventListener('change', syncSerbianOffer);
 $('downloadSerbian').addEventListener('click', downloadSerbianModel);
 
-const SERBIAN_MODEL_LANGUAGES = ['sr', 'hr'];
-let serbianModelMissing = false;
+let serbianHelper = null;
+let serbianDownloading = false;
 
 function syncSerbianOffer() {
-  $('serbianOffer').hidden = !(serbianModelMissing && SERBIAN_MODEL_LANGUAGES.includes($('language').value));
+  const model = modelFor(serbianHelper, $('language').value);
+  $('modelInUse').hidden = !model;
+  if (model) $('modelInUse').textContent = t('modelInUse', model);
+  const { show } = serbianOffer(serbianHelper, $('language').value);
+  $('serbianOffer').hidden = !show && !serbianDownloading;
+  if (show && !serbianDownloading) $('downloadSerbian').hidden = false;
+}
+
+function syncTranslateGemmaOption() {
+  const selected = $('translationEngine').value === 'translategemma';
+  $('translateGemmaOption').hidden = !translateGemmaOffer(serbianHelper, selected).show;
+}
+
+async function refreshSerbianOffer() {
+  serbianHelper = await helperInfo();
+  syncSerbianOffer();
+  syncTranslateGemmaOption();
 }
 
 async function downloadSerbianModel() {
   const button = $('downloadSerbian');
   const out = $('serbianResult');
+  const language = $('language').value;
   button.disabled = true;
+  serbianDownloading = true;
   say(out, t('downloadingSerbianModel'), true);
   try {
     const res = await chrome.runtime.sendNativeMessage(HOST_NAME, { cmd: 'downloadSerbianModel' });
     if (res?.status !== 'downloaded') throw new Error(res?.error ?? 'no answer');
-    serbianModelMissing = false;
+    serbianHelper = { ...serbianHelper, serbian_model: res.path };
     button.hidden = true;
-    say(out, t('serbianModelReady'), true);
+    syncSerbianOffer();
+    await chrome.storage.local.set({ settings: { ...(await loadSettings()), language } });
+    const restart = await chrome.runtime.sendMessage({ target: 'background', type: 'restart' }).catch(() => null);
+    say(out, t(restart?.restarted ? 'serbianModelRestarted' : 'serbianModelReady'), true);
   } catch (err) {
-    button.disabled = false;
     say(out, t('serbianModelFailed', err.message), false);
+  } finally {
+    button.disabled = false;
+    serbianDownloading = false;
   }
 }
 
-helperInfo().then((info) => {
-  serbianModelMissing = 'serbian_model' in info && !info.serbian_model;
-  syncSerbianOffer();
+refreshSerbianOffer();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && !serbianDownloading) refreshSerbianOffer();
 });
-$('translationEngine').addEventListener('change', syncEngineRows);
+$('translationEngine').addEventListener('change', () => {
+  const url = $('llmUrl').value.trim();
+  if ($('translationEngine').value === 'translategemma' && (!url || url === DEFAULTS.llmUrl)) $('llmUrl').value = TRANSLATEGEMMA_URL;
+  syncEngineRows();
+  syncTranslateGemmaOption();
+});
 
 async function helperInfo() {
   try {
@@ -231,21 +266,46 @@ async function browserVersion() {
   }
 }
 
+async function lookaheadInfo() {
+  try {
+    const res = await chrome.runtime.sendMessage({ target: 'background', type: 'debug' });
+    return res?.lookahead ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function serverAnswers(serverUrl) {
+  if (!serverUrl) return null;
+  return (await isServerUp(serverUrl)) ? 'yes' : 'no';
+}
+
+let slowDebugInfo = null;
+
 async function collectDebugInfo() {
   const settings = await loadSettings();
   const manifest = chrome.runtime.getManifest();
   const platform = await chrome.runtime.getPlatformInfo();
-  const { state } = await chrome.storage.session.get('state');
-  const [helper, translator, browser] = await Promise.all([helperInfo(), translatorInfo(settings), browserVersion()]);
+  const { state, errors } = await chrome.storage.session.get(['state', 'errors']);
+  slowDebugInfo ??= Promise.all([
+    helperInfo(),
+    translatorInfo(settings),
+    browserVersion(),
+    serverAnswers(state?.status === 'running' ? state.serverUrl : null),
+  ]);
+  const [[helper, translator, browser, answers], lookahead] = await Promise.all([slowDebugInfo, lookaheadInfo()]);
+  const offer = serbianOffer(helper, $('language').value);
   return formatDebugInfo([
     ['Titl', [['version', manifest.version], ['extension id', chrome.runtime.id], ['interface language', uiLocale()]]],
     ['Browser', [['browser', browser], ['system', `${platform.os} ${platform.arch}`]]],
     ['Settings', [
       ['mode', settings.mode],
       ['spoken language', settings.language],
-      ['Serbian script', settings.script],
+      ['Serbian script', settings.language === 'sr' ? settings.script : null],
       ['translate to', settings.translateTo || 'off'],
       ['translator', settings.translationEngine],
+      ['sentence translation', settings.translateTo ? settings.sentenceTranslation : null],
+      ['TranslateGemma option', translateGemmaOffer(helper, $('translationEngine').value === 'translategemma').reason],
       ['start whisper-server automatically', settings.autoStartServer],
       ['server URL', settings.autoStartServer ? null : settings.serverUrl],
     ]],
@@ -258,7 +318,10 @@ async function collectDebugInfo() {
       ['threads', helper.threads],
       ['whisper-server', helper.server],
       ['model', helper.model],
-      ['Serbian model', helper.serbian_model],
+      ['model for the spoken language', modelFor(helper, $('language').value)],
+      ['model the server last loaded', modelName(helper.server_model)],
+      ['Serbian model', offer.model],
+      ['Serbian model offer', offer.reason],
       ['extra flags', helper.args?.join(' ')],
       ['setup problem', helper.config_error],
       ['log', helper.log],
@@ -267,19 +330,35 @@ async function collectDebugInfo() {
       ['status', state?.status ?? 'idle'],
       ['mode', state?.mode],
       ['server', state?.serverUrl],
+      ['server answers', answers],
       ['detected language', settings.language === 'auto' ? state?.language : null],
       ['last request', describeTiming(state?.timing)],
       ['short audio context', state?.timing ? (state.timing.shortContext ? 'on' : 'off') : null],
       ['error', state?.error],
     ]],
+    ['Lookahead', describeLookahead(state, lookahead)],
     ["Chrome's translator", [['availability', translator]]],
+    ['Last errors', describeErrors(errors)],
   ]);
 }
 
+let debugTimer = null;
+
 async function showDebugInfo() {
-  if (!$('debug').open) return;
-  $('debugText').textContent = '…';
-  $('debugText').textContent = await collectDebugInfo();
+  clearTimeout(debugTimer);
+  if (!$('debug').open) {
+    slowDebugInfo = null;
+    return;
+  }
+  const pre = $('debugText');
+  if (!pre.textContent) pre.textContent = '…';
+  const text = await collectDebugInfo();
+  if (pre.textContent !== text) {
+    const scroll = pre.scrollTop;
+    pre.textContent = text;
+    pre.scrollTop = scroll;
+  }
+  debugTimer = setTimeout(showDebugInfo, 2000);
 }
 
 $('debug').addEventListener('toggle', showDebugInfo);

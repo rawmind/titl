@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildMessages, chatUrl, cleanTranslation, translateWithLlm } from '../src/llm.js';
+import { buildMessages, buildTranslateGemmaMessages, chatUrl, cleanTranslation, splitTranslation, translateWithLlm } from '../src/llm.js';
 import { DEFAULTS, validateSettings } from '../src/settings.js';
 
 test('chat URL accepts a server root, a /v1 base or the full endpoint', () => {
@@ -102,4 +102,54 @@ test('hidden local LLM fields never block saving with the Chrome translator', ()
 test('before the spoken language is detected, the prompt names only the target', () => {
   const [system] = buildMessages({ text: 'Hola', source: 'auto', target: 'en' });
   assert.match(system.content, /^You translate video subtitles to English\./);
+});
+
+test('TranslateGemma gets its own single-message prompt with language names and codes', () => {
+  const messages = buildTranslateGemmaMessages({ text: 'Dobar dan, kako ste?', source: 'sr', target: 'en' });
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0].role, 'user');
+  assert.equal(
+    messages[0].content,
+    'You are a professional Serbian (sr) to English (en) translator. Your goal is to accurately convey the meaning and nuances of the original Serbian text while adhering to English grammar, vocabulary, and cultural sensitivities.\nProduce only the English translation, without any additional explanations or commentary. Please translate the following Serbian text into English:\n\n\nDobar dan, kako ste?',
+  );
+  assert.match(buildTranslateGemmaMessages({ text: 'x', source: 'auto', target: 'pt-BR' })[0].content, /^You are a professional translator into .+ \(pt-BR\)\./);
+});
+
+test('TranslateGemma defaults to translategemma:4b with greedy decoding', async () => {
+  let body;
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    body = JSON.parse(init.body);
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'Good afternoon, how are you?' } }] }));
+  };
+  try {
+    const config = { ...DEFAULTS, translationEngine: 'translategemma', llmUrl: 'http://127.0.0.1:11434/v1', language: 'sr', translateTo: 'en' };
+    assert.equal(await translateWithLlm(config, { text: 'Dobar dan, kako ste?' }), 'Good afternoon, how are you?');
+    assert.equal(body.model, 'translategemma:4b');
+    assert.equal(body.temperature, 0);
+    assert.equal(body.messages.length, 1);
+    assert.equal(validateSettings(config), null);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('a sentence translation is split back across its cues by length', () => {
+  const parts = ['Danas ćemo razgovarati o budžetu za sledeću godinu i o tome šta je', 'najvažnije za naše građane.'];
+  const pieces = splitTranslation('Today we will discuss the budget for next year and what is most important for our citizens.', parts);
+  assert.equal(pieces.length, 2);
+  assert.equal(pieces.join(' '), 'Today we will discuss the budget for next year and what is most important for our citizens.');
+  assert.ok(pieces[0].length > pieces[1].length);
+});
+
+test('the split prefers a clause boundary near the proportional point', () => {
+  assert.deepEqual(splitTranslation('Good evening, thank you all for coming tonight.', ['Dobro veče,', 'hvala svima što ste došli večeras.']), [
+    'Good evening,',
+    'thank you all for coming tonight.',
+  ]);
+});
+
+test('a single cue keeps the whole translation and short ones never lose words', () => {
+  assert.deepEqual(splitTranslation('Hello there.', ['Zdravo.']), ['Hello there.']);
+  assert.deepEqual(splitTranslation('Yes.', ['Da,', 'naravno.']), ['Yes.', '']);
 });

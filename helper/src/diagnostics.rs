@@ -8,11 +8,13 @@ use std::fs;
 const START_MARKER: &str = "=== starting ";
 const BACKEND_PREFIX: &str = "whisper_backend_init_gpu: ";
 const THREADS_PREFIX: &str = "system_info: n_threads = ";
+const MODEL_PREFIX: &str = "=== model ";
 
 #[derive(Debug, PartialEq)]
 pub struct ServerRun {
     pub backend: Option<String>,
     pub threads: Option<String>,
+    pub model: Option<String>,
 }
 
 pub fn last_run(log: &str) -> Option<ServerRun> {
@@ -31,7 +33,8 @@ pub fn last_run(log: &str) -> Option<ServerRun> {
         .find_map(|l| l.strip_prefix(THREADS_PREFIX))
         .and_then(|rest| rest.split('|').next())
         .map(|t| t.trim().to_string());
-    Some(ServerRun { backend, threads })
+    let model = run.lines().find_map(|l| l.strip_prefix(MODEL_PREFIX)).map(|m| m.trim().to_string());
+    Some(ServerRun { backend, threads, model })
 }
 
 pub fn server_run() -> Option<ServerRun> {
@@ -71,6 +74,7 @@ pub fn info_reply() -> Value {
         "log": paths::log_path().display().to_string(),
         "backend": run.as_ref().and_then(|r| r.backend.clone()),
         "threads": run.as_ref().and_then(|r| r.threads.clone()),
+        "server_model": run.as_ref().and_then(|r| r.model.clone()),
     });
     match Config::load() {
         Ok(c) => {
@@ -101,7 +105,7 @@ mod tests {
         let log = format!("=== starting old on port 1\nwhisper_backend_init_gpu: using CUDA0 backend\n{CPU_RUN}");
         assert_eq!(
             last_run(&log),
-            Some(ServerRun { backend: Some("CPU".into()), threads: Some("4 / 4".into()) })
+            Some(ServerRun { backend: Some("CPU".into()), threads: Some("4 / 4".into()), model: None })
         );
     }
 
@@ -110,13 +114,19 @@ mod tests {
         let log = "=== starting /opt/whisper-server on port 2\nwhisper_backend_init_gpu: using MTL0 backend\nsystem_info: n_threads = 4 / 14 | x\n";
         assert_eq!(
             last_run(log),
-            Some(ServerRun { backend: Some("GPU (MTL0)".into()), threads: Some("4 / 14".into()) })
+            Some(ServerRun { backend: Some("GPU (MTL0)".into()), threads: Some("4 / 14".into()), model: None })
         );
     }
 
     #[test]
+    fn the_model_of_the_last_run_is_reported() {
+        let log = "=== starting x on port 3\n=== model /m/ggml-small.bin\n\n=== starting x on port 4\n=== model /m/ggml-small-sr-distill-v3-q8_0.bin\n";
+        assert_eq!(last_run(log).unwrap().model.as_deref(), Some("/m/ggml-small-sr-distill-v3-q8_0.bin"));
+    }
+
+    #[test]
     fn a_run_without_details_yet_reports_nothing() {
-        assert_eq!(last_run("=== starting x on port 3\n"), Some(ServerRun { backend: None, threads: None }));
+        assert_eq!(last_run("=== starting x on port 3\n"), Some(ServerRun { backend: None, threads: None, model: None }));
         assert_eq!(last_run(""), None);
     }
 }

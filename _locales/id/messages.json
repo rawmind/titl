@@ -272,6 +272,15 @@
   "llmModel": {
     "message": "Nama model (opsional untuk llama-server, mis. gemma3:4b untuk Ollama)"
   },
+  "engineTranslateGemma": {
+    "message": "TranslateGemma 4B (lokal)"
+  },
+  "sentenceTranslation": {
+    "message": "Eksperimental: terjemahkan kalimat utuh (hanya mode lookahead)"
+  },
+  "translateGemmaHint": {
+    "message": "Model terjemahan terbuka dari Google. Memakai sekitar 4 GB memori: perlu RAM minimal 8 GB. Cepat di Apple Silicon atau GPU dengan VRAM 4 GB atau lebih; dengan CPU saja tetap jalan, tetapi lebih lambat. Menerjemahkan setiap baris secara terpisah, tanpa baris di sekitarnya."
+  },
   "llmHint": {
     "message": "Server apa pun yang kompatibel dengan OpenAI di komputer ini: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, sekitar 2,5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) atau LM Studio (<code>http://127.0.0.1:1234/v1</code>). Harus di 127.0.0.1 atau localhost."
   },
@@ -290,6 +299,9 @@
   "copied": {
     "message": "Tersalin"
   },
+  "modelInUse": {
+    "message": "Model ucapan: $1"
+  },
   "serbianModelOffer": {
     "message": "Titl memakai Whisper small di komputer ini. Versi yang disesuaikan untuk bahasa Serbia dan Kroasia membuat sekitar separuh kesalahan, dan sama cepat atau lebih cepat."
   },
@@ -301,6 +313,9 @@
   },
   "serbianModelReady": {
     "message": "Terpasang. Titl akan memakainya saat Anda memulai subtitle berikutnya."
+  },
+  "serbianModelRestarted": {
+    "message": "Terpasang. Subtitel dimulai ulang dengannya."
   },
   "serbianModelFailed": {
     "message": "Gagal mengunduh: $1. Titl tetap memakai Whisper small."

@@ -272,6 +272,15 @@
   "llmModel": {
     "message": "Имя модели (для llama-server необязательно, например gemma3:4b для Ollama)"
   },
+  "engineTranslateGemma": {
+    "message": "TranslateGemma 4B (локально)"
+  },
+  "sentenceTranslation": {
+    "message": "Экспериментально: переводить целые предложения (только в режиме опережения)"
+  },
+  "translateGemmaHint": {
+    "message": "Открытая модель перевода от Google. Использует около 4 ГБ памяти: нужно не меньше 8 ГБ ОЗУ. Быстро работает на Apple Silicon или видеокарте с 4 ГБ видеопамяти и больше; только на процессоре работает, но медленнее. Переводит каждую строку отдельно, без соседних строк."
+  },
   "llmHint": {
     "message": "Любой OpenAI-совместимый сервер на этом компьютере: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, около 2,5 ГБ), Ollama (<code>http://127.0.0.1:11434/v1</code>) или LM Studio (<code>http://127.0.0.1:1234/v1</code>). Только 127.0.0.1 или localhost."
   },
@@ -290,6 +299,9 @@
   "copied": {
     "message": "Скопировано"
   },
+  "modelInUse": {
+    "message": "Модель распознавания речи: $1"
+  },
   "serbianModelOffer": {
     "message": "На этом компьютере Titl использует Whisper small. Версия, настроенная для сербского и хорватского, ошибается примерно вдвое реже и работает так же быстро или быстрее."
   },
@@ -301,6 +313,9 @@
   },
   "serbianModelReady": {
     "message": "Установлено. Titl будет использовать её при следующем запуске субтитров."
+  },
+  "serbianModelRestarted": {
+    "message": "Установлено. Субтитры перезапущены с ней."
   },
   "serbianModelFailed": {
     "message": "Не удалось скачать: $1. Titl продолжит использовать Whisper small."

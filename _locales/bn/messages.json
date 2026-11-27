@@ -272,6 +272,15 @@
   "llmModel": {
     "message": "মডেলের নাম (llama-server-এর জন্য ঐচ্ছিক, যেমন Ollama-র জন্য gemma3:4b)"
   },
+  "engineTranslateGemma": {
+    "message": "TranslateGemma 4B (লোকাল)"
+  },
+  "sentenceTranslation": {
+    "message": "পরীক্ষামূলক: পুরো বাক্য অনুবাদ করুন (শুধু লুকঅ্যাহেড মোডে)"
+  },
+  "translateGemmaHint": {
+    "message": "Google-এর ওপেন অনুবাদ মডেল। প্রায় 4 GB মেমরি লাগে: কমপক্ষে 8 GB RAM দরকার। Apple Silicon বা 4 GB বা তার বেশি VRAM-এর GPU-তে দ্রুত চলে; শুধু CPU-তেও চলে, তবে ধীরে। প্রতিটি লাইন আলাদাভাবে অনুবাদ করে, আশেপাশের লাইন ছাড়া।"
+  },
   "llmHint": {
     "message": "এই কম্পিউটারে যেকোনো OpenAI-সামঞ্জস্যপূর্ণ সার্ভার: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, প্রায় 2.5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) বা LM Studio (<code>http://127.0.0.1:1234/v1</code>)। 127.0.0.1 বা localhost-এ হতে হবে।"
   },
@@ -290,6 +299,9 @@
   "copied": {
     "message": "কপি হয়েছে"
   },
+  "modelInUse": {
+    "message": "স্পিচ মডেল: $1"
+  },
   "serbianModelOffer": {
     "message": "এই কম্পিউটারে Titl, Whisper small ব্যবহার করে। সার্বিয়ান ও ক্রোয়েশিয়ানের জন্য টিউন করা সংস্করণটি প্রায় অর্ধেক ভুল করে, এবং সমান দ্রুত বা আরও দ্রুত।"
   },
@@ -301,6 +313,9 @@
   },
   "serbianModelReady": {
     "message": "ইনস্টল হয়েছে। পরের বার সাবটাইটেল চালু করলে Titl এটি ব্যবহার করবে।"
+  },
+  "serbianModelRestarted": {
+    "message": "ইনস্টল হয়েছে। সাবটাইটেল এটি দিয়ে আবার শুরু হয়েছে।"
   },
   "serbianModelFailed": {
     "message": "ডাউনলোড ব্যর্থ: $1. Titl, Whisper small ব্যবহার করতে থাকবে।"

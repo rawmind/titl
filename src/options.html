@@ -53,6 +53,7 @@
         <select id="translationEngine">
           <option value="chrome" data-i18n="engineChrome">Chrome's built-in (fast, basic quality)</option>
           <option value="llm" data-i18n="engineLlm">Local LLM (better, uses context)</option>
+          <option value="translategemma" id="translateGemmaOption" data-i18n="engineTranslateGemma" hidden>TranslateGemma 4B (local)</option>
         </select>
       </label>
       <div id="llmRows">
@@ -62,9 +63,11 @@
         <label><span data-i18n="llmModel">Model name</span>
           <input id="llmModel" type="text" placeholder="gemma3:4b">
         </label>
-        <p class="hint" data-i18n-html="llmHint"></p>
+        <p class="hint" id="llmHint" data-i18n-html="llmHint"></p>
+        <p class="hint" id="translateGemmaHint" data-i18n-html="translateGemmaHint" hidden></p>
       </div>
       <p class="hint" id="chromeHint" data-i18n="translationHint">Runs on this device with Chrome's built-in translator. Serbian is translated as Croatian, which Chrome supports.</p>
+      <label class="check"><input id="sentenceTranslation" type="checkbox"> <span data-i18n="sentenceTranslation">Experimental: translate whole sentences (lookahead mode only)</span></label>
       <label class="check"><input id="showOriginal" type="checkbox"> <span data-i18n="showOriginal">Show the original above the translation</span></label>
       <label class="check"><input id="blurTranslation" type="checkbox"> <span data-i18n-html="blurTranslation">Blur the translation until you reveal it: press <kbd>V</kbd> or click the line</span></label>
       <button type="button" id="prepareTranslation" class="secondary" data-i18n="downloadModel">Download translation model</button>
@@ -76,6 +79,7 @@
       <label><span data-i18n="spokenLanguage">Spoken language</span>
         <select id="language" required></select>
       </label>
+      <p class="hint" id="modelInUse" hidden></p>
       <div id="serbianOffer" hidden>
         <p class="hint" data-i18n="serbianModelOffer">Titl uses Whisper small on this computer. A version tuned for Serbian and Croatian makes about half as many mistakes, and is as fast or faster.</p>
         <button type="button" id="downloadSerbian" class="secondary" data-i18n="downloadSerbianModel">Download it (264 MB)</button>

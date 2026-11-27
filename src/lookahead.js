@@ -14,6 +14,7 @@ export class LookaheadTranscriber {
     this.onError = onError;
     this.onLanguage = onLanguage;
     this.lock = new LanguageLock(config.language);
+    this.stats = { requests: 0, failures: 0, silent: 0, lastError: null, lastErrorAt: null };
     this.reset();
   }
 
@@ -72,14 +73,19 @@ export class LookaheadTranscriber {
     const gen = this.gen;
 
     if (rms(samples) < this.config.silenceRms) {
+      this.stats.silent++;
       this.commit(gen, ws, we, []);
       return true;
     }
 
     let result;
+    this.stats.requests++;
     try {
       result = await this.transcribe(samples, this.lock.request);
     } catch (err) {
+      this.stats.failures++;
+      this.stats.lastError = err.message;
+      this.stats.lastErrorAt = Date.now();
       this.onError(err);
       return false;
     }
@@ -118,6 +124,11 @@ export class LookaheadTranscriber {
     this.onCues(cues, from, to);
   }
 
+  buffered() {
+    const last = this.blocks.at(-1);
+    return last && this.commitT !== null ? (last.t1 - this.commitT) / last.rate : 0;
+  }
+
   extract(ws, we, rate) {
     const out = new Float32Array(Math.round(((we - ws) / rate) * SAMPLE_RATE));
     for (const b of this.blocks) {
@@ -141,7 +152,7 @@ function decodeInt16Base64(data) {
 }
 
 export class LookaheadSession {
-  constructor(mainTabId, config, { onLanguage = () => {}, onTiming = () => {} } = {}) {
+  constructor(mainTabId, config, { onLanguage = () => {}, onTiming = () => {}, onError = () => {} } = {}) {
     this.mainTabId = mainTabId;
     this.config = config;
     this.scoutTabId = null;
@@ -152,12 +163,18 @@ export class LookaheadSession {
     this.holdUntil = 0;
     this.focusReturned = false;
     this.stopped = false;
+    this.onError = onError;
+    this.captureError = null;
+    this.stats = { startedAt: Date.now(), scoutStates: 0, scoutAt: null, audioBlocks: 0, audioSec: 0, audioAt: null, otherVideoAudio: 0, seeks: 0, cues: 0 };
     const pace = new Pace(onTiming);
     this.transcriber = new LookaheadTranscriber(config, {
       transcribe: (samples, language) => transcribe(config, samples, { verbose: true, language, pace }),
       onCues: (cues, from, to) => this.emit(cues, from, to),
       onLanguage,
-      onError: (err) => this.toMain({ type: 'status', error: err.message }),
+      onError: (err) => {
+        this.onError('whisper request', err);
+        this.toMain({ type: 'status', error: err.message });
+      },
     });
   }
 
@@ -211,12 +228,24 @@ export class LookaheadSession {
   }
 
   onScoutAudio(msg) {
-    if (msg.videoId !== this.videoId) return;
-    this.transcriber.addAudio({ t0: msg.t0, rate: msg.rate, samples: decodeInt16Base64(msg.data) });
+    if (msg.videoId !== this.videoId) {
+      this.stats.otherVideoAudio++;
+      return;
+    }
+    const samples = decodeInt16Base64(msg.data);
+    this.stats.audioBlocks++;
+    this.stats.audioSec += samples.length / SAMPLE_RATE;
+    this.stats.audioAt = Date.now();
+    this.transcriber.addAudio({ t0: msg.t0, rate: msg.rate, samples });
   }
 
   onScoutState(state) {
     this.scout = state;
+    const captureError = state.capture?.error ?? null;
+    if (captureError && captureError !== this.captureError) this.onError('scout capture', captureError);
+    this.captureError = captureError;
+    this.stats.scoutStates++;
+    this.stats.scoutAt = Date.now();
     if (!state.paused && !state.ad) this.returnFocus();
     if (state.ended && state.videoId === this.videoId) this.transcriber.finish();
     this.steer();
@@ -227,8 +256,22 @@ export class LookaheadSession {
     this.steer();
   }
 
+  debugInfo() {
+    const { main, scout, coverage, transcriber } = this;
+    return {
+      ...this.stats,
+      videoId: this.videoId,
+      scoutTabId: this.scoutTabId,
+      main: main && { time: main.time, paused: main.paused, ad: main.ad },
+      scout: scout && { videoId: scout.videoId, time: scout.time, paused: scout.paused, ad: scout.ad, capture: scout.capture },
+      coveredTo: main ? (coverage.endAt(main.time) ?? null) : null,
+      transcriber: { ...transcriber.stats, buffered: transcriber.buffered() },
+    };
+  }
+
   emit(cues, from, to) {
     this.coverage.add(from, to);
+    this.stats.cues += cues.length;
     this.toMain({ type: 'cues', videoId: this.videoId, cues, coverage: this.coverage.ranges });
     this.toMain({ type: 'status', error: null });
   }
@@ -267,6 +310,7 @@ export class LookaheadSession {
     const offset = scout.time - target;
     if (!done && (offset < -1 || offset > config.maxWindowSec * scout.rate + 10)) {
       this.transcriber.reset();
+      this.stats.seeks++;
       this.command({ seek: target, play: true });
       this.hold(1500);
       return;
