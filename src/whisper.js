@@ -34,6 +34,7 @@ export async function transcribe(config, samples, { verbose = false, signal, lan
   form.append('file', new Blob([encodeWav(samples, SAMPLE_RATE)], { type: 'audio/wav' }), 'window.wav');
   form.append('language', language);
   form.append('response_format', verbose ? 'verbose_json' : 'json');
+  if (verbose) form.append('split_on_word', 'true');
   form.append('no_language_probabilities', 'true');
   const audioCtx = pace?.audioContext(seconds) ?? 0;
   if (audioCtx) form.append('audio_ctx', String(audioCtx));
