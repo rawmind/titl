@@ -10,6 +10,14 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 ### Upgrade
 - Needs both the new helper and the new extension. Other combinations keep working with the model you have.
 
+## [0.1.22](https://github.com/rawmind/titl/releases/tag/v0.1.22) - 2026-11-27
+
+### Fixed
+- **Words split between subtitle windows:** in lookahead mode, words were sometimes cut in half where one transcription window ends and the next begins, so a piece of the word went missing or was repeated, for example *poslan* | *Na listi* for *poslanika na listi*. whisper-server wraps its segments at 60 characters wherever a token ends, which is often inside a word, and Titl starts the next window at the last segment it keeps. Titl now asks whisper-server to wrap between words. In tests through Titl's own pipeline, with speech detection on, word errors fell in 11 of 12 conditions, for example from 27.0% to 21.9% with the Serbian model and from 25.4% to 19.7% with `large-v3-turbo` (12 Serbian parliament clips, 2.9 minutes). Live mode is unchanged.
+
+### Upgrade
+- Chrome updates the extension from the Chrome Web Store. The helper is unchanged; only its version number changes.
+
 ## [0.1.21](https://github.com/rawmind/titl/releases/tag/v0.1.21) - 2026-11-24
 
 ### Added
