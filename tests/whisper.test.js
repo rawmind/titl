@@ -23,3 +23,24 @@ test('a fast machine keeps the full context; a slow one switches to the short on
   pace.record(10, 100);
   assert.equal(pace.audioContext(8), 450);
 });
+
+test('lookahead requests wrap segments between words; live requests are unchanged', async () => {
+  const { transcribe } = await import('../src/whisper.js');
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    sent.push(init.body);
+    return new Response(JSON.stringify({ text: '', segments: [] }));
+  };
+  try {
+    const config = { serverUrl: 'http://127.0.0.1:8080/inference', language: 'sr', requestTimeoutSec: 5 };
+    await transcribe(config, new Float32Array(16000), { verbose: true });
+    await transcribe(config, new Float32Array(16000));
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  assert.equal(sent[0].get('response_format'), 'verbose_json');
+  assert.equal(sent[0].get('split_on_word'), 'true');
+  assert.equal(sent[1].get('response_format'), 'json');
+  assert.equal(sent[1].get('split_on_word'), null);
+});

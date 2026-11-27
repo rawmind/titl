@@ -5,25 +5,6 @@ import { Transcript, applyScript, cleanText, splitCue, translationSource } from 
 import { LanguageLock } from './detect.js';
 
 const TAIL_SEC = 1;
-const WORD_START = /^\s/;
-
-export function cutAtWordStart(segments, count, winSec) {
-  const last = segments[count - 1];
-  const next = segments[count];
-  const nextWord = next?.words?.find((w) => w.word);
-  const words = last?.words?.filter((w) => w.word) ?? [];
-  if (!nextWord || WORD_START.test(nextWord.word) || words.length < 2) return null;
-  let i = words.length - 1;
-  while (i > 0 && !WORD_START.test(words[i].word)) i--;
-  if (i === 0) return null;
-  const end = Math.min(winSec, Math.max(last.start, (words[i - 1].end + words[i].start) / 2));
-  const text = words
-    .slice(0, i)
-    .map((w) => w.word)
-    .join('')
-    .trim();
-  return { segments: [...segments.slice(0, count - 1), { ...last, end, text }], end };
-}
 
 export class LookaheadTranscriber {
   constructor(config, { transcribe, onCues, onError, onLanguage = () => {} }) {
@@ -112,11 +93,6 @@ export class LookaheadTranscriber {
     const toVideo = (s) => ({ start: ws + s.start * rate, end: ws + s.end * rate, text: s.text });
     let accepted = segments.filter((s) => s.end * rate <= winLen - TAIL_SEC);
     let commitT = ws + (accepted.at(-1)?.end ?? 0) * rate;
-    const cut = isLast ? null : cutAtWordStart(segments, accepted.length, winSec);
-    if (cut && cut.end * rate >= 1) {
-      accepted = cut.segments;
-      commitT = ws + cut.end * rate;
-    }
     if (isLast || !accepted.length || commitT - ws < 1) {
       accepted = segments;
       commitT = we;
