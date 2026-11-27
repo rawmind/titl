@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { LookaheadTranscriber } from '../src/lookahead.js';
+import { LookaheadTranscriber, cutAtWordStart } from '../src/lookahead.js';
 import { Coverage } from '../src/coverage.js';
 import { splitCue } from '../src/text.js';
 import { DEFAULTS } from '../src/settings.js';
@@ -167,4 +167,50 @@ test('segment times past the window are clamped to it', async () => {
   const all = emitted.flatMap((e) => e.cues);
   assert.ok(all.length > 0);
   for (const cue of all) assert.ok(cue.end <= 8, `cue ends at ${cue.end}`);
+});
+
+const piece = (word, start, end) => ({ word, start, end });
+
+test('a segment that ends mid-word is cut back to the start of that word', () => {
+  const segments = [
+    { start: 0, end: 3.9, text: ' kandidat za poslan', words: [piece(' kandidat', 0, 1), piece(' za', 1.2, 1.5), piece(' pos', 2.9, 3.4), piece('lan', 3.4, 3.9)] },
+    { start: 3.9, end: 7, text: 'ika na listi', words: [piece('ika', 3.9, 4.2), piece(' na', 4.3, 4.5), piece(' listi', 4.5, 5)] },
+  ];
+  const cut = cutAtWordStart(segments, 1, 8);
+  assert.equal(cut.segments.length, 1);
+  assert.equal(cut.segments[0].text, 'kandidat za');
+  assert.equal(cut.end, 2.2);
+});
+
+test('segments that end between words, or come without words, are left alone', () => {
+  const clean = [
+    { start: 0, end: 3, text: ' Prva.', words: [piece(' Prv', 0, 1), piece('a.', 1, 3)] },
+    { start: 3, end: 6, text: ' Druga.', words: [piece(' Druga.', 3, 6)] },
+  ];
+  assert.equal(cutAtWordStart(clean, 1, 8), null);
+  assert.equal(cutAtWordStart([{ start: 0, end: 3, text: 'a' }, { start: 3, end: 6, text: 'b' }], 1, 8), null);
+  assert.equal(cutAtWordStart(clean, 2, 8), null);
+  const oneWord = [
+    { start: 0, end: 2, text: ' poslan', words: [piece(' pos', 0, 1), piece('lan', 1, 2)] },
+    { start: 2, end: 4, text: 'ika', words: [piece('ika', 2, 4)] },
+  ];
+  assert.equal(cutAtWordStart(oneWord, 1, 8), null);
+});
+
+test('a word split across segments is transcribed whole in the next window', async () => {
+  const { t, emitted } = setup([
+    [
+      { start: 0, end: 3.9, text: ' Kandidat za poslan', words: [piece(' Kandidat', 0, 1), piece(' za', 1.2, 1.5), piece(' pos', 2.9, 3.4), piece('lan', 3.4, 3.9)] },
+      { start: 3.9, end: 7.5, text: 'ika na listi', words: [piece('ika', 3.9, 4.2), piece(' na', 4.3, 4.5), piece(' listi', 4.5, 5)] },
+    ],
+    [{ start: 0, end: 5, text: ' poslanika na listi.', words: [piece(' poslanika', 0, 1.5), piece(' na', 1.6, 1.8), piece(' listi.', 1.8, 2.5)] }],
+  ]);
+  for (let i = 0; i < 16; i++) {
+    t.addAudio({ t0: i, rate: 1, samples: loud(1) });
+    await flush();
+  }
+  assert.equal(emitted[0].to, 2.2);
+  assert.equal(emitted[0].cues.map((c) => c.text).join(' '), 'Kandidat za');
+  assert.equal(emitted[1].from, 2.2);
+  assert.equal(emitted[1].cues.map((c) => c.text).join(' '), 'poslanika na listi.');
 });
