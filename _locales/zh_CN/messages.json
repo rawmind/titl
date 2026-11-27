@@ -272,6 +272,12 @@
   "llmModel": {
     "message": "模型名称（llama-server 可留空，Ollama 例如 gemma3:4b）"
   },
+  "engineTranslateGemma": {
+    "message": "TranslateGemma 4B（本地）"
+  },
+  "translateGemmaHint": {
+    "message": "Google 的开放翻译模型。运行时约占用 4 GB 内存：至少需要 8 GB RAM。在 Apple Silicon 或显存 4 GB 及以上的 GPU 上速度快；仅用 CPU 也能运行，但较慢。逐行单独翻译，不参考前后的行。"
+  },
   "llmHint": {
     "message": "本机上任何兼容 OpenAI 的服务器：llama-server（<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>，约 2.5 GB）、Ollama（<code>http://127.0.0.1:11434/v1</code>）或 LM Studio（<code>http://127.0.0.1:1234/v1</code>）。必须是 127.0.0.1 或 localhost。"
   },
@@ -290,6 +296,9 @@
   "copied": {
     "message": "已复制"
   },
+  "modelInUse": {
+    "message": "语音模型：$1"
+  },
   "serbianModelOffer": {
     "message": "Titl 在这台电脑上使用 Whisper small。针对塞尔维亚语和克罗地亚语调优的版本错误约减少一半，速度相同或更快。"
   },
@@ -301,6 +310,9 @@
   },
   "serbianModelReady": {
     "message": "已安装。下次开始字幕时 Titl 会使用它。"
+  },
+  "serbianModelRestarted": {
+    "message": "已安装。字幕已使用它重新启动。"
   },
   "serbianModelFailed": {
     "message": "下载失败：$1。Titl 将继续使用 Whisper small。"

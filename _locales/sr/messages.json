@@ -272,6 +272,12 @@
   "llmModel": {
     "message": "Naziv modela (opciono za llama-server, npr. gemma3:4b za Ollama)"
   },
+  "engineTranslateGemma": {
+    "message": "TranslateGemma 4B (lokalno)"
+  },
+  "translateGemmaHint": {
+    "message": "Googleov otvoreni model za prevođenje. Koristi oko 4 GB memorije: potrebno je najmanje 8 GB RAM-a. Brz na Apple Silicon računarima ili grafičkoj kartici sa 4 GB VRAM-a ili više; samo na procesoru radi, ali sporije. Prevodi svaki red zasebno, bez okolnih redova."
+  },
   "llmHint": {
     "message": "Bilo koji server kompatibilan sa OpenAI na ovom računaru: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, oko 2,5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) ili LM Studio (<code>http://127.0.0.1:1234/v1</code>). Mora biti 127.0.0.1 ili localhost."
   },
@@ -290,6 +296,9 @@
   "copied": {
     "message": "Kopirano"
   },
+  "modelInUse": {
+    "message": "Model za govor: $1"
+  },
   "serbianModelOffer": {
     "message": "Titl na ovom računaru koristi Whisper small. Verzija prilagođena srpskom i hrvatskom pravi otprilike upola manje grešaka i jednako je brza ili brža."
   },
@@ -301,6 +310,9 @@
   },
   "serbianModelReady": {
     "message": "Instalirano. Titl će je koristiti kada sledeći put pokrenete titlove."
+  },
+  "serbianModelRestarted": {
+    "message": "Instalirano. Titlovi su ponovo pokrenuti s njim."
   },
   "serbianModelFailed": {
     "message": "Preuzimanje nije uspelo: $1. Titl i dalje koristi Whisper small."

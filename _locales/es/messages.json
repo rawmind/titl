@@ -272,6 +272,12 @@
   "llmModel": {
     "message": "Nombre del modelo (opcional con llama-server, p. ej. gemma3:4b para Ollama)"
   },
+  "engineTranslateGemma": {
+    "message": "TranslateGemma 4B (local)"
+  },
+  "translateGemmaHint": {
+    "message": "El modelo abierto de traducción de Google. Usa unos 4 GB de memoria: necesita al menos 8 GB de RAM. Es rápido en Apple Silicon o con una GPU de 4 GB de VRAM o más; solo con la CPU funciona, pero más lento. Traduce cada línea por separado, sin las líneas de alrededor."
+  },
   "llmHint": {
     "message": "Cualquier servidor compatible con OpenAI en este equipo: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, unos 2,5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) o LM Studio (<code>http://127.0.0.1:1234/v1</code>). Debe estar en 127.0.0.1 o localhost."
   },
@@ -290,6 +296,9 @@
   "copied": {
     "message": "Copiado"
   },
+  "modelInUse": {
+    "message": "Modelo de voz: $1"
+  },
   "serbianModelOffer": {
     "message": "Titl usa Whisper small en este ordenador. Una versión ajustada para serbio y croata comete aproximadamente la mitad de errores y es igual de rápida o más."
   },
@@ -301,6 +310,9 @@
   },
   "serbianModelReady": {
     "message": "Instalada. Titl la usará la próxima vez que inicies los subtítulos."
+  },
+  "serbianModelRestarted": {
+    "message": "Instalado. Los subtítulos se reiniciaron con él."
   },
   "serbianModelFailed": {
     "message": "Error al descargar: $1. Titl seguirá usando Whisper small."

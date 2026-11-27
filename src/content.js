@@ -16,7 +16,7 @@
   const TRANSLATOR_RETRY_MS = 15000;
   const REVEAL_KEY = 'v';
   const AUTO = 'auto';
-  const t = (key, ...subs) => chrome.i18n.getMessage(key, subs.map(String)) || key;
+  const t = (key, ...subs) => chrome.i18n?.getMessage(key, subs.map(String)) || key;
 
   let root = null;
   let primaryEl = null;
@@ -204,7 +204,7 @@
   async function setupTranslator() {
     const target = options.translateTo;
     if (!target) return;
-    if (options.translationEngine === 'llm') {
+    if (['llm', 'translategemma'].includes(options.translationEngine)) {
       translator = llmTranslator;
       return;
     }
@@ -230,7 +230,7 @@
 
   function setLanguage(language) {
     if (!options || !language || language === options.language) return;
-    if (options.translationEngine === 'llm') {
+    if (['llm', 'translategemma'].includes(options.translationEngine)) {
       options.language = language;
       return;
     }
@@ -239,7 +239,7 @@
     translator = null;
     options = { ...options, language };
     setTranslationNotice('');
-    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
+    setupTranslator().catch((err) => translationFailed(err.message));
   }
 
   function setTranslateTo(target) {
@@ -259,7 +259,7 @@
     options = { ...options, translateTo: target };
     setTranslationNotice('');
     if (mode === 'live') renderLive();
-    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
+    setupTranslator().catch((err) => translationFailed(err.message));
     maybeResume();
   }
 
@@ -292,10 +292,10 @@
       else if (TRANSLATOR_SETTING_UP.test(err.message)) {
         setTranslationNotice(t('translatorSettingUp'));
         setTimeout(() => {
-          if (options === opts && !translator) setupTranslator().catch((e) => setTranslationNotice(t('translationUnavailable', e.message)));
+          if (options === opts && !translator) setupTranslator().catch((e) => translationFailed(e.message));
         }, TRANSLATOR_RETRY_MS);
       }
-      else setTranslationNotice(t('translationUnavailable', err.message));
+      else translationFailed(err.message);
     } finally {
       clearTimeout(stallTimer);
     }
@@ -489,6 +489,11 @@
     });
   }
 
+  function translationFailed(message) {
+    setTranslationNotice(t('translationUnavailable', message));
+    sendToBackground({ type: 'report-error', source: 'translation', message });
+  }
+
   function sendToBackground(msg) {
     if (!chrome.runtime?.id) return stop();
     try {
@@ -499,6 +504,7 @@
   }
 
   function tick() {
+    if (!chrome.runtime?.id) return stop();
     const video = getVideo();
     if (!video) return;
     if (video !== attachedVideo) attachVideo(video);
@@ -535,7 +541,7 @@
     revealed = false;
     window.addEventListener('keydown', onKeyDown, true);
     ensureOverlay();
-    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
+    setupTranslator().catch((err) => translationFailed(err.message));
     if (mode !== 'lookahead') return;
     resetCues(getVideoId());
     timer = setInterval(tick, TICK_MS);
