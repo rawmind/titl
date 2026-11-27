@@ -272,12 +272,6 @@
   "llmModel": {
     "message": "মডেলের নাম (llama-server-এর জন্য ঐচ্ছিক, যেমন Ollama-র জন্য gemma3:4b)"
   },
-  "engineTranslateGemma": {
-    "message": "TranslateGemma 4B (লোকাল)"
-  },
-  "translateGemmaHint": {
-    "message": "Google-এর ওপেন অনুবাদ মডেল। প্রায় 4 GB মেমরি লাগে: কমপক্ষে 8 GB RAM দরকার। Apple Silicon বা 4 GB বা তার বেশি VRAM-এর GPU-তে দ্রুত চলে; শুধু CPU-তেও চলে, তবে ধীরে। প্রতিটি লাইন আলাদাভাবে অনুবাদ করে, আশেপাশের লাইন ছাড়া।"
-  },
   "llmHint": {
     "message": "এই কম্পিউটারে যেকোনো OpenAI-সামঞ্জস্যপূর্ণ সার্ভার: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, প্রায় 2.5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) বা LM Studio (<code>http://127.0.0.1:1234/v1</code>)। 127.0.0.1 বা localhost-এ হতে হবে।"
   },

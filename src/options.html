@@ -53,7 +53,6 @@
         <select id="translationEngine">
           <option value="chrome" data-i18n="engineChrome">Chrome's built-in (fast, basic quality)</option>
           <option value="llm" data-i18n="engineLlm">Local LLM (better, uses context)</option>
-          <option value="translategemma" id="translateGemmaOption" data-i18n="engineTranslateGemma" hidden>TranslateGemma 4B (local)</option>
         </select>
       </label>
       <div id="llmRows">
@@ -64,7 +63,6 @@
           <input id="llmModel" type="text" placeholder="gemma3:4b">
         </label>
         <p class="hint" id="llmHint" data-i18n-html="llmHint"></p>
-        <p class="hint" id="translateGemmaHint" data-i18n-html="translateGemmaHint" hidden></p>
       </div>
       <p class="hint" id="chromeHint" data-i18n="translationHint">Runs on this device with Chrome's built-in translator. Serbian is translated as Croatian, which Chrome supports.</p>
       <label class="check"><input id="showOriginal" type="checkbox"> <span data-i18n="showOriginal">Show the original above the translation</span></label>

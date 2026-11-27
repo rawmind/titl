@@ -272,12 +272,6 @@
   "llmModel": {
     "message": "اسم النموذج (اختياري مع llama-server، مثل gemma3:4b مع Ollama)"
   },
-  "engineTranslateGemma": {
-    "message": "TranslateGemma 4B (محلي)"
-  },
-  "translateGemmaHint": {
-    "message": "نموذج الترجمة المفتوح من Google. يستخدم نحو 4 غيغابايت من الذاكرة: يحتاج إلى 8 غيغابايت من RAM على الأقل. سريع على Apple Silicon أو على بطاقة رسوميات بذاكرة 4 غيغابايت أو أكثر؛ ويعمل على المعالج وحده لكن أبطأ. يترجم كل سطر وحده، من دون الأسطر المحيطة به."
-  },
   "llmHint": {
     "message": "أي خادم متوافق مع OpenAI على هذا الكمبيوتر: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>، نحو 2.5 غيغابايت)، أو Ollama (<code>http://127.0.0.1:11434/v1</code>) أو LM Studio (<code>http://127.0.0.1:1234/v1</code>). يجب أن يكون على 127.0.0.1 أو localhost."
   },

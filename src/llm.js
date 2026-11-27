@@ -1,5 +1,5 @@
 import { languageName } from './languages.js';
-import { TRANSLATEGEMMA_MODEL, isLocalUrl } from './settings.js';
+import { isLocalUrl } from './settings.js';
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
@@ -35,22 +35,6 @@ export function buildMessages({ text, before = [], after = [], source, target })
   ];
 }
 
-function languageCode(code) {
-  return code.replace('_', '-');
-}
-
-export function buildTranslateGemmaMessages({ text, source, target }) {
-  const to = languageName(target);
-  const toTag = `${to} (${languageCode(target)})`;
-  const known = source && source !== 'auto';
-  const from = known ? languageName(source) : null;
-  const intro = known
-    ? `You are a professional ${from} (${languageCode(source)}) to ${toTag} translator. Your goal is to accurately convey the meaning and nuances of the original ${from} text while adhering to ${to} grammar, vocabulary, and cultural sensitivities.`
-    : `You are a professional translator into ${toTag}. Your goal is to accurately convey the meaning and nuances of the original text while adhering to ${to} grammar, vocabulary, and cultural sensitivities.`;
-  const ask = known ? `Please translate the following ${from} text into ${to}:` : `Please translate the following text into ${to}:`;
-  return [{ role: 'user', content: `${intro}\nProduce only the ${to} translation, without any additional explanations or commentary. ${ask}\n\n\n${text}` }];
-}
-
 export function cleanTranslation(content) {
   let text = String(content ?? '')
     .replace(/<think>[\s\S]*?<\/think>/g, '')
@@ -65,16 +49,14 @@ export function cleanTranslation(content) {
 export async function translateWithLlm(config, { text, before, after }) {
   if (!isLocalUrl(config.llmUrl)) throw new Error('Model API URL must be http://127.0.0.1 or http://localhost');
   const url = chatUrl(config.llmUrl);
-  const gemma = config.translationEngine === 'translategemma';
   const request = { text, before, after, source: config.language, target: config.translateTo };
   const body = {
-    messages: gemma ? buildTranslateGemmaMessages(request) : buildMessages(request),
-    temperature: gemma ? 0 : 0.2,
+    messages: buildMessages(request),
+    temperature: 0.2,
     max_tokens: 256,
     stream: false,
   };
-  const model = config.llmModel || (gemma ? TRANSLATEGEMMA_MODEL : '');
-  if (model) body.model = model;
+  if (config.llmModel) body.model = config.llmModel;
   let res;
   try {
     res = await fetch(url, {

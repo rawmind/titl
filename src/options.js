@@ -1,10 +1,10 @@
 import { describeErrors } from './errors.js';
-import { DEFAULTS, TRANSLATEGEMMA_MODEL, TRANSLATEGEMMA_URL, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, usesLlm, validateSettings } from './settings.js';
+import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
 import { languageOptions, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
 import { translateWithLlm } from './llm.js';
 import { HOST_NAME, isServerUp } from './server.js';
-import { browserFromBrands, browserName, describeLookahead, describeTiming, estimateBackend, formatDebugInfo, modelFor, modelName, serbianOffer, translateGemmaOffer } from './debug.js';
+import { browserFromBrands, browserName, describeLookahead, describeTiming, estimateBackend, formatDebugInfo, modelFor, modelName, serbianOffer } from './debug.js';
 
 const $ = (id) => document.getElementById(id);
 const INSTALL_TIMEOUT_MS = 60_000;
@@ -25,13 +25,8 @@ function syncScriptRow() {
 
 function syncEngineRows() {
   const engine = $('translationEngine').value;
-  const llm = usesLlm(engine);
-  const gemma = engine === 'translategemma';
+  const llm = engine === 'llm';
   $('llmRows').hidden = !llm;
-  $('llmHint').hidden = gemma;
-  $('translateGemmaHint').hidden = !gemma;
-  $('llmModel').placeholder = gemma ? TRANSLATEGEMMA_MODEL : 'gemma3:4b';
-  $('llmUrl').placeholder = gemma ? TRANSLATEGEMMA_URL : DEFAULTS.llmUrl;
   $('llmUrl').disabled = $('llmModel').disabled = !llm;
   $('chromeHint').hidden = llm;
   $('prepareTranslation').textContent = t(llm ? 'testConnection' : 'downloadModel');
@@ -101,7 +96,7 @@ async function prepareTranslation() {
   const language = chosen === 'auto' ? 'sr' : chosen;
   const target = $('translateTo').value;
   if (!target) return say(out, t('chooseTarget'), false);
-  if (usesLlm($('translationEngine').value)) return testLlm(out, language, target);
+  if ($('translationEngine').value === 'llm') return testLlm(out, language, target);
   if (!('Translator' in self)) return say(out, t('translatorUnavailableHere'), false);
   try {
     let pair = null;
@@ -185,15 +180,9 @@ function syncSerbianOffer() {
   if (show && !serbianDownloading) $('downloadSerbian').hidden = false;
 }
 
-function syncTranslateGemmaOption() {
-  const selected = $('translationEngine').value === 'translategemma';
-  $('translateGemmaOption').hidden = !translateGemmaOffer(serbianHelper, selected).show;
-}
-
 async function refreshSerbianOffer() {
   serbianHelper = await helperInfo();
   syncSerbianOffer();
-  syncTranslateGemmaOption();
 }
 
 async function downloadSerbianModel() {
@@ -224,12 +213,7 @@ refreshSerbianOffer();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && !serbianDownloading) refreshSerbianOffer();
 });
-$('translationEngine').addEventListener('change', () => {
-  const url = $('llmUrl').value.trim();
-  if ($('translationEngine').value === 'translategemma' && (!url || url === DEFAULTS.llmUrl)) $('llmUrl').value = TRANSLATEGEMMA_URL;
-  syncEngineRows();
-  syncTranslateGemmaOption();
-});
+$('translationEngine').addEventListener('change', syncEngineRows);
 
 async function helperInfo() {
   try {
@@ -304,7 +288,6 @@ async function collectDebugInfo() {
       ['Serbian script', settings.language === 'sr' ? settings.script : null],
       ['translate to', settings.translateTo || 'off'],
       ['translator', settings.translationEngine],
-      ['TranslateGemma option', translateGemmaOffer(helper, $('translationEngine').value === 'translategemma').reason],
       ['start whisper-server automatically', settings.autoStartServer],
       ['server URL', settings.autoStartServer ? null : settings.serverUrl],
     ]],

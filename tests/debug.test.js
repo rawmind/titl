@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { browserFromBrands, browserName, describeLookahead, describeTiming, estimateBackend, formatDebugInfo, modelFor, modelName, serbianOffer, translateGemmaOffer } from '../src/debug.js';
+import { browserFromBrands, browserName, describeLookahead, describeTiming, estimateBackend, formatDebugInfo, modelFor, modelName, serbianOffer } from '../src/debug.js';
 
 test('debug info is plain text, one section per block, empty values left out', () => {
   const text = formatDebugInfo([
@@ -107,13 +107,4 @@ test('the model shown is the one the helper picks for the spoken language', () =
   assert.equal(modelFor({ version: '0.1.21', model: 'C:\\m\\ggml-large-v3-turbo.bin' }, 'sr'), 'large-v3-turbo');
   assert.equal(modelFor({ problem: 'not installed' }, 'sr'), null);
   assert.equal(modelName(undefined), null);
-});
-
-test('TranslateGemma is offered only when whisper-server runs on a GPU, unless already selected', () => {
-  assert.equal(translateGemmaOffer({ backend: 'GPU (MTL0)' }, false).show, true);
-  assert.equal(translateGemmaOffer({ backend: 'GPU (CUDA0)' }, false).show, true);
-  assert.deepEqual(translateGemmaOffer({ backend: 'CPU' }, false), { show: false, reason: 'hidden: whisper-server runs on CPU' });
-  assert.equal(translateGemmaOffer({}, false).reason, 'hidden: no GPU detected yet (start subtitles once)');
-  assert.equal(translateGemmaOffer(null, false).show, false);
-  assert.equal(translateGemmaOffer({ backend: 'CPU' }, true).show, true);
 });

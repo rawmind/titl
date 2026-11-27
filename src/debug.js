@@ -103,10 +103,3 @@ export function serbianOffer(helper, language) {
   if (!SERBIAN_MODEL_LANGUAGES.includes(language)) return { show: false, model: 'not downloaded', reason: `hidden: spoken language is ${language}, not sr or hr` };
   return { show: true, model: 'not downloaded', reason: 'shown' };
 }
-
-export function translateGemmaOffer(helper, selected) {
-  const backend = helper?.backend;
-  if (backend?.startsWith('GPU')) return { show: true, reason: `shown: whisper-server runs on ${backend}` };
-  const why = backend ? `whisper-server runs on ${backend}` : 'no GPU detected yet (start subtitles once)';
-  return selected ? { show: true, reason: `shown because it is selected, but ${why}` } : { show: false, reason: `hidden: ${why}` };
-}

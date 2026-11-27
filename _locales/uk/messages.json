@@ -272,12 +272,6 @@
   "llmModel": {
     "message": "Назва моделі (для llama-server необов'язково, напр. gemma3:4b для Ollama)"
   },
-  "engineTranslateGemma": {
-    "message": "TranslateGemma 4B (локально)"
-  },
-  "translateGemmaHint": {
-    "message": "Відкрита модель перекладу від Google. Використовує близько 4 ГБ пам'яті: потрібно щонайменше 8 ГБ ОЗП. Швидко працює на Apple Silicon або відеокарті з 4 ГБ відеопам'яті й більше; лише на процесорі працює, але повільніше. Перекладає кожен рядок окремо, без сусідніх рядків."
-  },
   "llmHint": {
     "message": "Будь-який OpenAI-сумісний сервер на цьому комп'ютері: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, близько 2,5 ГБ), Ollama (<code>http://127.0.0.1:11434/v1</code>) або LM Studio (<code>http://127.0.0.1:1234/v1</code>). Лише 127.0.0.1 або localhost."
   },

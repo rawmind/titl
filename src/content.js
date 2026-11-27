@@ -204,7 +204,7 @@
   async function setupTranslator() {
     const target = options.translateTo;
     if (!target) return;
-    if (['llm', 'translategemma'].includes(options.translationEngine)) {
+    if (options.translationEngine === 'llm') {
       translator = llmTranslator;
       return;
     }
@@ -230,7 +230,7 @@
 
   function setLanguage(language) {
     if (!options || !language || language === options.language) return;
-    if (['llm', 'translategemma'].includes(options.translationEngine)) {
+    if (options.translationEngine === 'llm') {
       options.language = language;
       return;
     }

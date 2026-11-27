@@ -272,12 +272,6 @@
   "llmModel": {
     "message": "Naziv modela (opciono za llama-server, npr. gemma3:4b za Ollama)"
   },
-  "engineTranslateGemma": {
-    "message": "TranslateGemma 4B (lokalno)"
-  },
-  "translateGemmaHint": {
-    "message": "Googleov otvoreni model za prevođenje. Koristi oko 4 GB memorije: potrebno je najmanje 8 GB RAM-a. Brz na Apple Silicon računarima ili grafičkoj kartici sa 4 GB VRAM-a ili više; samo na procesoru radi, ali sporije. Prevodi svaki red zasebno, bez okolnih redova."
-  },
   "llmHint": {
     "message": "Bilo koji server kompatibilan sa OpenAI na ovom računaru: llama-server (<code>llama-server -hf ggml-org/gemma-3-4b-it-GGUF --port 8081</code>, oko 2,5 GB), Ollama (<code>http://127.0.0.1:11434/v1</code>) ili LM Studio (<code>http://127.0.0.1:1234/v1</code>). Mora biti 127.0.0.1 ili localhost."
   },
