@@ -7,12 +7,12 @@ use std::path::{Path, PathBuf};
 
 pub const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
 pub const CPU_MODEL: &str = "small";
-pub const SERBIAN_MODEL: &str = "small-sr-distill-v2-q8_0";
+pub const SERBIAN_MODEL: &str = "small-sr-distill-v3-q8_0";
 const SERBIAN_MODEL_LANGUAGES: &[&str] = &["sr", "hr"];
 const WHISPER_CPP_MODELS: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main";
 const SERBIAN_MODELS: &str =
-    "https://huggingface.co/rawmind/whisper-small-sr-distill-v2/resolve/ce069ef8e23e7a0af4addd9fee055c924639135d";
-const SERBIAN_SHA256: &str = "0bd02f68a2dec6d879e975669aaa7f738133eeb868c2d6bae6e1907077d15caa";
+    "https://huggingface.co/rawmind/whisper-small-sr-distill-v3/resolve/07561e38857987fd987d8c06541b943d0c9672d4";
+const SERBIAN_SHA256: &str = "578f8c9a5bbb4af2bd56e968034ef62292d64387beb9e05db8fd2e065a880b0e";
 pub const VAD_FILE: &str = "ggml-silero-v6.2.0.bin";
 const VAD_URL: &str =
     "https://huggingface.co/ggml-org/whisper-vad/resolve/9ffd54a1e1ee413ddf265af9913beaf518d1639b/ggml-silero-v6.2.0.bin";
@@ -178,7 +178,7 @@ mod tests {
     fn serbian_model_comes_from_its_own_pinned_repo() {
         assert_eq!(
             url(SERBIAN_MODEL),
-            "https://huggingface.co/rawmind/whisper-small-sr-distill-v2/resolve/ce069ef8e23e7a0af4addd9fee055c924639135d/ggml-small-sr-distill-v2-q8_0.bin"
+            "https://huggingface.co/rawmind/whisper-small-sr-distill-v3/resolve/07561e38857987fd987d8c06541b943d0c9672d4/ggml-small-sr-distill-v3-q8_0.bin"
         );
         assert_eq!(url(CPU_MODEL), "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin");
     }
