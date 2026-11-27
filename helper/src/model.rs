@@ -4,6 +4,7 @@ use serde_json::{json, Value};
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 pub const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
 pub const CPU_MODEL: &str = "small";
@@ -13,11 +14,14 @@ const WHISPER_CPP_MODELS: &str = "https://huggingface.co/ggerganov/whisper.cpp/r
 const SERBIAN_MODELS: &str =
     "https://huggingface.co/rawmind/whisper-small-sr-distill-v3/resolve/07561e38857987fd987d8c06541b943d0c9672d4";
 const SERBIAN_SHA256: &str = "578f8c9a5bbb4af2bd56e968034ef62292d64387beb9e05db8fd2e065a880b0e";
+const SERBIAN_SIZE: u64 = 264_464_624;
 pub const VAD_FILE: &str = "ggml-silero-v6.2.0.bin";
 const VAD_URL: &str =
     "https://huggingface.co/ggml-org/whisper-vad/resolve/9ffd54a1e1ee413ddf265af9913beaf518d1639b/ggml-silero-v6.2.0.bin";
 const VAD_SIZE: u64 = 885_098;
 const VAD_SHA256: &str = "2aa269b785eeb53a82983a20501ddf7c1d9c48e33ab63a41391ac6c9f7fb6987";
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
+const READ_TIMEOUT: Duration = Duration::from_secs(60);
 pub const PREFERRED_MODELS: &[&str] = &["large-v3-turbo", "large-v3-turbo-q8_0", "large-v3-turbo-q5_0"];
 
 pub fn file_name(name: &str) -> String {
@@ -34,7 +38,8 @@ pub fn is_small(path: &Path) -> bool {
 }
 
 pub fn serbian_in(dir: &Path) -> Option<PathBuf> {
-    Some(dir.join(file_name(SERBIAN_MODEL))).filter(|p| p.is_file())
+    Some(dir.join(file_name(SERBIAN_MODEL)))
+        .filter(|p| fs::metadata(p).is_ok_and(|m| m.is_file() && m.len() == SERBIAN_SIZE))
 }
 
 pub fn download_serbian() -> Result<PathBuf, String> {
@@ -43,12 +48,7 @@ pub fn download_serbian() -> Result<PathBuf, String> {
         return Ok(path);
     }
     let dest = dir.join(file_name(SERBIAN_MODEL));
-    fetch(&url(SERBIAN_MODEL), &dest)?;
-    let sha = whisper_cpp::sha256_of(&dest)?;
-    if sha != SERBIAN_SHA256 {
-        let _ = fs::remove_file(&dest);
-        return Err(format!("{} has an unexpected checksum: {sha}", file_name(SERBIAN_MODEL)));
-    }
+    fetch(&url(SERBIAN_MODEL), &dest, Some(SERBIAN_SHA256))?;
     Ok(dest)
 }
 
@@ -88,12 +88,7 @@ pub fn download_vad() -> Result<PathBuf, String> {
         return Ok(path);
     }
     let dest = dir.join(VAD_FILE);
-    fetch(VAD_URL, &dest)?;
-    let sha = whisper_cpp::sha256_of(&dest)?;
-    if sha != VAD_SHA256 {
-        let _ = fs::remove_file(&dest);
-        return Err(format!("{VAD_FILE} has an unexpected checksum: {sha}"));
-    }
+    fetch(VAD_URL, &dest, Some(VAD_SHA256))?;
     Ok(dest)
 }
 
@@ -105,12 +100,15 @@ pub fn download(name: &str) -> Result<PathBuf, String> {
     if !valid_name(name) {
         return Err(format!("invalid model name: {name}"));
     }
+    if name == SERBIAN_MODEL {
+        return download_serbian();
+    }
     let dest = paths::models_dir().join(file_name(name));
     if dest.is_file() {
         println!("Model already downloaded: {}", dest.display());
         return Ok(dest);
     }
-    fetch(&url(name), &dest).map_err(|e| {
+    fetch(&url(name), &dest, None).map_err(|e| {
         if e.contains("HTTP 404") {
             format!("no such model: {name} (see https://huggingface.co/ggerganov/whisper.cpp)")
         } else {
@@ -120,12 +118,13 @@ pub fn download(name: &str) -> Result<PathBuf, String> {
     Ok(dest)
 }
 
-pub fn fetch(url: &str, dest: &Path) -> Result<(), String> {
+pub fn fetch(url: &str, dest: &Path, sha256: Option<&str>) -> Result<(), String> {
     if let Some(dir) = dest.parent() {
         fs::create_dir_all(dir).map_err(|e| format!("cannot create {}: {e}", dir.display()))?;
     }
     eprintln!("Downloading {url}");
-    let response = ureq::get(url).set("User-Agent", "titl").call().map_err(|e| match e {
+    let agent = ureq::AgentBuilder::new().timeout_connect(CONNECT_TIMEOUT).timeout_read(READ_TIMEOUT).build();
+    let response = agent.get(url).set("User-Agent", "titl").call().map_err(|e| match e {
         ureq::Error::Status(code, _) => format!("download failed: HTTP {code} for {url}"),
         other => format!("download failed: {other}"),
     })?;
@@ -138,7 +137,10 @@ pub fn fetch(url: &str, dest: &Path) -> Result<(), String> {
     let mut written: u64 = 0;
     let mut last_percent = None;
     loop {
-        let n = reader.read(&mut buf).map_err(|e| format!("download interrupted: {e}"))?;
+        let n = reader.read(&mut buf).map_err(|e| {
+            let _ = fs::remove_file(&part);
+            format!("download interrupted: {e}")
+        })?;
         if n == 0 {
             break;
         }
@@ -155,10 +157,20 @@ pub fn fetch(url: &str, dest: &Path) -> Result<(), String> {
     eprintln!();
     if let Some(total) = total {
         if written != total {
+            let _ = fs::remove_file(&part);
             return Err(format!("download incomplete: {written} of {total} bytes"));
         }
     }
     file.sync_all().map_err(|e| e.to_string())?;
+    drop(file);
+    if let Some(expected) = sha256 {
+        let actual = whisper_cpp::sha256_of(&part)?;
+        if !actual.eq_ignore_ascii_case(expected) {
+            let _ = fs::remove_file(&part);
+            let name = dest.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+            return Err(format!("{name} has an unexpected checksum: {actual}"));
+        }
+    }
     fs::rename(&part, dest).map_err(|e| format!("cannot move {} into place: {e}", dest.display()))
 }
 
@@ -193,7 +205,9 @@ mod tests {
             assert_eq!(for_language(&small, language, &dir), small);
         }
         let serbian = dir.join(file_name(SERBIAN_MODEL));
-        fs::write(&serbian, "model").unwrap();
+        fs::write(&serbian, "partial").unwrap();
+        assert_eq!(for_language(&small, "sr", &dir), small);
+        File::create(&serbian).unwrap().set_len(SERBIAN_SIZE).unwrap();
         for language in SERBIAN_MODEL_LANGUAGES {
             assert_eq!(for_language(&small, language, &dir), serbian);
             assert_eq!(for_language(&turbo, language, &dir), turbo);

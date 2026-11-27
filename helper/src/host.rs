@@ -92,6 +92,58 @@ struct Server {
 struct Started {
     vad: bool,
     serbian: bool,
+    log_offset: u64,
+}
+
+#[derive(Debug, PartialEq)]
+enum Cause {
+    Port,
+    Model,
+    Vad,
+    Unknown,
+}
+
+fn exit_cause(output: &str) -> Cause {
+    let lower = output.to_lowercase();
+    if lower.contains("couldn't bind") || lower.contains("address already in use") {
+        Cause::Port
+    } else if lower.contains("failed to initialize whisper context") || lower.contains("failed to load model") {
+        Cause::Model
+    } else if lower.contains("vad") && (lower.contains("unknown argument") || lower.contains("failed")) {
+        Cause::Vad
+    } else {
+        Cause::Unknown
+    }
+}
+
+fn fallback(cause: &Cause, started: &Started) -> Option<Fallback> {
+    match cause {
+        Cause::Port => None,
+        Cause::Model if started.serbian => Some(Fallback::Serbian),
+        Cause::Vad if started.vad => Some(Fallback::Vad),
+        Cause::Unknown if started.vad => Some(Fallback::Vad),
+        Cause::Unknown if started.serbian => Some(Fallback::Serbian),
+        _ => None,
+    }
+}
+
+#[derive(Debug, PartialEq)]
+enum Fallback {
+    Vad,
+    Serbian,
+}
+
+fn log_since(path: &Path, offset: u64) -> String {
+    let Ok(mut file) = std::fs::File::open(path) else {
+        return String::new();
+    };
+    use std::io::Seek;
+    if file.seek(io::SeekFrom::Start(offset)).is_err() {
+        return String::new();
+    }
+    let mut bytes = Vec::new();
+    let _ = file.take(1 << 20).read_to_end(&mut bytes);
+    String::from_utf8_lossy(&bytes).into_owned()
 }
 
 fn model_for(configured: &Path, language: &str, serbian_failed: bool) -> PathBuf {
@@ -146,8 +198,14 @@ impl Server {
             let started = self.spawn(port, language).map_err(Failure::Other)?;
             self.port = Some(port);
             match self.wait_ready(port) {
-                Err(Failure::Exited(_)) if started.serbian => self.serbian_failed = true,
-                Err(Failure::Exited(_)) if started.vad => self.vad_failed = true,
+                Err(Failure::Exited(message)) => {
+                    let cause = exit_cause(&log_since(&paths::log_path(), started.log_offset));
+                    match fallback(&cause, &started) {
+                        Some(Fallback::Vad) => self.vad_failed = true,
+                        Some(Fallback::Serbian) => self.serbian_failed = true,
+                        None => return Err(Failure::Exited(message)),
+                    }
+                }
                 result => return result,
             }
         }
@@ -164,6 +222,8 @@ impl Server {
             .open(&log_path)
             .map_err(|e| format!("cannot open {}: {e}", log_path.display()))?;
         let _ = writeln!(log, "\n=== starting {} on port {port}", config.server.display());
+        let _ = writeln!(log, "=== model {}", model.display());
+        let log_offset = log.metadata().map(|m| m.len()).unwrap_or(0);
         let log_err = log.try_clone().map_err(|e| e.to_string())?;
 
         let mut command = Command::new(&config.server);
@@ -188,7 +248,7 @@ impl Server {
             .spawn()
             .map_err(|e| format!("cannot start {}: {e}", config.server.display()))?;
         self.child = Some(child);
-        let started = Started { vad: !vad.is_empty(), serbian: model != config.model };
+        let started = Started { vad: !vad.is_empty(), serbian: model != config.model, log_offset };
         self.model = Some(model);
         Ok(started)
     }
@@ -271,6 +331,47 @@ mod tests {
         let small = paths::models_dir().join(model::file_name(model::CPU_MODEL));
         assert_eq!(model_for(&small, "sr", true), small);
         assert_eq!(model_for(&small, "en", false), small);
+    }
+
+    fn started(vad: bool, serbian: bool) -> Started {
+        Started { vad, serbian, log_offset: 0 }
+    }
+
+    #[test]
+    fn a_port_clash_disables_nothing() {
+        let cause = exit_cause("\ncouldn't bind to server socket: hostname=127.0.0.1 port=50000\n");
+        assert_eq!(cause, Cause::Port);
+        assert_eq!(fallback(&cause, &started(true, true)), None);
+    }
+
+    #[test]
+    fn a_model_that_fails_to_load_drops_only_the_serbian_model() {
+        let cause = exit_cause("whisper_init_from_file_with_params_no_state: failed to load model\nerror: failed to initialize whisper context\n");
+        assert_eq!(cause, Cause::Model);
+        assert_eq!(fallback(&cause, &started(true, true)), Some(Fallback::Serbian));
+        assert_eq!(fallback(&cause, &started(true, false)), None);
+    }
+
+    #[test]
+    fn rejected_speech_detection_flags_turn_only_speech_detection_off() {
+        let cause = exit_cause("error: unknown argument: --vad\n");
+        assert_eq!(cause, Cause::Vad);
+        assert_eq!(fallback(&cause, &started(true, true)), Some(Fallback::Vad));
+    }
+
+    #[test]
+    fn an_unexplained_exit_blames_speech_detection_before_the_serbian_model() {
+        assert_eq!(fallback(&Cause::Unknown, &started(true, true)), Some(Fallback::Vad));
+        assert_eq!(fallback(&Cause::Unknown, &started(false, true)), Some(Fallback::Serbian));
+        assert_eq!(fallback(&Cause::Unknown, &started(false, false)), None);
+    }
+
+    #[test]
+    fn only_the_output_of_this_start_is_read() {
+        let path = std::env::temp_dir().join(format!("titl-log-{}", std::process::id()));
+        std::fs::write(&path, "couldn't bind\nfailed to load model\n").unwrap();
+        assert_eq!(exit_cause(&log_since(&path, 14)), Cause::Model);
+        let _ = std::fs::remove_file(&path);
     }
 
     #[test]

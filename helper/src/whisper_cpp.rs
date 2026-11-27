@@ -300,7 +300,7 @@ fn install_asset(asset: &Asset) -> Result<PathBuf, String> {
     }
     let _ = fs::remove_dir_all(&dir);
     let archive = paths::whisper_dir().join(&asset.name);
-    model::fetch(&asset.url, &archive)?;
+    model::fetch(&asset.url, &archive, None)?;
     if let Some(expected) = &asset.sha256 {
         let actual = sha256_of(&archive)?;
         if &actual != expected {
