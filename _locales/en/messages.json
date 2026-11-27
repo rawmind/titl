@@ -275,6 +275,9 @@
   "engineTranslateGemma": {
     "message": "TranslateGemma 4B (local)"
   },
+  "sentenceTranslation": {
+    "message": "Experimental: translate whole sentences (lookahead mode only)"
+  },
   "translateGemmaHint": {
     "message": "Google's open translation model. Uses about 4 GB of memory: needs at least 8 GB of RAM. Fast on Apple Silicon or a GPU with 4 GB of VRAM or more; on the CPU alone it works but is slower. Translates each line on its own, without the surrounding lines."
   },

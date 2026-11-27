@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildMessages, buildTranslateGemmaMessages, chatUrl, cleanTranslation, translateWithLlm } from '../src/llm.js';
+import { buildMessages, buildTranslateGemmaMessages, chatUrl, cleanTranslation, splitTranslation, translateWithLlm } from '../src/llm.js';
 import { DEFAULTS, validateSettings } from '../src/settings.js';
 
 test('chat URL accepts a server root, a /v1 base or the full endpoint', () => {
@@ -132,4 +132,24 @@ test('TranslateGemma defaults to translategemma:4b with greedy decoding', async 
   } finally {
     globalThis.fetch = realFetch;
   }
+});
+
+test('a sentence translation is split back across its cues by length', () => {
+  const parts = ['Danas ćemo razgovarati o budžetu za sledeću godinu i o tome šta je', 'najvažnije za naše građane.'];
+  const pieces = splitTranslation('Today we will discuss the budget for next year and what is most important for our citizens.', parts);
+  assert.equal(pieces.length, 2);
+  assert.equal(pieces.join(' '), 'Today we will discuss the budget for next year and what is most important for our citizens.');
+  assert.ok(pieces[0].length > pieces[1].length);
+});
+
+test('the split prefers a clause boundary near the proportional point', () => {
+  assert.deepEqual(splitTranslation('Good evening, thank you all for coming tonight.', ['Dobro veče,', 'hvala svima što ste došli večeras.']), [
+    'Good evening,',
+    'thank you all for coming tonight.',
+  ]);
+});
+
+test('a single cue keeps the whole translation and short ones never lose words', () => {
+  assert.deepEqual(splitTranslation('Hello there.', ['Zdravo.']), ['Hello there.']);
+  assert.deepEqual(splitTranslation('Yes.', ['Da,', 'naravno.']), ['Yes.', '']);
 });

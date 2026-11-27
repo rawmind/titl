@@ -275,6 +275,9 @@
   "engineTranslateGemma": {
     "message": "TranslateGemma 4B (local)"
   },
+  "sentenceTranslation": {
+    "message": "Expérimental : traduire des phrases entières (mode anticipé uniquement)"
+  },
   "translateGemmaHint": {
     "message": "Le modèle de traduction ouvert de Google. Utilise environ 4 Go de mémoire : il faut au moins 8 Go de RAM. Rapide sur Apple Silicon ou avec un GPU de 4 Go de VRAM ou plus ; sur le processeur seul, il fonctionne mais plus lentement. Traduit chaque ligne seule, sans les lignes voisines."
   },

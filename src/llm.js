@@ -62,6 +62,45 @@ export function cleanTranslation(content) {
   return text;
 }
 
+const CLAUSE_END = /[,;:.!?…]["'»”)\]]*$/;
+
+export function splitTranslation(translation, parts) {
+  if (parts.length <= 1) return [translation];
+  const words = String(translation ?? '').split(/\s+/).filter(Boolean);
+  const weights = parts.map((p) => Math.max(1, String(p).trim().length));
+  const total = weights.reduce((a, b) => a + b, 0);
+  const ends = [];
+  let length = 0;
+  for (const w of words) ends.push((length += w.length + 1));
+  const out = [];
+  let from = 0;
+  let share = 0;
+  for (let k = 0; k < parts.length - 1; k++) {
+    share += weights[k];
+    const left = parts.length - 1 - k;
+    if (words.length - from <= left) {
+      out.push(words.slice(from, from + 1).join(' '));
+      from = Math.min(words.length, from + 1);
+      continue;
+    }
+    const goal = (share / total) * length;
+    const slack = length / parts.length / 4;
+    let best = from + 1;
+    let bestScore = Infinity;
+    for (let b = from + 1; b <= words.length - left; b++) {
+      const score = Math.abs(ends[b - 1] - goal) - (CLAUSE_END.test(words[b - 1]) ? slack : 0);
+      if (score < bestScore) {
+        bestScore = score;
+        best = b;
+      }
+    }
+    out.push(words.slice(from, best).join(' '));
+    from = best;
+  }
+  out.push(words.slice(from).join(' '));
+  return out;
+}
+
 export async function translateWithLlm(config, { text, before, after }) {
   if (!isLocalUrl(config.llmUrl)) throw new Error('Model API URL must be http://127.0.0.1 or http://localhost');
   const url = chatUrl(config.llmUrl);

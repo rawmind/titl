@@ -1,7 +1,7 @@
 import { loadSettings, validateSettings } from './settings.js';
 import { LookaheadSession } from './lookahead.js';
 import { resolveServer } from './server.js';
-import { translateWithLlm } from './llm.js';
+import { splitTranslation, translateWithLlm } from './llm.js';
 import { AUTO } from './detect.js';
 import { pushError } from './errors.js';
 
@@ -101,6 +101,7 @@ async function start(tabId) {
       language: config.language,
       translateTo: config.translateTo,
       translationEngine: config.translationEngine,
+      sentenceTranslation: config.sentenceTranslation,
       showOriginal: config.showOriginal,
       blurTranslation: config.blurTranslation,
       subtitleSize: config.subtitleSize,
@@ -164,7 +165,13 @@ async function handle(msg, sender) {
     case 'llm-translate': {
       const settings = await loadSettings();
       const language = msg.source ?? settings.language;
-      return { translation: await translateWithLlm({ ...settings, language }, msg) };
+      if (!Array.isArray(msg.parts)) return { translation: await translateWithLlm({ ...settings, language }, msg) };
+      const translation = await translateWithLlm({ ...settings, language }, { text: msg.parts.join(' '), before: msg.before });
+      return { translations: splitTranslation(translation, msg.parts) };
+    }
+
+    case 'split-translation': {
+      return { translations: splitTranslation(msg.translation, msg.parts) };
     }
 
     case 'language':

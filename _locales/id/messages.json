@@ -275,6 +275,9 @@
   "engineTranslateGemma": {
     "message": "TranslateGemma 4B (lokal)"
   },
+  "sentenceTranslation": {
+    "message": "Eksperimental: terjemahkan kalimat utuh (hanya mode lookahead)"
+  },
   "translateGemmaHint": {
     "message": "Model terjemahan terbuka dari Google. Memakai sekitar 4 GB memori: perlu RAM minimal 8 GB. Cepat di Apple Silicon atau GPU dengan VRAM 4 GB atau lebih; dengan CPU saja tetap jalan, tetapi lebih lambat. Menerjemahkan setiap baris secara terpisah, tanpa baris di sekitarnya."
   },

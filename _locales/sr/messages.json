@@ -275,6 +275,9 @@
   "engineTranslateGemma": {
     "message": "TranslateGemma 4B (lokalno)"
   },
+  "sentenceTranslation": {
+    "message": "Eksperimentalno: prevodi cele rečenice (samo u režimu unapred)"
+  },
   "translateGemmaHint": {
     "message": "Googleov otvoreni model za prevođenje. Koristi oko 4 GB memorije: potrebno je najmanje 8 GB RAM-a. Brz na Apple Silicon računarima ili grafičkoj kartici sa 4 GB VRAM-a ili više; samo na procesoru radi, ali sporije. Prevodi svaki red zasebno, bez okolnih redova."
   },

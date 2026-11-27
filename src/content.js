@@ -10,6 +10,10 @@
   const TRANSLATOR_SOURCE_FALLBACK = { sr: 'hr', bs: 'hr' };
   const LLM_CONTEXT_BEFORE = 4;
   const LLM_CONTEXT_AFTER = 2;
+  const SENTENCE_END = /[.!?…]["'»”)\]]*$/;
+  const SENTENCE_MAX_CUES = 4;
+  const SENTENCE_MAX_GAP_SEC = 1.5;
+  const SENTENCE_WAIT_SEC = 3;
   const CHROME_TRANSLATE_TIMEOUT_MS = 10000;
   const TRANSLATOR_INSTALL_TIMEOUT_MS = 60000;
   const TRANSLATOR_SETTING_UP = /Unable to create translator|service count exceeded/i;
@@ -196,7 +200,7 @@
         throw new Error(res?.error);
       }
       if (translationNotice) setTranslationNotice('');
-      return res.translation;
+      return res.translations ?? res.translation;
     },
     destroy() {},
   };
@@ -325,11 +329,70 @@
     return Boolean(cue.translation) || Boolean(cue.translationFailed);
   }
 
+  function sentenceCues(i, now) {
+    const group = [cues[i]];
+    for (let j = i; ; j++) {
+      const cue = cues[j];
+      if (SENTENCE_END.test((cue.src ?? cue.text).trim()) || group.length >= SENTENCE_MAX_CUES) return group;
+      const next = cues[j + 1];
+      if (!next) return cues[i].start - now <= SENTENCE_WAIT_SEC ? group : null;
+      if (next.start - cue.end > SENTENCE_MAX_GAP_SEC || next.translation != null || next.translationFailed) return group;
+      group.push(next);
+    }
+  }
+
+  function translateSentence(group) {
+    const job = (cueJob = {});
+    const gen = translationGen;
+    for (const cue of group) cue.translation = '';
+    const parts = group.map((c) => c.src ?? c.text);
+    const text = parts.join(' ');
+    const translated =
+      translator === llmTranslator
+        ? translate(text, () => ({ parts, before: cueContext(group[0]).before }))
+        : translate(text).then(async (translation) => {
+            const res = await chrome.runtime.sendMessage({ target: 'background', type: 'split-translation', translation, parts });
+            return res?.ok ? res.translations : [translation];
+          });
+    translated
+      .then(
+        (translations) => {
+          if (gen !== translationGen) return;
+          const pieces = Array.isArray(translations) ? translations : [translations];
+          skipTranslationWait = !pieces.some(Boolean);
+          group.forEach((cue, k) => {
+            cue.translation = pieces[k] || null;
+            cue.translationFailed = !pieces[k];
+          });
+        },
+        () => {
+          if (gen !== translationGen) return;
+          for (const cue of group) {
+            cue.translation = null;
+            cue.translationFailed = true;
+          }
+          skipTranslationWait = true;
+        },
+      )
+      .finally(() => {
+        if (cueJob !== job) return;
+        cueJob = null;
+        maybeResume();
+        translateCues();
+      });
+  }
+
   function translateCues() {
     if (!translator || cueJob) return;
     const now = getVideo()?.currentTime ?? 0;
-    const cue = cues.find((c) => c.translation == null && !c.translationFailed && c.end >= now - CUE_HOLD_SEC);
-    if (!cue) return;
+    const i = cues.findIndex((c) => c.translation == null && !c.translationFailed && c.end >= now - CUE_HOLD_SEC);
+    if (i < 0) return;
+    const cue = cues[i];
+    if (options.sentenceTranslation) {
+      const group = sentenceCues(i, now);
+      if (group) translateSentence(group);
+      return;
+    }
     const job = (cueJob = {});
     const gen = translationGen;
     cue.translation = '';

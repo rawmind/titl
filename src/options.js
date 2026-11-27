@@ -10,7 +10,7 @@ const $ = (id) => document.getElementById(id);
 const INSTALL_TIMEOUT_MS = 60_000;
 const SAMPLE_TIMEOUT_MS = 10_000;
 const TRANSLATOR_SETTING_UP = /Unable to create translator|service count exceeded/i;
-const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'translationEngine', 'llmUrl', 'llmModel', 'showOriginal', 'blurTranslation', 'subtitleSize', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
+const FIELDS = ['serverUrl', 'autoStartServer', 'mode', 'showEarlySec', 'minLeadSec', 'language', 'script', 'translateTo', 'translationEngine', 'llmUrl', 'llmModel', 'sentenceTranslation', 'showOriginal', 'blurTranslation', 'subtitleSize', 'skipAds', 'windowSec', 'stepSec', 'maxWindowSec', 'lagThresholdSec'];
 
 function fill(settings) {
   for (const f of FIELDS) {
@@ -304,6 +304,7 @@ async function collectDebugInfo() {
       ['Serbian script', settings.language === 'sr' ? settings.script : null],
       ['translate to', settings.translateTo || 'off'],
       ['translator', settings.translationEngine],
+      ['sentence translation', settings.translateTo ? settings.sentenceTranslation : null],
       ['TranslateGemma option', translateGemmaOffer(helper, $('translationEngine').value === 'translategemma').reason],
       ['start whisper-server automatically', settings.autoStartServer],
       ['server URL', settings.autoStartServer ? null : settings.serverUrl],

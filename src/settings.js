@@ -7,6 +7,7 @@ export const DEFAULTS = {
   translationEngine: 'chrome',
   llmUrl: 'http://127.0.0.1:8081/v1',
   llmModel: '',
+  sentenceTranslation: false,
   showOriginal: true,
   blurTranslation: false,
   subtitleSize: 100,
