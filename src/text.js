@@ -1,4 +1,4 @@
-import { SCRIPT } from './settings.js';
+import { SCRIPT, SERBIAN } from './settings.js';
 
 const CYRILLIC = {
   а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', ђ: 'dj', е: 'e', ж: 'z', з: 'z', и: 'i',
@@ -48,7 +48,7 @@ export function toCyrillic(text) {
 }
 
 export function translationSource(text, language) {
-  return language === 'sr' ? toLatin(text) : text;
+  return language === SERBIAN ? toLatin(text) : text;
 }
 
 export function applyScript(text, script) {

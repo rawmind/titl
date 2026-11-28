@@ -6,6 +6,7 @@
   const BLOCK_SEC = 1;
   const STATE_MS = 500;
   const STALL_MS = 2000;
+  const HAVE_FUTURE_DATA = 3;
 
   let video = null;
   let stream = null;
@@ -131,7 +132,10 @@
     sendChain = sendChain
       .then(async () => send({ ...msg, data: await encode(chunks, frames, sampleRate) }))
       .then(
-        () => capture.sent++,
+        () => {
+          capture.sent++;
+          capture.error = null;
+        },
         (err) => {
           capture.error = String(err?.message ?? err);
         },
@@ -209,7 +213,7 @@
         pendingRead ??= reader.read().catch(() => ({ done: true }));
         const result = await Promise.race([pendingRead, sleep(STALL_MS).then(() => null)]);
         if (!result) {
-          if (!video.paused && !video.seeking && !isAd()) recapture();
+          if (!video.paused && !video.seeking && video.readyState >= HAVE_FUTURE_DATA && !isAd()) recapture();
           continue;
         }
         pendingRead = null;

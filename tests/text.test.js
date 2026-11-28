@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Transcript, cleanText, findNewStart, toCyrillic, toLatin, tokenize } from '../src/text.js';
+import { Transcript, cleanText, findNewStart, toCyrillic, toLatin, tokenize, translationSource } from '../src/text.js';
 import { AUTO, SCRIPT, SERBIAN, scriptFor } from '../src/settings.js';
 
 test('Cyrillic to Latin, including digraphs and case', () => {
@@ -77,4 +77,9 @@ test('cleanText strips annotations and known hallucinations', () => {
 test('the saved Serbian script applies only when Serbian is chosen, otherwise Latin', () => {
   assert.equal(scriptFor({ language: SERBIAN, script: SCRIPT.CYRILLIC }), SCRIPT.CYRILLIC);
   assert.equal(scriptFor({ language: AUTO, script: SCRIPT.CYRILLIC }), SCRIPT.LATIN);
+});
+
+test('Serbian lines are translated from Latin script, other languages as they are', () => {
+  assert.equal(translationSource('Добар дан', SERBIAN), 'Dobar dan');
+  assert.equal(translationSource('Добар дан', 'ru'), 'Добар дан');
 });

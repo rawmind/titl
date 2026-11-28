@@ -69,4 +69,4 @@ export function validateSettings(s) {
   return null;
 }
 
-export const TRANSLATOR_SOURCE_FALLBACK = { sr: 'hr', bs: 'hr' };
+export const TRANSLATOR_SOURCE_FALLBACK = { [SERBIAN]: CROATIAN, bs: CROATIAN };

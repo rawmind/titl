@@ -94,7 +94,7 @@ $('prepareTranslation').addEventListener('click', async () => {
 async function prepareTranslation() {
   const out = $('translationResult');
   const chosen = $('language').value.trim();
-  const language = chosen === AUTO ? 'sr' : chosen;
+  const language = chosen === AUTO ? SERBIAN : chosen;
   const target = $('translateTo').value;
   if (!target) return say(out, t('chooseTarget'), false);
   if ($('translationEngine').value === ENGINE.LLM) return testLlm(out, language, target);
@@ -232,7 +232,7 @@ async function helperInfo() {
 async function translatorInfo(settings) {
   if (!('Translator' in self)) return 'not available in this browser';
   if (!settings.translateTo || settings.translationEngine !== ENGINE.CHROME) return 'not in use';
-  const language = settings.language === AUTO ? 'sr' : settings.language;
+  const language = settings.language === AUTO ? SERBIAN : settings.language;
   const results = [];
   for (const source of [language, TRANSLATOR_SOURCE_FALLBACK[language]]) {
     if (!source || source === settings.translateTo) continue;
