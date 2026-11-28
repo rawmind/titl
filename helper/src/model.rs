@@ -42,10 +42,24 @@ pub fn serbian_in(dir: &Path) -> Option<PathBuf> {
         .filter(|p| fs::metadata(p).is_ok_and(|m| m.is_file() && m.len() == SERBIAN_SIZE))
 }
 
+pub fn serbian_intact(path: &Path) -> bool {
+    whisper_cpp::sha256_of(path).is_ok_and(|sha| sha.eq_ignore_ascii_case(SERBIAN_SHA256))
+}
+
+pub fn discard_corrupt_serbian(dir: &Path) -> bool {
+    match serbian_in(dir) {
+        Some(path) if !serbian_intact(&path) => fs::remove_file(&path).is_ok(),
+        _ => false,
+    }
+}
+
 pub fn download_serbian() -> Result<PathBuf, String> {
     let dir = paths::models_dir();
     if let Some(path) = serbian_in(&dir) {
-        return Ok(path);
+        if serbian_intact(&path) {
+            return Ok(path);
+        }
+        fs::remove_file(&path).map_err(|e| format!("cannot replace {}: {e}", path.display()))?;
     }
     let dest = dir.join(file_name(SERBIAN_MODEL));
     fetch(&url(SERBIAN_MODEL), &dest, Some(SERBIAN_SHA256))?;
@@ -59,10 +73,11 @@ pub fn download_serbian_reply() -> Value {
     }
 }
 
-pub fn for_language(configured: &Path, language: &str, models_dir: &Path) -> PathBuf {
+pub fn for_language(configured: &Path, language: &str, models_dir: &Path, gpu: bool, turbo: Option<PathBuf>) -> PathBuf {
     if SERBIAN_MODEL_LANGUAGES.contains(&language) && is_small(configured) {
-        if let Some(serbian) = serbian_in(models_dir) {
-            return serbian;
+        let better = if gpu { turbo } else { serbian_in(models_dir) };
+        if let Some(model) = better {
+            return model;
         }
     }
     configured.to_path_buf()
@@ -196,25 +211,40 @@ mod tests {
     }
 
     #[test]
-    fn serbian_model_is_used_only_for_serbian_and_croatian_with_small() {
+    fn serbian_model_is_used_only_for_serbian_and_croatian_with_small_on_a_cpu() {
         let dir = std::env::temp_dir().join(format!("titl-model-{}", std::process::id()));
         fs::create_dir_all(&dir).unwrap();
         let small = dir.join(file_name(CPU_MODEL));
         let turbo = dir.join(file_name("large-v3-turbo"));
         for language in SERBIAN_MODEL_LANGUAGES {
-            assert_eq!(for_language(&small, language, &dir), small);
+            assert_eq!(for_language(&small, language, &dir, false, None), small);
         }
         let serbian = dir.join(file_name(SERBIAN_MODEL));
         fs::write(&serbian, "partial").unwrap();
-        assert_eq!(for_language(&small, "sr", &dir), small);
+        assert_eq!(for_language(&small, "sr", &dir, false, None), small);
         File::create(&serbian).unwrap().set_len(SERBIAN_SIZE).unwrap();
         for language in SERBIAN_MODEL_LANGUAGES {
-            assert_eq!(for_language(&small, language, &dir), serbian);
-            assert_eq!(for_language(&turbo, language, &dir), turbo);
+            assert_eq!(for_language(&small, language, &dir, false, None), serbian);
+            assert_eq!(for_language(&turbo, language, &dir, false, None), turbo);
         }
         for other in ["auto", "bs", "sl", "en", ""] {
-            assert_eq!(for_language(&small, other, &dir), small);
+            assert_eq!(for_language(&small, other, &dir, false, None), small);
         }
+    }
+
+    #[test]
+    fn with_a_gpu_serbian_and_croatian_use_turbo_instead_of_the_serbian_model() {
+        let dir = std::env::temp_dir().join(format!("titl-model-gpu-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let small = dir.join(file_name(CPU_MODEL));
+        let turbo = dir.join(file_name("large-v3-turbo"));
+        File::create(dir.join(file_name(SERBIAN_MODEL))).unwrap().set_len(SERBIAN_SIZE).unwrap();
+        for language in SERBIAN_MODEL_LANGUAGES {
+            assert_eq!(for_language(&small, language, &dir, true, Some(turbo.clone())), turbo);
+            assert_eq!(for_language(&small, language, &dir, true, None), small);
+        }
+        assert_eq!(for_language(&small, "en", &dir, true, Some(turbo.clone())), small);
+        let _ = fs::remove_dir_all(&dir);
     }
 
     #[test]

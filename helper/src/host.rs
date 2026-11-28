@@ -121,10 +121,22 @@ fn fallback(cause: &Cause, started: &Started) -> Option<Fallback> {
         Cause::Port => None,
         Cause::Model if started.serbian => Some(Fallback::Serbian),
         Cause::Vad if started.vad => Some(Fallback::Vad),
-        Cause::Unknown if started.vad => Some(Fallback::Vad),
-        Cause::Unknown if started.serbian => Some(Fallback::Serbian),
         _ => None,
     }
+}
+
+fn unexplained_guesses(vad: bool, serbian: bool) -> Vec<(bool, bool)> {
+    let mut guesses = Vec::new();
+    if serbian {
+        guesses.push((false, true));
+    }
+    if vad {
+        guesses.push((true, false));
+    }
+    if vad && serbian {
+        guesses.push((true, true));
+    }
+    guesses
 }
 
 #[derive(Debug, PartialEq)]
@@ -146,11 +158,17 @@ fn log_since(path: &Path, offset: u64) -> String {
     String::from_utf8_lossy(&bytes).into_owned()
 }
 
-fn model_for(configured: &Path, language: &str, serbian_failed: bool) -> PathBuf {
+pub fn on_gpu() -> bool {
+    cfg!(target_os = "macos") || diagnostics::server_run().and_then(|r| r.backend).is_some_and(|b| b.starts_with("GPU"))
+}
+
+pub fn model_for(config: &Config, language: &str, serbian_failed: bool) -> PathBuf {
     if serbian_failed {
-        return configured.to_path_buf();
+        return config.model.clone();
     }
-    model::for_language(configured, language, &paths::models_dir())
+    let gpu = on_gpu();
+    let turbo = if gpu { crate::install::find_model(&config.server) } else { None };
+    model::for_language(&config.model, language, &paths::models_dir(), gpu, turbo)
 }
 
 impl Server {
@@ -171,7 +189,7 @@ impl Server {
                 Err(f) => error(f.message()),
             };
         }
-        let wanted = Config::load().ok().map(|c| model_for(&c.model, language, self.serbian_failed));
+        let wanted = Config::load().ok().map(|c| model_for(&c, language, self.serbian_failed));
         let same_model = wanted.is_none() || self.model == wanted;
         if let Some(port) = self.port.filter(|_| same_model && self.running()) {
             return match self.wait_ready(port) {
@@ -194,26 +212,43 @@ impl Server {
 
     fn launch(&mut self, port: u16, language: &str) -> Result<(), Failure> {
         self.stop();
+        let mut known = (self.vad_failed, self.serbian_failed);
+        let mut guesses: Option<std::vec::IntoIter<(bool, bool)>> = None;
         loop {
             let started = self.spawn(port, language).map_err(Failure::Other)?;
             self.port = Some(port);
-            match self.wait_ready(port) {
-                Err(Failure::Exited(message)) => {
-                    let cause = exit_cause(&log_since(&paths::log_path(), started.log_offset));
-                    match fallback(&cause, &started) {
-                        Some(Fallback::Vad) => self.vad_failed = true,
-                        Some(Fallback::Serbian) => self.serbian_failed = true,
-                        None => return Err(Failure::Exited(message)),
-                    }
-                }
+            let message = match self.wait_ready(port) {
+                Err(Failure::Exited(message)) => message,
                 result => return result,
+            };
+            let cause = exit_cause(&log_since(&paths::log_path(), started.log_offset));
+            if cause == Cause::Model && started.serbian {
+                model::discard_corrupt_serbian(&paths::models_dir());
             }
+            match fallback(&cause, &started) {
+                Some(Fallback::Vad) => known.0 = true,
+                Some(Fallback::Serbian) => known.1 = true,
+                None if cause == Cause::Unknown => {
+                    let next = guesses.get_or_insert_with(|| unexplained_guesses(started.vad, started.serbian).into_iter()).next();
+                    let Some((vad, serbian)) = next else {
+                        (self.vad_failed, self.serbian_failed) = known;
+                        return Err(Failure::Exited(message));
+                    };
+                    (self.vad_failed, self.serbian_failed) = (known.0 || vad, known.1 || serbian);
+                    continue;
+                }
+                None => {
+                    (self.vad_failed, self.serbian_failed) = known;
+                    return Err(Failure::Exited(message));
+                }
+            }
+            (self.vad_failed, self.serbian_failed) = known;
         }
     }
 
     fn spawn(&mut self, port: u16, language: &str) -> Result<Started, String> {
         let config = Config::load()?;
-        let model = model_for(&config.model, language, self.serbian_failed);
+        let model = model_for(&config, language, self.serbian_failed);
         let vad = model::vad_args(&config.args, config.vad_on() && !self.vad_failed, &paths::models_dir());
         let log_path = paths::log_path();
         let mut log = OpenOptions::new()
@@ -326,13 +361,6 @@ pub fn run() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn a_serbian_model_that_failed_falls_back_to_the_configured_one() {
-        let small = paths::models_dir().join(model::file_name(model::CPU_MODEL));
-        assert_eq!(model_for(&small, "sr", true), small);
-        assert_eq!(model_for(&small, "en", false), small);
-    }
-
     fn started(vad: bool, serbian: bool) -> Started {
         Started { vad, serbian, log_offset: 0 }
     }
@@ -360,10 +388,12 @@ mod tests {
     }
 
     #[test]
-    fn an_unexplained_exit_blames_speech_detection_before_the_serbian_model() {
-        assert_eq!(fallback(&Cause::Unknown, &started(true, true)), Some(Fallback::Vad));
-        assert_eq!(fallback(&Cause::Unknown, &started(false, true)), Some(Fallback::Serbian));
-        assert_eq!(fallback(&Cause::Unknown, &started(false, false)), None);
+    fn an_unexplained_exit_tries_one_suspect_at_a_time_before_both() {
+        assert_eq!(fallback(&Cause::Unknown, &started(true, true)), None);
+        assert_eq!(unexplained_guesses(true, true), [(false, true), (true, false), (true, true)]);
+        assert_eq!(unexplained_guesses(true, false), [(true, false)]);
+        assert_eq!(unexplained_guesses(false, true), [(false, true)]);
+        assert!(unexplained_guesses(false, false).is_empty());
     }
 
     #[test]

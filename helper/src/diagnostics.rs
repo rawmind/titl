@@ -81,7 +81,10 @@ pub fn info_reply() -> Value {
             reply["model"] = json!(c.model.display().to_string());
             reply["args"] = json!(server_flags(&c));
             reply["server"] = json!(describe_server(&c));
-            if crate::model::is_small(&c.model) {
+            let gpu = crate::host::on_gpu();
+            reply["gpu"] = json!(gpu);
+            reply["serbian_language_model"] = json!(crate::host::model_for(&c, "sr", false).display().to_string());
+            if crate::model::is_small(&c.model) && !gpu {
                 let serbian = crate::model::serbian_in(&crate::paths::models_dir());
                 reply["serbian_model"] = json!(serbian.map(|p| p.display().to_string()));
             }
