@@ -9,6 +9,7 @@ pub struct Config {
     pub model: PathBuf,
     pub args: Vec<String>,
     pub vad: Option<bool>,
+    pub gpu: Option<bool>,
     pub extension: Option<PathBuf>,
     pub extension_ids: Vec<String>,
 }
@@ -52,6 +53,7 @@ impl Config {
                 .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
                 .unwrap_or_default(),
             vad: value.get("vad").and_then(Value::as_bool),
+            gpu: value.get("gpu").and_then(Value::as_bool),
             extension: value.get("extension").and_then(Value::as_str).map(PathBuf::from),
             extension_ids: value
                 .get("extensionIds")
@@ -72,6 +74,7 @@ impl Config {
             "model": self.model,
             "args": self.args,
             "vad": self.vad,
+            "gpu": self.gpu,
             "extension": self.extension,
             "extensionIds": self.extension_ids,
         });

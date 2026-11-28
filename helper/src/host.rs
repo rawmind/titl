@@ -81,17 +81,28 @@ impl Failure {
     }
 }
 
+type Stamp = (PathBuf, Option<SystemTime>, u64);
+type Guesses = (std::vec::IntoIter<(bool, bool)>, Stamp, Option<Stamp>);
+
+fn stamp(path: &Path) -> Stamp {
+    let meta = std::fs::metadata(path).ok();
+    (path.to_path_buf(), meta.as_ref().and_then(|m| m.modified().ok()), meta.map_or(0, |m| m.len()))
+}
+
+#[derive(Default)]
 struct Server {
     child: Option<Child>,
     port: Option<u16>,
     model: Option<PathBuf>,
-    vad_failed: bool,
-    serbian_failed: bool,
+    vad_failed: Option<Stamp>,
+    serbian_failed: Option<Stamp>,
 }
 
 struct Started {
     vad: bool,
     serbian: bool,
+    server: Stamp,
+    model: Option<Stamp>,
     log_offset: u64,
 }
 
@@ -103,14 +114,21 @@ enum Cause {
     Unknown,
 }
 
+fn vad_line(line: &str) -> bool {
+    (line.contains("unknown argument") && line.contains("--vad"))
+        || (line.starts_with("whisper_vad") && (line.contains("failed") || line.contains("error")))
+        || line.contains("failed to initialize vad")
+}
+
 fn exit_cause(output: &str) -> Cause {
     let lower = output.to_lowercase();
+    let lines = || lower.lines().map(str::trim).filter(|l| !l.starts_with("==="));
     if lower.contains("couldn't bind") || lower.contains("address already in use") {
         Cause::Port
+    } else if lines().any(vad_line) {
+        Cause::Vad
     } else if lower.contains("failed to initialize whisper context") || lower.contains("failed to load model") {
         Cause::Model
-    } else if lower.contains("vad") && (lower.contains("unknown argument") || lower.contains("failed")) {
-        Cause::Vad
     } else {
         Cause::Unknown
     }
@@ -158,17 +176,26 @@ fn log_since(path: &Path, offset: u64) -> String {
     String::from_utf8_lossy(&bytes).into_owned()
 }
 
-pub fn on_gpu() -> bool {
-    cfg!(target_os = "macos") || diagnostics::server_run().and_then(|r| r.backend).is_some_and(|b| b.starts_with("GPU"))
+fn gpu_from(macos: bool, logged: Option<bool>, installed: Option<bool>) -> bool {
+    macos || logged.or(installed).unwrap_or(false)
 }
 
-pub fn model_for(config: &Config, language: &str, serbian_failed: bool) -> PathBuf {
-    if serbian_failed {
+pub fn on_gpu(config: &Config) -> bool {
+    gpu_from(cfg!(target_os = "macos"), diagnostics::logged_gpu(), config.gpu)
+}
+
+fn still_failed(failed: Option<&Stamp>, path: &Path) -> bool {
+    failed.is_some_and(|f| *f == stamp(path))
+}
+
+pub fn model_for(config: &Config, language: &str, serbian_failed: Option<&Stamp>) -> PathBuf {
+    let gpu = on_gpu(config);
+    let turbo = if gpu { crate::install::find_model(&config.server) } else { None };
+    let choice = model::for_language(&config.model, language, &paths::models_dir(), gpu, turbo);
+    if choice != config.model && still_failed(serbian_failed, &choice) {
         return config.model.clone();
     }
-    let gpu = on_gpu();
-    let turbo = if gpu { crate::install::find_model(&config.server) } else { None };
-    model::for_language(&config.model, language, &paths::models_dir(), gpu, turbo)
+    choice
 }
 
 impl Server {
@@ -180,76 +207,99 @@ impl Server {
         if host != "127.0.0.1" && host != "localhost" {
             return error("Only 127.0.0.1/localhost is allowed");
         }
+        let deadline = Instant::now() + START_TIMEOUT;
         if let Some(port) = requested {
             if reachable(port) {
                 return ready(port);
             }
-            return match self.launch(port, language) {
+            return match self.launch(port, language, deadline) {
                 Ok(()) => ready(port),
                 Err(f) => error(f.message()),
             };
         }
-        let wanted = Config::load().ok().map(|c| model_for(&c, language, self.serbian_failed));
+        let wanted = Config::load().ok().map(|c| model_for(&c, language, self.serbian_failed.as_ref()));
         let same_model = wanted.is_none() || self.model == wanted;
         if let Some(port) = self.port.filter(|_| same_model && self.running()) {
-            return match self.wait_ready(port) {
+            return match self.wait_ready(port, deadline) {
                 Ok(()) => ready(port),
                 Err(f) => error(f.message()),
             };
         }
-        for attempt in 1..=START_ATTEMPTS {
+        let mut last = None;
+        for _ in 1..=START_ATTEMPTS {
+            if Instant::now() >= deadline {
+                break;
+            }
             let Some(port) = pick_port() else {
                 return error("no free port between 10000 and 65535");
             };
-            match self.launch(port, language) {
+            match self.launch(port, language, deadline) {
                 Ok(()) => return ready(port),
-                Err(Failure::Exited(_)) if attempt < START_ATTEMPTS => continue,
+                Err(Failure::Exited(message)) => last = Some(message),
                 Err(f) => return error(f.message()),
             }
         }
-        error("whisper-server could not start")
+        error(last.unwrap_or_else(|| "whisper-server could not start".into()))
     }
 
-    fn launch(&mut self, port: u16, language: &str) -> Result<(), Failure> {
+    fn remember(&mut self, flags: &(Option<Stamp>, Option<Stamp>)) {
+        (self.vad_failed, self.serbian_failed) = flags.clone();
+    }
+
+    fn launch(&mut self, port: u16, language: &str, deadline: Instant) -> Result<(), Failure> {
         self.stop();
-        let mut known = (self.vad_failed, self.serbian_failed);
-        let mut guesses: Option<std::vec::IntoIter<(bool, bool)>> = None;
+        let mut known = (self.vad_failed.clone(), self.serbian_failed.clone());
+        let mut guesses: Option<Guesses> = None;
         loop {
-            let started = self.spawn(port, language).map_err(Failure::Other)?;
+            let started = match self.spawn(port, language) {
+                Ok(started) => started,
+                Err(e) => {
+                    self.remember(&known);
+                    return Err(Failure::Other(e));
+                }
+            };
             self.port = Some(port);
-            let message = match self.wait_ready(port) {
+            let message = match self.wait_ready(port, deadline) {
+                Ok(()) => return Ok(()),
                 Err(Failure::Exited(message)) => message,
-                result => return result,
+                Err(other) => {
+                    self.remember(&known);
+                    return Err(other);
+                }
             };
             let cause = exit_cause(&log_since(&paths::log_path(), started.log_offset));
             if cause == Cause::Model && started.serbian {
                 model::discard_corrupt_serbian(&paths::models_dir());
             }
             match fallback(&cause, &started) {
-                Some(Fallback::Vad) => known.0 = true,
-                Some(Fallback::Serbian) => known.1 = true,
+                Some(Fallback::Vad) => known.0 = Some(started.server.clone()),
+                Some(Fallback::Serbian) => known.1 = started.model.clone(),
                 None if cause == Cause::Unknown => {
-                    let next = guesses.get_or_insert_with(|| unexplained_guesses(started.vad, started.serbian).into_iter()).next();
-                    let Some((vad, serbian)) = next else {
-                        (self.vad_failed, self.serbian_failed) = known;
+                    let (list, server, model) = guesses.get_or_insert_with(|| {
+                        (unexplained_guesses(started.vad, started.serbian).into_iter(), started.server.clone(), started.model.clone())
+                    });
+                    let Some((vad, serbian)) = list.next() else {
+                        self.remember(&known);
                         return Err(Failure::Exited(message));
                     };
-                    (self.vad_failed, self.serbian_failed) = (known.0 || vad, known.1 || serbian);
+                    self.vad_failed = if vad { Some(server.clone()) } else { known.0.clone() };
+                    self.serbian_failed = if serbian { model.clone() } else { known.1.clone() };
                     continue;
                 }
                 None => {
-                    (self.vad_failed, self.serbian_failed) = known;
+                    self.remember(&known);
                     return Err(Failure::Exited(message));
                 }
             }
-            (self.vad_failed, self.serbian_failed) = known;
+            self.remember(&known);
         }
     }
 
     fn spawn(&mut self, port: u16, language: &str) -> Result<Started, String> {
         let config = Config::load()?;
-        let model = model_for(&config, language, self.serbian_failed);
-        let vad = model::vad_args(&config.args, config.vad_on() && !self.vad_failed, &paths::models_dir());
+        let model = model_for(&config, language, self.serbian_failed.as_ref());
+        let vad_off = still_failed(self.vad_failed.as_ref(), &config.server);
+        let vad = model::vad_args(&config.args, config.vad_on() && !vad_off, &paths::models_dir());
         let log_path = paths::log_path();
         let mut log = OpenOptions::new()
             .create(true)
@@ -283,13 +333,19 @@ impl Server {
             .spawn()
             .map_err(|e| format!("cannot start {}: {e}", config.server.display()))?;
         self.child = Some(child);
-        let started = Started { vad: !vad.is_empty(), serbian: model != config.model, log_offset };
+        let swapped = model != config.model;
+        let started = Started {
+            vad: !vad.is_empty(),
+            serbian: swapped,
+            server: stamp(&config.server),
+            model: swapped.then(|| stamp(&model)),
+            log_offset,
+        };
         self.model = Some(model);
         Ok(started)
     }
 
-    fn wait_ready(&mut self, port: u16) -> Result<(), Failure> {
-        let deadline = Instant::now() + START_TIMEOUT;
+    fn wait_ready(&mut self, port: u16, deadline: Instant) -> Result<(), Failure> {
         let log = paths::log_path();
         while Instant::now() < deadline {
             if let Some(child) = self.child.as_mut() {
@@ -325,7 +381,7 @@ impl Server {
 pub fn run() {
     let mut stdin = io::stdin().lock();
     let mut stdout = io::stdout().lock();
-    let mut server = Server { child: None, port: None, model: None, vad_failed: false, serbian_failed: false };
+    let mut server = Server::default();
     update::cleanup();
     while let Ok(Some(message)) = read_message(&mut stdin) {
         let reply = match message.get("cmd").and_then(Value::as_str) {
@@ -362,7 +418,7 @@ mod tests {
     use super::*;
 
     fn started(vad: bool, serbian: bool) -> Started {
-        Started { vad, serbian, log_offset: 0 }
+        Started { vad, serbian, server: stamp(Path::new("whisper-server")), model: None, log_offset: 0 }
     }
 
     #[test]
@@ -426,7 +482,7 @@ mod tests {
 
     #[test]
     fn refuses_non_local_hosts() {
-        let mut server = Server { child: None, port: None, model: None, vad_failed: false, serbian_failed: false };
+        let mut server = Server::default();
         assert_eq!(server.start("example.com", None, "sr")["status"], "error");
     }
 
@@ -437,5 +493,44 @@ mod tests {
             assert!(port >= 10_000);
             assert!(TcpListener::bind(("127.0.0.1", port)).is_ok());
         }
+    }
+
+    #[test]
+    fn a_gpu_is_known_from_the_install_before_any_server_has_run() {
+        assert!(gpu_from(false, None, Some(true)));
+        assert!(!gpu_from(false, None, None));
+        assert!(!gpu_from(false, None, Some(false)));
+        assert!(gpu_from(false, Some(true), Some(false)));
+        assert!(!gpu_from(false, Some(false), Some(true)));
+        assert!(gpu_from(true, Some(false), None));
+    }
+
+    #[test]
+    fn a_failure_is_forgotten_once_the_file_changes() {
+        let path = std::env::temp_dir().join(format!("titl-stamp-{}", std::process::id()));
+        std::fs::write(&path, "old").unwrap();
+        let failed = stamp(&path);
+        assert!(still_failed(Some(&failed), &path));
+        std::fs::write(&path, "replaced").unwrap();
+        assert!(!still_failed(Some(&failed), &path));
+        assert!(!still_failed(None, &path));
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn speech_detection_is_blamed_only_for_its_own_errors() {
+        let path = "=== model C:\\Users\\vadim\\m.bin\nwhisper_init_from_file: loading model from 'C:\\Users\\vadim\\m.bin'\nerror: failed to load model\n";
+        assert_eq!(exit_cause(path), Cause::Model);
+        assert_eq!(exit_cause("whisper_vad_init_from_file_with_params: failed to load model\n"), Cause::Vad);
+        assert_eq!(exit_cause("error: unknown argument: --vad-model\n"), Cause::Vad);
+        assert_eq!(exit_cause("error: unknown argument: --flash\nsomething failed\n"), Cause::Unknown);
+    }
+
+    #[test]
+    fn a_start_that_is_out_of_time_fails_at_once() {
+        let mut server = Server::default();
+        let started = Instant::now();
+        assert!(matches!(server.wait_ready(1, Instant::now()), Err(Failure::Other(_))));
+        assert!(started.elapsed() < Duration::from_secs(1));
     }
 }

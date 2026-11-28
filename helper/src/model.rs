@@ -9,7 +9,9 @@ use std::time::Duration;
 pub const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
 pub const CPU_MODEL: &str = "small";
 pub const SERBIAN_MODEL: &str = "small-sr-distill-v3-q8_0";
-const SERBIAN_MODEL_LANGUAGES: &[&str] = &["sr", "hr"];
+pub const SERBIAN: &str = "sr";
+pub const CROATIAN: &str = "hr";
+const SERBIAN_MODEL_LANGUAGES: &[&str] = &[SERBIAN, CROATIAN];
 const WHISPER_CPP_MODELS: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main";
 const SERBIAN_MODELS: &str =
     "https://huggingface.co/rawmind/whisper-small-sr-distill-v3/resolve/07561e38857987fd987d8c06541b943d0c9672d4";
@@ -42,13 +44,13 @@ pub fn serbian_in(dir: &Path) -> Option<PathBuf> {
         .filter(|p| fs::metadata(p).is_ok_and(|m| m.is_file() && m.len() == SERBIAN_SIZE))
 }
 
-pub fn serbian_intact(path: &Path) -> bool {
-    whisper_cpp::sha256_of(path).is_ok_and(|sha| sha.eq_ignore_ascii_case(SERBIAN_SHA256))
+pub fn serbian_intact(path: &Path) -> Result<bool, String> {
+    whisper_cpp::sha256_of(path).map(|sha| sha.eq_ignore_ascii_case(SERBIAN_SHA256))
 }
 
 pub fn discard_corrupt_serbian(dir: &Path) -> bool {
     match serbian_in(dir) {
-        Some(path) if !serbian_intact(&path) => fs::remove_file(&path).is_ok(),
+        Some(path) if serbian_intact(&path) == Ok(false) => fs::remove_file(&path).is_ok(),
         _ => false,
     }
 }
@@ -56,7 +58,7 @@ pub fn discard_corrupt_serbian(dir: &Path) -> bool {
 pub fn download_serbian() -> Result<PathBuf, String> {
     let dir = paths::models_dir();
     if let Some(path) = serbian_in(&dir) {
-        if serbian_intact(&path) {
+        if serbian_intact(&path)? {
             return Ok(path);
         }
         fs::remove_file(&path).map_err(|e| format!("cannot replace {}: {e}", path.display()))?;
@@ -137,6 +139,15 @@ pub fn fetch(url: &str, dest: &Path, sha256: Option<&str>) -> Result<(), String>
     if let Some(dir) = dest.parent() {
         fs::create_dir_all(dir).map_err(|e| format!("cannot create {}: {e}", dir.display()))?;
     }
+    let part = dest.with_extension("part");
+    let result = fetch_into(url, &part, sha256, dest);
+    if result.is_err() {
+        let _ = fs::remove_file(&part);
+    }
+    result
+}
+
+fn fetch_into(url: &str, part: &Path, sha256: Option<&str>, dest: &Path) -> Result<(), String> {
     eprintln!("Downloading {url}");
     let agent = ureq::AgentBuilder::new().timeout_connect(CONNECT_TIMEOUT).timeout_read(READ_TIMEOUT).build();
     let response = agent.get(url).set("User-Agent", "titl").call().map_err(|e| match e {
@@ -145,17 +156,13 @@ pub fn fetch(url: &str, dest: &Path, sha256: Option<&str>) -> Result<(), String>
     })?;
     let total: Option<u64> = response.header("Content-Length").and_then(|v| v.parse().ok());
 
-    let part = dest.with_extension("part");
-    let mut file = File::create(&part).map_err(|e| format!("cannot write {}: {e}", part.display()))?;
+    let mut file = File::create(part).map_err(|e| format!("cannot write {}: {e}", part.display()))?;
     let mut reader = response.into_reader();
     let mut buf = vec![0u8; 1 << 20];
     let mut written: u64 = 0;
     let mut last_percent = None;
     loop {
-        let n = reader.read(&mut buf).map_err(|e| {
-            let _ = fs::remove_file(&part);
-            format!("download interrupted: {e}")
-        })?;
+        let n = reader.read(&mut buf).map_err(|e| format!("download interrupted: {e}"))?;
         if n == 0 {
             break;
         }
@@ -172,21 +179,19 @@ pub fn fetch(url: &str, dest: &Path, sha256: Option<&str>) -> Result<(), String>
     eprintln!();
     if let Some(total) = total {
         if written != total {
-            let _ = fs::remove_file(&part);
             return Err(format!("download incomplete: {written} of {total} bytes"));
         }
     }
     file.sync_all().map_err(|e| e.to_string())?;
     drop(file);
     if let Some(expected) = sha256 {
-        let actual = whisper_cpp::sha256_of(&part)?;
+        let actual = whisper_cpp::sha256_of(part)?;
         if !actual.eq_ignore_ascii_case(expected) {
-            let _ = fs::remove_file(&part);
             let name = dest.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
             return Err(format!("{name} has an unexpected checksum: {actual}"));
         }
     }
-    fs::rename(&part, dest).map_err(|e| format!("cannot move {} into place: {e}", dest.display()))
+    fs::rename(part, dest).map_err(|e| format!("cannot move {} into place: {e}", dest.display()))
 }
 
 #[cfg(test)]
@@ -268,5 +273,33 @@ mod tests {
         assert!(valid_name("large-v3-turbo"));
         assert!(!valid_name("../etc/passwd"));
         assert!(!valid_name(""));
+    }
+
+    #[test]
+    fn an_unreadable_serbian_model_is_not_treated_as_corrupt() {
+        let missing = std::env::temp_dir().join(format!("titl-missing-{}.bin", std::process::id()));
+        assert!(serbian_intact(&missing).is_err());
+    }
+
+    #[test]
+    fn a_failed_download_leaves_no_partial_file() {
+        use std::io::Write as _;
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut request = [0u8; 1024];
+            let _ = stream.read(&mut request);
+            stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\nConnection: close\r\n\r\nhello").unwrap();
+        });
+        let dir = std::env::temp_dir().join(format!("titl-fetch-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let dest = dir.join("model.bin");
+        let result = fetch(&format!("http://127.0.0.1:{port}/model.bin"), &dest, Some("00"));
+        server.join().unwrap();
+        assert!(result.unwrap_err().contains("unexpected checksum"));
+        assert!(!dest.exists());
+        assert!(!dest.with_extension("part").exists());
+        let _ = fs::remove_dir_all(&dir);
     }
 }

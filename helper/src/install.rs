@@ -199,9 +199,12 @@ fn resolve_server(opts: &Options) -> Result<(PathBuf, Option<Build>), String> {
     }
 }
 
+pub fn has_gpu(macos: bool, build: Option<Build>, nvidia: bool) -> bool {
+    macos || build == Some(Build::Cuda) || (build.is_none() && nvidia)
+}
+
 pub fn default_model(macos: bool, build: Option<Build>, nvidia: bool) -> &'static str {
-    let gpu = macos || build == Some(Build::Cuda) || (build.is_none() && nvidia);
-    if gpu { model::DEFAULT_MODEL } else { model::CPU_MODEL }
+    if has_gpu(macos, build, nvidia) { model::DEFAULT_MODEL } else { model::CPU_MODEL }
 }
 
 pub fn install(mut opts: Options) -> Result<(), String> {
@@ -222,14 +225,16 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         crate::migrate::Outcome::NothingToDo => {}
     }
     let (server, build) = resolve_server(&opts)?;
+    let macos = cfg!(target_os = "macos");
+    let nvidia = build.is_none() && !macos && whisper_cpp::nvidia_present();
+    let gpu = has_gpu(macos, build, nvidia);
     let model = match (opts.model, opts.download_model) {
         (Some(path), _) => stable(&path)?,
         (None, Some(name)) => model::download(&name)?,
         (None, None) => match find_model(&server) {
             Some(path) => path,
             None => {
-                let nvidia = build.is_none() && !cfg!(target_os = "macos") && whisper_cpp::nvidia_present();
-                let name = default_model(cfg!(target_os = "macos"), build, nvidia);
+                let name = default_model(macos, build, nvidia);
                 println!("No Whisper model found; downloading {name}.");
                 model::download(name)?
             }
@@ -268,6 +273,7 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         model: model.clone(),
         args,
         vad,
+        gpu: Some(gpu),
         extension: extension_dir.clone(),
         extension_ids: extra_ids,
     }
@@ -461,6 +467,15 @@ mod tests {
         assert_eq!(opts.vad, None);
         assert_eq!(parse(&["--no-vad".to_string()]).unwrap().vad, Some(false));
         assert_eq!(parse(&["--vad".to_string()]).unwrap().vad, Some(true));
+    }
+
+    #[test]
+    fn the_gpu_flag_saved_at_install_matches_the_model_choice() {
+        assert!(has_gpu(true, None, false));
+        assert!(has_gpu(false, Some(Build::Cuda), false));
+        assert!(!has_gpu(false, Some(Build::Cpu), true));
+        assert!(has_gpu(false, None, true));
+        assert!(!has_gpu(false, None, false));
     }
 
     #[test]
