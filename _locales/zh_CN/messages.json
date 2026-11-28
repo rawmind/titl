@@ -15,7 +15,7 @@
     "message": "服务器地址"
   },
   "serverUrlHint": {
-    "message": "仅用于您自己启动的 whisper-server，或未安装辅助程序时。启用自动启动后，Titl 会在空闲端口上运行自己的服务器。必须是 127.0.0.1 或 localhost。"
+    "message": "只要下面的选项开着，就可以忽略这一项。只适用于自己运行 whisper-server 的人：它在本机上的地址（127.0.0.1 或 localhost）。"
   },
   "autoStart": {
     "message": "如果 whisper-server 未运行则自动启动（需要 <code>titl install</code>）"
@@ -36,7 +36,7 @@
     "message": "实时 — 转写正在播放的内容（字幕会晚几秒）"
   },
   "modeHint": {
-    "message": "直播始终使用实时模式。"
+    "message": "预读会在隐藏的静音标签页里比你稍早一点收听视频，所以每行字幕都能准时出现。实时收听的是你正在听到的内容，所以字幕会晚几秒。直播总是使用实时模式。"
   },
   "skipAds": {
     "message": "当 YouTube 提供时，在隐藏标签页中点击“跳过广告”"
@@ -289,5 +289,53 @@
   },
   "copied": {
     "message": "已复制"
+  },
+  "autoStartHint": {
+    "message": "推荐。开启字幕时，Titl 会在本机自动启动语音识别。只有自己运行 whisper-server 时才需要关闭。"
+  },
+  "skipAdsHint": {
+    "message": "仅限预读模式。跳过隐藏标签页里的广告，让字幕更快准备好。不影响你看到的广告。"
+  },
+  "showEarlyHint": {
+    "message": "仅限预读模式。在说出每行之前稍早一点显示，让你来得及阅读。如果觉得字幕晚了，就调大。"
+  },
+  "minLeadHint": {
+    "message": "仅限预读模式。字幕落后时，视频会短暂暂停，等字幕跟上。0 表示从不暂停。"
+  },
+  "translateToHint": {
+    "message": "同时用另一种语言显示字幕。关闭时只显示原话。"
+  },
+  "llmUrlHint": {
+    "message": "本机上语言模型程序的地址。"
+  },
+  "llmModelHint": {
+    "message": "该程序要使用的模型。如果只有一个模型，可以留空。"
+  },
+  "showOriginalHint": {
+    "message": "学语言时很有用：既能看到说了什么，也能看到意思。"
+  },
+  "blurTranslationHint": {
+    "message": "用于练习：先试着听懂原文，再看翻译。"
+  },
+  "spokenLanguageHint": {
+    "message": "视频里说的语言。自动检测适用于大多数视频；选定语言能从第一行起就得到更好的结果。"
+  },
+  "serbianScriptHint": {
+    "message": "塞尔维亚语可以用拉丁字母或西里尔字母书写。选择你看得懂的那种。"
+  },
+  "subtitleSizeHint": {
+    "message": "100% 是正常大小。屏幕很大或文字看不清时可以调大。"
+  },
+  "liveWindowHint": {
+    "message": "仅限实时模式。Titl 一次收听多少秒的声音。越长越准确，但会稍晚一些。"
+  },
+  "liveStepHint": {
+    "message": "仅限实时模式。字幕更新的频率。越小更新越频繁，但电脑负担越重。"
+  },
+  "maxWindowHint": {
+    "message": "一次处理的最长一段声音。如果实时字幕落后得更多，Titl 会向前跳以赶上。"
+  },
+  "lagThresholdHint": {
+    "message": "仅限实时模式。字幕比你听到的声音落后这么多秒时，Titl 会提醒你。"
   }
 }

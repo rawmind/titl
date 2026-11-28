@@ -15,7 +15,7 @@
     "message": "URL server"
   },
   "serverUrlHint": {
-    "message": "Hanya dipakai untuk whisper-server yang Anda jalankan sendiri, atau jika helper belum terpasang. Dengan mulai otomatis, Titl menjalankan servernya sendiri di port yang bebas. Harus 127.0.0.1 atau localhost."
+    "message": "Abaikan saja selama opsi di bawah aktif. Hanya untuk yang menjalankan whisper-server sendiri: alamatnya di komputer ini (127.0.0.1 atau localhost)."
   },
   "autoStart": {
     "message": "Jalankan whisper-server otomatis jika belum berjalan (perlu <code>titl install</code>)"
@@ -36,7 +36,7 @@
     "message": "Langsung — mentranskripsi yang sedang diputar (subtitel terlambat beberapa detik)"
   },
   "modeHint": {
-    "message": "Siaran langsung selalu memakai mode langsung."
+    "message": "Lookahead mendengarkan video sedikit lebih dulu di tab tersembunyi yang dibisukan, jadi setiap baris muncul tepat waktu. Langsung mendengarkan yang Anda dengar, jadi baris datang beberapa detik terlambat. Siaran langsung selalu memakai mode langsung."
   },
   "skipAds": {
     "message": "Klik \"Lewati iklan\" di tab tersembunyi saat YouTube menawarkannya"
@@ -289,5 +289,53 @@
   },
   "copied": {
     "message": "Tersalin"
+  },
+  "autoStartHint": {
+    "message": "Disarankan. Titl menjalankan pengenal suara di komputer ini saat Anda menyalakan subtitel. Matikan hanya jika Anda menjalankan whisper-server sendiri."
+  },
+  "skipAdsHint": {
+    "message": "Hanya mode lookahead. Melewati iklan di tab tersembunyi agar subtitel siap lebih cepat. Iklan yang Anda tonton tidak terpengaruh."
+  },
+  "showEarlyHint": {
+    "message": "Hanya mode lookahead. Menampilkan setiap baris sesaat sebelum diucapkan, agar sempat dibaca. Naikkan jika baris terasa terlambat."
+  },
+  "minLeadHint": {
+    "message": "Hanya mode lookahead. Jika subtitel tertinggal, video berhenti sebentar sampai subtitel menyusul. 0 berarti tidak pernah berhenti."
+  },
+  "translateToHint": {
+    "message": "Menampilkan subtitel juga dalam bahasa lain. Mati hanya menampilkan yang diucapkan."
+  },
+  "llmUrlHint": {
+    "message": "Alamat program model bahasa di komputer ini."
+  },
+  "llmModelHint": {
+    "message": "Model mana yang harus dipakai program itu. Kosongkan jika hanya ada satu."
+  },
+  "showOriginalHint": {
+    "message": "Berguna saat belajar bahasa: Anda melihat apa yang diucapkan dan artinya."
+  },
+  "blurTranslationHint": {
+    "message": "Untuk latihan: coba pahami aslinya dulu, lalu intip terjemahannya."
+  },
+  "spokenLanguageHint": {
+    "message": "Bahasa yang diucapkan dalam video. Deteksi otomatis cocok untuk kebanyakan video; memilih bahasanya memberi hasil lebih baik sejak baris pertama."
+  },
+  "serbianScriptHint": {
+    "message": "Bahasa Serbia ditulis dengan huruf Latin atau Sirilik. Pilih yang Anda baca."
+  },
+  "subtitleSizeHint": {
+    "message": "100% adalah ukuran normal. Perbesar untuk layar besar atau jika teks sulit dibaca."
+  },
+  "liveWindowHint": {
+    "message": "Hanya mode langsung. Berapa detik suara yang didengar Titl sekaligus. Lebih lama lebih akurat, tetapi sedikit lebih lambat."
+  },
+  "liveStepHint": {
+    "message": "Hanya mode langsung. Seberapa sering subtitel diperbarui. Lebih kecil lebih sering, tetapi lebih membebani komputer."
+  },
+  "maxWindowHint": {
+    "message": "Potongan suara terpanjang yang diproses sekaligus. Jika subtitel langsung tertinggal lebih jauh, Titl melompat maju untuk menyusul."
+  },
+  "lagThresholdHint": {
+    "message": "Hanya mode langsung. Titl memberi tahu saat subtitel tertinggal sekian detik dari yang Anda dengar."
   }
 }

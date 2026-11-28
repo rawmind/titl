@@ -15,7 +15,7 @@
     "message": "Adresa servera"
   },
   "serverUrlHint": {
-    "message": "Koristi se samo za whisper-server koji sami pokrećete ili kada pomoćni program nije instaliran. Uz automatsko pokretanje, Titl pokreće svoj server na slobodnom portu. Mora biti 127.0.0.1 ili localhost."
+    "message": "Ovo možete da zanemarite dok je opcija ispod uključena. Potrebno je samo onima koji sami pokreću whisper-server: njegova adresa na ovom računaru (127.0.0.1 ili localhost)."
   },
   "autoStart": {
     "message": "Automatski pokreni whisper-server ako nije pokrenut (potrebno je <code>titl install</code>)"
@@ -36,7 +36,7 @@
     "message": "Uživo — transkribuje ono što se pušta (titlovi kasne nekoliko sekundi)"
   },
   "modeHint": {
-    "message": "Prenosi uživo uvek koriste režim uživo."
+    "message": "Unapred sluša video malo ispred vas u skrivenoj, utišanoj kartici, pa se svaki red pojavi tačno na vreme. Uživo sluša isto što i vi, pa redovi kasne nekoliko sekundi. Prenosi uživo uvek koriste režim uživo."
   },
   "skipAds": {
     "message": "Klikni „Preskoči oglas“ u skrivenoj kartici kada YouTube to ponudi"
@@ -289,5 +289,53 @@
   },
   "copied": {
     "message": "Kopirano"
+  },
+  "autoStartHint": {
+    "message": "Preporučeno. Titl sam pokreće prepoznavanje govora na ovom računaru kada uključite titlove. Isključite samo ako whisper-server pokrećete sami."
+  },
+  "skipAdsHint": {
+    "message": "Samo u režimu unapred. Preskače reklame u skrivenoj kartici da bi titlovi bili spremni ranije. Reklame koje vi gledate se ne diraju."
+  },
+  "showEarlyHint": {
+    "message": "Samo u režimu unapred. Prikazuje red malo pre nego što bude izgovoren, da stignete da ga pročitate. Povećajte ako redovi kasne."
+  },
+  "minLeadHint": {
+    "message": "Samo u režimu unapred. Ako titlovi zaostanu, video se nakratko pauzira dok ih ne sustignu. 0 znači da se nikad ne pauzira."
+  },
+  "translateToHint": {
+    "message": "Prikazuje titlove i na drugom jeziku. Isključeno prikazuje samo ono što se govori."
+  },
+  "llmUrlHint": {
+    "message": "Adresa programa sa jezičkim modelom na ovom računaru."
+  },
+  "llmModelHint": {
+    "message": "Koji model taj program treba da koristi. Ostavite prazno ako ima samo jedan."
+  },
+  "showOriginalHint": {
+    "message": "Korisno kad učite jezik: vidite i šta je rečeno i šta to znači."
+  },
+  "blurTranslationHint": {
+    "message": "Za vežbu: prvo pokušajte da razumete original, pa onda virnite u prevod."
+  },
+  "spokenLanguageHint": {
+    "message": "Jezik kojim se govori u videu. Automatsko prepoznavanje radi za većinu videa; ako izaberete jezik, rezultat je bolji od prvog reda."
+  },
+  "serbianScriptHint": {
+    "message": "Srpski se piše latinicom ili ćirilicom. Izaberite pismo koje čitate."
+  },
+  "subtitleSizeHint": {
+    "message": "100% je uobičajena veličina. Povećajte za veliki ekran ili ako se tekst teško čita."
+  },
+  "liveWindowHint": {
+    "message": "Samo u režimu uživo. Koliko sekundi zvuka Titl sluša odjednom. Duže je tačnije, ali malo kasnije."
+  },
+  "liveStepHint": {
+    "message": "Samo u režimu uživo. Koliko često se titlovi osvežavaju. Manje znači češće, ali više opterećuje računar."
+  },
+  "maxWindowHint": {
+    "message": "Najduži deo zvuka koji se obrađuje odjednom. Ako titlovi uživo zaostanu više od toga, Titl preskače napred da ih sustigne."
+  },
+  "lagThresholdHint": {
+    "message": "Samo u režimu uživo. Titl vas upozorava kada titlovi kasne toliko sekundi za zvukom."
   }
 }

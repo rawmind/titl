@@ -77,6 +77,11 @@ label {
   font-size: 14px;
 }
 
+.field-hint {
+  display: block;
+  font-weight: 400;
+}
+
 .check {
   display: flex;
   align-items: flex-start;
