@@ -302,29 +302,11 @@
   "minLeadHint": {
     "message": "Lookahead mode only. If subtitles fall behind, the video pauses briefly until they catch up. 0 means never pause."
   },
-  "translateToHint": {
-    "message": "Shows the subtitles in another language too. Off shows only what is said."
-  },
   "llmUrlHint": {
     "message": "Where the language model program on this computer can be reached."
   },
   "llmModelHint": {
     "message": "Which model that program should use. Leave it empty if it runs only one."
-  },
-  "showOriginalHint": {
-    "message": "Helpful when learning a language: you see what was said and what it means."
-  },
-  "blurTranslationHint": {
-    "message": "For practice: try to understand the original first, then peek at the translation."
-  },
-  "spokenLanguageHint": {
-    "message": "The language people speak in the video. Detect automatically works for most videos; choosing the language gives better results from the first line."
-  },
-  "serbianScriptHint": {
-    "message": "Serbian is written in Latin or Cyrillic letters. Pick the one you read."
-  },
-  "subtitleSizeHint": {
-    "message": "100% is the normal size. Make it bigger for a large screen or if the text is hard to read."
   },
   "liveWindowHint": {
     "message": "Live mode only. How many seconds of sound Titl listens to at a time. Longer is more accurate but a little later."

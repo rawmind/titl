@@ -302,29 +302,11 @@
   "minLeadHint": {
     "message": "Mode anticipé uniquement. Si les sous-titres prennent du retard, la vidéo se met brièvement en pause le temps qu'ils rattrapent. 0 : jamais de pause."
   },
-  "translateToHint": {
-    "message": "Affiche aussi les sous-titres dans une autre langue. Désactivé affiche seulement ce qui est dit."
-  },
   "llmUrlHint": {
     "message": "L'adresse du programme de modèle de langage sur cet ordinateur."
   },
   "llmModelHint": {
     "message": "Le modèle que ce programme doit utiliser. Laissez vide s'il n'en a qu'un."
-  },
-  "showOriginalHint": {
-    "message": "Pratique pour apprendre une langue : vous voyez ce qui a été dit et ce que cela veut dire."
-  },
-  "blurTranslationHint": {
-    "message": "Pour s'entraîner : essayez d'abord de comprendre l'original, puis jetez un œil à la traduction."
-  },
-  "spokenLanguageHint": {
-    "message": "La langue parlée dans la vidéo. La détection automatique convient à la plupart des vidéos ; choisir la langue donne de meilleurs résultats dès la première ligne."
-  },
-  "serbianScriptHint": {
-    "message": "Le serbe s'écrit en lettres latines ou cyrilliques. Choisissez celles que vous lisez."
-  },
-  "subtitleSizeHint": {
-    "message": "100 % est la taille normale. Agrandissez pour un grand écran ou si le texte est difficile à lire."
   },
   "liveWindowHint": {
     "message": "Mode en direct uniquement. Combien de secondes de son Titl écoute à la fois. Plus long est plus précis, mais un peu plus tardif."

@@ -302,29 +302,11 @@
   "minLeadHint": {
     "message": "Hanya mode lookahead. Jika subtitel tertinggal, video berhenti sebentar sampai subtitel menyusul. 0 berarti tidak pernah berhenti."
   },
-  "translateToHint": {
-    "message": "Menampilkan subtitel juga dalam bahasa lain. Mati hanya menampilkan yang diucapkan."
-  },
   "llmUrlHint": {
     "message": "Alamat program model bahasa di komputer ini."
   },
   "llmModelHint": {
     "message": "Model mana yang harus dipakai program itu. Kosongkan jika hanya ada satu."
-  },
-  "showOriginalHint": {
-    "message": "Berguna saat belajar bahasa: Anda melihat apa yang diucapkan dan artinya."
-  },
-  "blurTranslationHint": {
-    "message": "Untuk latihan: coba pahami aslinya dulu, lalu intip terjemahannya."
-  },
-  "spokenLanguageHint": {
-    "message": "Bahasa yang diucapkan dalam video. Deteksi otomatis cocok untuk kebanyakan video; memilih bahasanya memberi hasil lebih baik sejak baris pertama."
-  },
-  "serbianScriptHint": {
-    "message": "Bahasa Serbia ditulis dengan huruf Latin atau Sirilik. Pilih yang Anda baca."
-  },
-  "subtitleSizeHint": {
-    "message": "100% adalah ukuran normal. Perbesar untuk layar besar atau jika teks sulit dibaca."
   },
   "liveWindowHint": {
     "message": "Hanya mode langsung. Berapa detik suara yang didengar Titl sekaligus. Lebih lama lebih akurat, tetapi sedikit lebih lambat."

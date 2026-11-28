@@ -302,29 +302,11 @@
   "minLeadHint": {
     "message": "Só no modo antecipado. Se as legendas atrasarem, o vídeo pausa por um momento até elas alcançarem. 0 significa nunca pausar."
   },
-  "translateToHint": {
-    "message": "Mostra as legendas também em outro idioma. Desligado mostra só o que é dito."
-  },
   "llmUrlHint": {
     "message": "Onde o programa do modelo de linguagem pode ser acessado neste computador."
   },
   "llmModelHint": {
     "message": "Qual modelo esse programa deve usar. Deixe em branco se ele tiver só um."
-  },
-  "showOriginalHint": {
-    "message": "Útil para aprender um idioma: você vê o que foi dito e o que significa."
-  },
-  "blurTranslationHint": {
-    "message": "Para praticar: tente entender o original primeiro e depois espie a tradução."
-  },
-  "spokenLanguageHint": {
-    "message": "O idioma falado no vídeo. A detecção automática funciona na maioria dos vídeos; escolher o idioma dá resultados melhores desde a primeira linha."
-  },
-  "serbianScriptHint": {
-    "message": "O sérvio é escrito com letras latinas ou cirílicas. Escolha as que você lê."
-  },
-  "subtitleSizeHint": {
-    "message": "100% é o tamanho normal. Aumente para uma tela grande ou se o texto estiver difícil de ler."
   },
   "liveWindowHint": {
     "message": "Só no modo ao vivo. Quantos segundos de som o Titl ouve de cada vez. Mais é mais preciso, mas um pouco mais tarde."

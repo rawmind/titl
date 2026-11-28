@@ -302,29 +302,11 @@
   "minLeadHint": {
     "message": "仅限预读模式。字幕落后时，视频会短暂暂停，等字幕跟上。0 表示从不暂停。"
   },
-  "translateToHint": {
-    "message": "同时用另一种语言显示字幕。关闭时只显示原话。"
-  },
   "llmUrlHint": {
     "message": "本机上语言模型程序的地址。"
   },
   "llmModelHint": {
     "message": "该程序要使用的模型。如果只有一个模型，可以留空。"
-  },
-  "showOriginalHint": {
-    "message": "学语言时很有用：既能看到说了什么，也能看到意思。"
-  },
-  "blurTranslationHint": {
-    "message": "用于练习：先试着听懂原文，再看翻译。"
-  },
-  "spokenLanguageHint": {
-    "message": "视频里说的语言。自动检测适用于大多数视频；选定语言能从第一行起就得到更好的结果。"
-  },
-  "serbianScriptHint": {
-    "message": "塞尔维亚语可以用拉丁字母或西里尔字母书写。选择你看得懂的那种。"
-  },
-  "subtitleSizeHint": {
-    "message": "100% 是正常大小。屏幕很大或文字看不清时可以调大。"
   },
   "liveWindowHint": {
     "message": "仅限实时模式。Titl 一次收听多少秒的声音。越长越准确，但会稍晚一些。"
