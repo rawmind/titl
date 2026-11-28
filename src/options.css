@@ -172,3 +172,85 @@ fieldset .secondary + span {
 .page-footer .heart {
   color: var(--accent);
 }
+
+.info {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: rgba(154, 160, 170, 0.18);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: 1px;
+  cursor: help;
+  outline: none;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.info:hover,
+.info:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 0 4px rgba(245, 197, 24, 0.18);
+}
+
+.tip {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 12px);
+  left: -14px;
+  width: 280px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface-2);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  pointer-events: none;
+}
+
+.tip::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 16px;
+  width: 10px;
+  height: 10px;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  background: var(--surface-2);
+  transform: rotate(45deg);
+}
+
+.tip.flip {
+  left: auto;
+  right: -14px;
+}
+
+.tip.flip::before {
+  left: auto;
+  right: 16px;
+}
+
+.info:hover .tip,
+.info:focus .tip {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}

@@ -15,7 +15,7 @@
     "message": "URL do servidor"
   },
   "serverUrlHint": {
-    "message": "Usada apenas para um whisper-server que você mesmo inicia, ou quando o assistente não está instalado. Com o início automático, o Titl roda seu próprio servidor em uma porta livre. Deve ser 127.0.0.1 ou localhost."
+    "message": "Pode ignorar enquanto a opção abaixo estiver ligada. Só serve para quem executa o próprio whisper-server: o endereço dele neste computador (127.0.0.1 ou localhost)."
   },
   "autoStart": {
     "message": "Iniciar o whisper-server automaticamente se não estiver rodando (requer <code>titl install</code>)"
@@ -36,7 +36,7 @@
     "message": "Ao vivo — transcreve o que está tocando (legendas alguns segundos atrasadas)"
   },
   "modeHint": {
-    "message": "Transmissões ao vivo sempre usam o modo ao vivo."
+    "message": "Antecipado ouve o vídeo um pouco à sua frente numa aba oculta e sem som, então cada linha aparece na hora certa. Ao vivo ouve o mesmo que você, então as linhas chegam alguns segundos atrasadas. Transmissões ao vivo sempre usam o modo ao vivo."
   },
   "skipAds": {
     "message": "Clicar em \"Pular anúncio\" na aba oculta quando o YouTube oferecer"
@@ -289,5 +289,35 @@
   },
   "copied": {
     "message": "Copiado"
+  },
+  "autoStartHint": {
+    "message": "Recomendado. O Titl inicia o reconhecimento de fala neste computador quando você liga as legendas. Desligue só se você mesmo executa o whisper-server."
+  },
+  "skipAdsHint": {
+    "message": "Só no modo antecipado. Pula anúncios na aba oculta para que as legendas fiquem prontas mais cedo. Os anúncios que você assiste não são afetados."
+  },
+  "showEarlyHint": {
+    "message": "Só no modo antecipado. Mostra cada linha um instante antes de ser falada, para dar tempo de ler. Aumente se as linhas parecerem atrasadas."
+  },
+  "minLeadHint": {
+    "message": "Só no modo antecipado. Se as legendas atrasarem, o vídeo pausa por um momento até elas alcançarem. 0 significa nunca pausar."
+  },
+  "llmUrlHint": {
+    "message": "Onde o programa do modelo de linguagem pode ser acessado neste computador."
+  },
+  "llmModelHint": {
+    "message": "Qual modelo esse programa deve usar. Deixe em branco se ele tiver só um."
+  },
+  "liveWindowHint": {
+    "message": "Só no modo ao vivo. Quantos segundos de som o Titl ouve de cada vez. Mais é mais preciso, mas um pouco mais tarde."
+  },
+  "liveStepHint": {
+    "message": "Só no modo ao vivo. Com que frequência as legendas são atualizadas. Menor atualiza mais vezes, mas exige mais do computador."
+  },
+  "maxWindowHint": {
+    "message": "O maior trecho de som processado de uma vez. Se as legendas ao vivo atrasarem mais que isso, o Titl pula adiante para alcançar."
+  },
+  "lagThresholdHint": {
+    "message": "Só no modo ao vivo. O Titl avisa quando as legendas estão esse número de segundos atrás do que você ouve."
   }
 }
