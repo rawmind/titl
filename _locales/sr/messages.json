@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "Instalirano. Titlovi su ponovo pokrenuti s njim."
   },
+  "serbianModelRestartFailed": {
+    "message": "Instalirano, ali ponovno pokretanje titlova nije uspelo: $1"
+  },
   "serbianModelFailed": {
     "message": "Preuzimanje nije uspelo: $1. Titl i dalje koristi Whisper small."
   }

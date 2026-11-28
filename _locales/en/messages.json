@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "Installed. Subtitles restarted with it."
   },
+  "serbianModelRestartFailed": {
+    "message": "Installed, but restarting subtitles failed: $1"
+  },
   "serbianModelFailed": {
     "message": "Download failed: $1. Titl keeps using Whisper small."
   }

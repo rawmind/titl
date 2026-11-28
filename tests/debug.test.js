@@ -108,3 +108,13 @@ test('the model shown is the one the helper picks for the spoken language', () =
   assert.equal(modelFor({ problem: 'not installed' }, 'sr'), null);
   assert.equal(modelName(undefined), null);
 });
+
+test('with a GPU the Serbian model is never offered and Serbian shows the model the helper picks', () => {
+  const gpu = { version: '0.1.22', gpu: true, model: '/m/ggml-small.bin', serbian_language_model: '/m/ggml-large-v3-turbo.bin' };
+  assert.equal(serbianOffer(gpu, 'sr').show, false);
+  assert.equal(serbianOffer(gpu, 'sr').reason, 'hidden: this machine has a GPU');
+  assert.equal(modelFor(gpu, 'sr'), 'large-v3-turbo');
+  assert.equal(modelFor(gpu, 'en'), 'small');
+  const cpu = { version: '0.1.22', gpu: false, model: '/m/ggml-small.bin', serbian_model: null, serbian_language_model: '/m/ggml-small.bin' };
+  assert.equal(serbianOffer(cpu, 'sr').show, true);
+});

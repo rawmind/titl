@@ -1,4 +1,6 @@
 export const AUTO = 'auto';
+export const SERBIAN = 'sr';
+export const CROATIAN = 'hr';
 export const ENGINE = Object.freeze({ CHROME: 'chrome', LLM: 'llm' });
 export const MODE = Object.freeze({ LOOKAHEAD: 'lookahead', LIVE: 'live' });
 export const SCRIPT = Object.freeze({ LATIN: 'latin', CYRILLIC: 'cyrillic', ORIGINAL: 'original' });
@@ -28,6 +30,10 @@ export const DEFAULTS = {
   silenceRms: 0.004,
   requestTimeoutSec: 30,
 };
+
+export function scriptFor(config) {
+  return config.language === SERBIAN ? config.script : DEFAULTS.script;
+}
 
 export async function loadSettings() {
   const { settings } = await chrome.storage.local.get('settings');

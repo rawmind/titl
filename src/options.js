@@ -1,5 +1,5 @@
 import { describeErrors } from './errors.js';
-import { AUTO, DEFAULTS, ENGINE, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
+import { AUTO, DEFAULTS, ENGINE, SERBIAN, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
 import { languageOptions, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
 import { translateWithLlm } from './llm.js';
@@ -20,7 +20,7 @@ function fill(settings) {
 }
 
 function syncScriptRow() {
-  $('scriptRow').hidden = $('language').value !== 'sr';
+  $('scriptRow').hidden = $('language').value !== SERBIAN;
 }
 
 function syncEngineRows() {
@@ -54,6 +54,7 @@ $('form').addEventListener('submit', async (e) => {
   await chrome.storage.local.set({ settings });
   say($('message'), t('saved'), true);
   const res = await chrome.runtime.sendMessage({ target: 'background', type: 'restart' }).catch(() => null);
+  slowDebugInfo = null;
   if (res?.restarted) say($('message'), t('savedApplied'), true);
   else if (res && !res.ok) say($('message'), t('savedRestartFailed', res.error), false);
 });
@@ -199,8 +200,11 @@ async function downloadSerbianModel() {
     button.hidden = true;
     syncSerbianOffer();
     await chrome.storage.local.set({ settings: { ...(await loadSettings()), language } });
-    const restart = await chrome.runtime.sendMessage({ target: 'background', type: 'restart' }).catch(() => null);
-    say(out, t(restart?.restarted ? 'serbianModelRestarted' : 'serbianModelReady'), true);
+    slowDebugInfo = null;
+    const restart = await chrome.runtime.sendMessage({ target: 'background', type: 'restart' }).catch((err) => ({ ok: false, error: err.message }));
+    if (restart?.restarted) say(out, t('serbianModelRestarted'), true);
+    else if (restart && !restart.ok) say(out, t('serbianModelRestartFailed', restart.error), false);
+    else say(out, t('serbianModelReady'), true);
   } catch (err) {
     say(out, t('serbianModelFailed', err.message), false);
   } finally {
@@ -264,13 +268,17 @@ async function serverAnswers(serverUrl) {
   return (await isServerUp(serverUrl)) ? 'yes' : 'no';
 }
 
+const SLOW_DEBUG_MS = 10_000;
 let slowDebugInfo = null;
+let slowDebugAt = 0;
 
 async function collectDebugInfo() {
   const settings = await loadSettings();
   const manifest = chrome.runtime.getManifest();
   const platform = await chrome.runtime.getPlatformInfo();
   const { state, errors } = await chrome.storage.session.get(['state', 'errors']);
+  if (Date.now() - slowDebugAt > SLOW_DEBUG_MS) slowDebugInfo = null;
+  if (!slowDebugInfo) slowDebugAt = Date.now();
   slowDebugInfo ??= Promise.all([
     helperInfo(),
     translatorInfo(settings),
@@ -285,7 +293,7 @@ async function collectDebugInfo() {
     ['Settings', [
       ['mode', settings.mode],
       ['spoken language', settings.language],
-      ['Serbian script', settings.language === 'sr' ? settings.script : null],
+      ['Serbian script', settings.language === SERBIAN ? settings.script : null],
       ['translate to', settings.translateTo || 'off'],
       ['translator', settings.translationEngine],
       ['start whisper-server automatically', settings.autoStartServer],

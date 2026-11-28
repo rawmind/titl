@@ -3,6 +3,7 @@ import { Coverage } from './coverage.js';
 import { Pace, SAMPLE_RATE, transcribe } from './whisper.js';
 import { Transcript, applyScript, cleanText, splitCue, translationSource } from './text.js';
 import { LanguageLock } from './detect.js';
+import { SERBIAN, scriptFor } from './settings.js';
 
 const TAIL_SEC = 1;
 
@@ -106,7 +107,7 @@ export class LookaheadTranscriber {
 
     const cues = [];
     for (const seg of accepted.map(toVideo)) {
-      const scripted = language === 'sr' ? applyScript(seg.text, this.config.script) : seg.text;
+      const scripted = language === SERBIAN ? applyScript(seg.text, scriptFor(this.config)) : seg.text;
       const text = this.transcript.append(cleanText(scripted));
       if (!text) continue;
       for (const cue of splitCue({ ...seg, text })) {

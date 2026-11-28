@@ -1,4 +1,4 @@
-import { MODE } from './settings.js';
+import { CROATIAN, MODE, SERBIAN } from './settings.js';
 
 export function formatDebugInfo(sections) {
   return sections
@@ -79,7 +79,7 @@ export function describeLookahead(state, info, now = Date.now()) {
   ];
 }
 
-const SERBIAN_MODEL_LANGUAGES = ['sr', 'hr'];
+const SERBIAN_MODEL_LANGUAGES = [SERBIAN, CROATIAN];
 
 function fileName(path) {
   return path?.split(/[\\/]/).at(-1);
@@ -91,12 +91,13 @@ export function modelName(path) {
 
 export function modelFor(helper, language) {
   if (!helper?.model) return null;
-  const serbian = SERBIAN_MODEL_LANGUAGES.includes(language) && helper.serbian_model;
-  return modelName(serbian || helper.model);
+  if (!SERBIAN_MODEL_LANGUAGES.includes(language)) return modelName(helper.model);
+  return modelName(helper.serbian_language_model ?? (helper.serbian_model || helper.model));
 }
 
 export function serbianOffer(helper, language) {
   if (!helper || helper.problem) return { show: false, model: null, reason: `hidden: helper ${helper?.problem ?? 'did not answer'}` };
+  if (helper.gpu) return { show: false, model: `not used: whisper-server runs on a GPU, Serbian uses ${modelName(helper.serbian_language_model) ?? 'the configured model'}`, reason: 'hidden: this machine has a GPU' };
   if (!('serbian_model' in helper)) {
     const model = helper.version ? `not used with ${fileName(helper.model) ?? 'this model'} (only with small)` : null;
     return { show: false, model, reason: helper.version ? 'hidden: the helper does not run small' : 'hidden: helper is older than this feature' };

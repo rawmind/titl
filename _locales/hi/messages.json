@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "इंस्टॉल हो गया। सबटाइटल इसके साथ फिर से शुरू हुए।"
   },
+  "serbianModelRestartFailed": {
+    "message": "इंस्टॉल हो गया, लेकिन सबटाइटल फिर से शुरू नहीं हो सके: $1"
+  },
   "serbianModelFailed": {
     "message": "डाउनलोड विफल: $1. Titl, Whisper small का उपयोग जारी रखेगा।"
   }

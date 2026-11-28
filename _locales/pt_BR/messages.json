@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "Instalado. As legendas foram reiniciadas com ele."
   },
+  "serbianModelRestartFailed": {
+    "message": "Instalado, mas não foi possível reiniciar as legendas: $1"
+  },
   "serbianModelFailed": {
     "message": "Falha no download: $1. O Titl continua usando o Whisper small."
   }

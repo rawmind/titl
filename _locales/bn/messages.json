@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "ইনস্টল হয়েছে। সাবটাইটেল এটি দিয়ে আবার শুরু হয়েছে।"
   },
+  "serbianModelRestartFailed": {
+    "message": "ইনস্টল হয়েছে, কিন্তু সাবটাইটেল আবার চালু করা যায়নি: $1"
+  },
   "serbianModelFailed": {
     "message": "ডাউনলোড ব্যর্থ: $1. Titl, Whisper small ব্যবহার করতে থাকবে।"
   }

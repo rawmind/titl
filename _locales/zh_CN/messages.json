@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "已安装。字幕已使用它重新启动。"
   },
+  "serbianModelRestartFailed": {
+    "message": "已安装，但重新启动字幕失败：$1"
+  },
   "serbianModelFailed": {
     "message": "下载失败：$1。Titl 将继续使用 Whisper small。"
   }

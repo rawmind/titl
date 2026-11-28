@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "Installé. Les sous-titres ont redémarré avec ce modèle."
   },
+  "serbianModelRestartFailed": {
+    "message": "Installé, mais le redémarrage des sous-titres a échoué : $1"
+  },
   "serbianModelFailed": {
     "message": "Échec du téléchargement : $1. Titl continue d’utiliser Whisper small."
   }

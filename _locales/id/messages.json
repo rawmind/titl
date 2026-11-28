@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "Terpasang. Subtitel dimulai ulang dengannya."
   },
+  "serbianModelRestartFailed": {
+    "message": "Terpasang, tetapi gagal memulai ulang subtitel: $1"
+  },
   "serbianModelFailed": {
     "message": "Gagal mengunduh: $1. Titl tetap memakai Whisper small."
   }

@@ -308,6 +308,9 @@
   "serbianModelRestarted": {
     "message": "Встановлено. Субтитри перезапущено з нею."
   },
+  "serbianModelRestartFailed": {
+    "message": "Встановлено, але перезапустити субтитри не вдалося: $1"
+  },
   "serbianModelFailed": {
     "message": "Не вдалося завантажити: $1. Titl і далі використовує Whisper small."
   }

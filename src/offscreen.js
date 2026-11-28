@@ -1,7 +1,7 @@
 import { RingBuffer, rms } from './audio.js';
 import { Pace, SAMPLE_RATE, transcribe } from './whisper.js';
 import { Transcript, applyScript, cleanText, translationSource } from './text.js';
-import { isLocalUrl } from './settings.js';
+import { SERBIAN, isLocalUrl, scriptFor } from './settings.js';
 import { LanguageLock } from './detect.js';
 
 const TICK_MS = 250;
@@ -111,7 +111,7 @@ function tick() {
       if (lock.observe(result)) send({ type: 'language', language: lock.current });
       const raw = result.text ?? '';
       const language = lock.current;
-      const scripted = language === 'sr' ? applyScript(raw, config.script) : raw;
+      const scripted = language === SERBIAN ? applyScript(raw, scriptFor(config)) : raw;
       const text = s.transcript.append(cleanText(scripted));
       if (text) send({ type: 'caption', text, src: translationSource(text, language) });
       const lag = (ring.total - end) / SAMPLE_RATE;
