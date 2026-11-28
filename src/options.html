@@ -17,28 +17,26 @@
 
     <fieldset>
       <legend data-i18n="sectionServer">whisper.cpp server</legend>
-      <label><span data-i18n="serverUrl">Inference URL</span>
+      <label><span data-i18n="serverUrl">Inference URL</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="serverUrlHint">You can ignore this while the option below is on. It is only for people who run their own whisper-server: its address on this computer (127.0.0.1 or localhost).</small></span>
         <input id="serverUrl" type="url" required placeholder="http://127.0.0.1:8080/inference">
       </label>
-      <p class="hint" data-i18n="serverUrlHint">Only used for a whisper-server you start yourself, or when the helper isn't installed. With auto-start, Titl runs its own server on a free port. Must be on 127.0.0.1 or localhost.</p>
-      <label class="check"><input id="autoStartServer" type="checkbox"> <span data-i18n-html="autoStart">Start whisper-server automatically if it is not running (needs <code>titl install</code>)</span></label>
+      <label class="check"><input id="autoStartServer" type="checkbox"> <span><span data-i18n-html="autoStart">Start whisper-server automatically if it is not running (needs <code>titl install</code>)</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="autoStartHint">Recommended. Titl starts the speech recognizer on this computer when you turn subtitles on. Turn it off only if you run whisper-server yourself.</small></span></span></label>
       <button type="button" id="test" class="secondary" data-i18n="testConnection">Test connection</button>
       <span id="testResult"></span>
     </fieldset>
 
     <fieldset>
       <legend data-i18n="sectionTiming">Timing</legend>
-      <label><span data-i18n="mode">Mode</span>
+      <label><span data-i18n="mode">Mode</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="modeHint">Lookahead listens a little ahead of you in a hidden, muted tab, so each line appears right on time. Live listens to what you hear, so lines come a few seconds late. Live streams always use live mode.</small></span>
         <select id="mode">
           <option value="lookahead" data-i18n="modeLookahead">Lookahead — subtitles on time (opens a hidden muted tab)</option>
           <option value="live" data-i18n="modeLive">Live — transcribe what is playing (subtitles a few seconds late)</option>
         </select>
       </label>
-      <p class="hint" data-i18n="modeHint">Live streams always use live mode.</p>
-      <label class="check"><input id="skipAds" type="checkbox"> <span data-i18n="skipAds">Click "Skip ad" in the hidden lookahead tab when YouTube offers it</span></label>
+      <label class="check"><input id="skipAds" type="checkbox"> <span><span data-i18n="skipAds">Click "Skip ad" in the hidden lookahead tab when YouTube offers it</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="skipAdsHint">Lookahead mode only. Skips ads in the hidden tab so subtitles are ready sooner. Ads you watch are not touched.</small></span></span></label>
       <div class="row">
-        <label><span data-i18n="showEarly">Show early by (s)</span> <input id="showEarlySec" type="number" min="0" max="3" step="0.1" required></label>
-        <label><span data-i18n="minLead">Pause until ready (s ahead, 0 = off)</span> <input id="minLeadSec" type="number" min="0" max="30" step="1" required></label>
+        <label><span data-i18n="showEarly">Show early by (s)</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="showEarlyHint">Lookahead mode only. Shows each line a moment before it is spoken, so you have time to read it. Raise it if lines feel late.</small></span> <input id="showEarlySec" type="number" min="0" max="3" step="0.1" required></label>
+        <label><span data-i18n="minLead">Pause until ready (s ahead, 0 = off)</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="minLeadHint">Lookahead mode only. If subtitles fall behind, the video pauses briefly until they catch up. 0 means never pause.</small></span> <input id="minLeadSec" type="number" min="0" max="30" step="1" required></label>
       </div>
     </fieldset>
 
@@ -56,10 +54,10 @@
         </select>
       </label>
       <div id="llmRows">
-        <label><span data-i18n="llmUrl">Model API URL</span>
+        <label><span data-i18n="llmUrl">Model API URL</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="llmUrlHint">Where the language model program on this computer can be reached.</small></span>
           <input id="llmUrl" type="url" placeholder="http://127.0.0.1:8081/v1">
         </label>
-        <label><span data-i18n="llmModel">Model name</span>
+        <label><span data-i18n="llmModel">Model name</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="llmModelHint">Which model that program should use. Leave it empty if it runs only one.</small></span>
           <input id="llmModel" type="text" placeholder="gemma3:4b">
         </label>
         <p class="hint" id="llmHint" data-i18n-html="llmHint"></p>
@@ -93,11 +91,11 @@
         <input id="subtitleSize" type="number" min="50" max="300" step="5" required>
       </label>
       <div class="row">
-        <label><span data-i18n="liveWindow">Live window (s)</span> <input id="windowSec" type="number" min="2" max="30" step="0.5" required></label>
-        <label><span data-i18n="liveStep">Live step (s)</span> <input id="stepSec" type="number" min="1" max="29" step="0.5" required></label>
-        <label><span data-i18n="maxWindow">Max window (s)</span> <input id="maxWindowSec" type="number" min="2" max="60" step="1" required></label>
+        <label><span data-i18n="liveWindow">Live window (s)</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="liveWindowHint">Live mode only. How many seconds of sound Titl listens to at a time. Longer is more accurate but a little later.</small></span> <input id="windowSec" type="number" min="2" max="30" step="0.5" required></label>
+        <label><span data-i18n="liveStep">Live step (s)</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="liveStepHint">Live mode only. How often the subtitles update. Smaller updates more often but works the computer harder.</small></span> <input id="stepSec" type="number" min="1" max="29" step="0.5" required></label>
+        <label><span data-i18n="maxWindow">Max window (s)</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="maxWindowHint">The longest stretch of sound handled at once. If live subtitles fall further behind, Titl skips ahead to catch up.</small></span> <input id="maxWindowSec" type="number" min="2" max="60" step="1" required></label>
       </div>
-      <label><span data-i18n="lagThreshold">Lag warning threshold (s)</span>
+      <label><span data-i18n="lagThreshold">Lag warning threshold (s)</span><span class="info" tabindex="0"><span aria-hidden="true">i</span><small class="tip" role="tooltip" data-i18n="lagThresholdHint">Live mode only. Titl tells you when the subtitles are this many seconds behind what you hear.</small></span>
         <input id="lagThresholdSec" type="number" min="1" max="120" step="1" required>
       </label>
     </fieldset>

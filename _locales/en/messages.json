@@ -15,7 +15,7 @@
     "message": "Inference URL"
   },
   "serverUrlHint": {
-    "message": "Only used for a whisper-server you start yourself, or when the helper isn't installed. With auto-start, Titl runs its own server on a free port. Must be on 127.0.0.1 or localhost."
+    "message": "You can ignore this while the option below is on. It is only for people who run their own whisper-server: its address on this computer (127.0.0.1 or localhost)."
   },
   "autoStart": {
     "message": "Start whisper-server automatically if it is not running (needs <code>titl install</code>)"
@@ -36,7 +36,7 @@
     "message": "Live — transcribe what is playing (subtitles a few seconds late)"
   },
   "modeHint": {
-    "message": "Live streams always use live mode."
+    "message": "Lookahead listens a little ahead of you in a hidden, muted tab, so each line appears right on time. Live listens to what you hear, so lines come a few seconds late. Live streams always use live mode."
   },
   "skipAds": {
     "message": "Click \"Skip ad\" in the hidden lookahead tab when YouTube offers it"
@@ -313,5 +313,35 @@
   },
   "serbianModelFailed": {
     "message": "Download failed: $1. Titl keeps using Whisper small."
+  },
+  "autoStartHint": {
+    "message": "Recommended. Titl starts the speech recognizer on this computer when you turn subtitles on. Turn it off only if you run whisper-server yourself."
+  },
+  "skipAdsHint": {
+    "message": "Lookahead mode only. Skips ads in the hidden tab so subtitles are ready sooner. Ads you watch are not touched."
+  },
+  "showEarlyHint": {
+    "message": "Lookahead mode only. Shows each line a moment before it is spoken, so you have time to read it. Raise it if lines feel late."
+  },
+  "minLeadHint": {
+    "message": "Lookahead mode only. If subtitles fall behind, the video pauses briefly until they catch up. 0 means never pause."
+  },
+  "llmUrlHint": {
+    "message": "Where the language model program on this computer can be reached."
+  },
+  "llmModelHint": {
+    "message": "Which model that program should use. Leave it empty if it runs only one."
+  },
+  "liveWindowHint": {
+    "message": "Live mode only. How many seconds of sound Titl listens to at a time. Longer is more accurate but a little later."
+  },
+  "liveStepHint": {
+    "message": "Live mode only. How often the subtitles update. Smaller updates more often but works the computer harder."
+  },
+  "maxWindowHint": {
+    "message": "The longest stretch of sound handled at once. If live subtitles fall further behind, Titl skips ahead to catch up."
+  },
+  "lagThresholdHint": {
+    "message": "Live mode only. Titl tells you when the subtitles are this many seconds behind what you hear."
   }
 }

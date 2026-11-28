@@ -15,7 +15,7 @@
     "message": "URL del servidor"
   },
   "serverUrlHint": {
-    "message": "Solo se usa para un whisper-server que inicies tú, o si el asistente no está instalado. Con el inicio automático, Titl ejecuta su propio servidor en un puerto libre. Debe ser 127.0.0.1 o localhost."
+    "message": "Puedes ignorarlo mientras la opción de abajo esté activada. Solo sirve si ejecutas tu propio whisper-server: su dirección en este equipo (127.0.0.1 o localhost)."
   },
   "autoStart": {
     "message": "Iniciar whisper-server automáticamente si no se está ejecutando (requiere <code>titl install</code>)"
@@ -36,7 +36,7 @@
     "message": "En vivo — transcribe lo que se reproduce (subtítulos unos segundos tarde)"
   },
   "modeHint": {
-    "message": "Las emisiones en directo siempre usan el modo en vivo."
+    "message": "Anticipado escucha el vídeo un poco por delante de ti en una pestaña oculta y silenciada, así cada línea aparece a tiempo. En directo escucha lo mismo que tú, así que las líneas llegan unos segundos tarde. Las emisiones en directo siempre usan el modo en directo."
   },
   "skipAds": {
     "message": "Pulsar «Omitir anuncio» en la pestaña oculta cuando YouTube lo ofrezca"
@@ -313,5 +313,35 @@
   },
   "serbianModelFailed": {
     "message": "Error al descargar: $1. Titl seguirá usando Whisper small."
+  },
+  "autoStartHint": {
+    "message": "Recomendado. Titl inicia el reconocimiento de voz en este equipo cuando activas los subtítulos. Desactívalo solo si ejecutas whisper-server por tu cuenta."
+  },
+  "skipAdsHint": {
+    "message": "Solo en modo anticipado. Salta los anuncios en la pestaña oculta para que los subtítulos estén listos antes. No afecta a los anuncios que ves tú."
+  },
+  "showEarlyHint": {
+    "message": "Solo en modo anticipado. Muestra cada línea un momento antes de que se diga, para que te dé tiempo a leerla. Súbelo si las líneas llegan tarde."
+  },
+  "minLeadHint": {
+    "message": "Solo en modo anticipado. Si los subtítulos se retrasan, el vídeo se pausa un momento hasta que se ponen al día. 0 significa no pausar nunca."
+  },
+  "llmUrlHint": {
+    "message": "Dónde se encuentra el programa del modelo de lenguaje en este equipo."
+  },
+  "llmModelHint": {
+    "message": "Qué modelo debe usar ese programa. Déjalo vacío si solo tiene uno."
+  },
+  "liveWindowHint": {
+    "message": "Solo en modo en directo. Cuántos segundos de sonido escucha Titl de una vez. Más es más preciso, pero un poco más tarde."
+  },
+  "liveStepHint": {
+    "message": "Solo en modo en directo. Cada cuánto se actualizan los subtítulos. Menos actualiza más a menudo, pero exige más al equipo."
+  },
+  "maxWindowHint": {
+    "message": "El tramo de sonido más largo que se procesa de una vez. Si los subtítulos en directo se retrasan más, Titl salta hacia delante para ponerse al día."
+  },
+  "lagThresholdHint": {
+    "message": "Solo en modo en directo. Titl te avisa cuando los subtítulos van tantos segundos por detrás de lo que oyes."
   }
 }

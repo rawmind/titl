@@ -356,3 +356,15 @@ $('copyDebug').addEventListener('click', async () => {
   await navigator.clipboard.writeText($('debugText').textContent);
   say($('copyResult'), t('copied'), true);
 });
+
+function placeTip(info) {
+  const tip = info.querySelector('.tip');
+  tip.classList.remove('flip');
+  if (tip.getBoundingClientRect().right > document.documentElement.clientWidth - 8) tip.classList.add('flip');
+}
+
+for (const info of document.querySelectorAll('.info')) {
+  info.addEventListener('click', (e) => e.preventDefault());
+  info.addEventListener('mouseenter', () => placeTip(info));
+  info.addEventListener('focus', () => placeTip(info));
+}

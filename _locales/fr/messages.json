@@ -15,7 +15,7 @@
     "message": "URL du serveur"
   },
   "serverUrlHint": {
-    "message": "Utilisée uniquement pour un whisper-server que vous lancez vous-même, ou si l’assistant n’est pas installé. Avec le démarrage automatique, Titl lance son propre serveur sur un port libre. Doit être 127.0.0.1 ou localhost."
+    "message": "Vous pouvez l'ignorer tant que l'option ci-dessous est activée. Utile seulement si vous lancez vous-même whisper-server : son adresse sur cet ordinateur (127.0.0.1 ou localhost)."
   },
   "autoStart": {
     "message": "Démarrer whisper-server automatiquement s’il ne tourne pas (nécessite <code>titl install</code>)"
@@ -36,7 +36,7 @@
     "message": "Direct — transcrit ce qui est lu (sous-titres avec quelques secondes de retard)"
   },
   "modeHint": {
-    "message": "Les diffusions en direct utilisent toujours le mode direct."
+    "message": "Anticipé écoute la vidéo un peu en avance dans un onglet caché et muet, donc chaque ligne arrive pile à l'heure. En direct écoute ce que vous entendez, donc les lignes arrivent quelques secondes en retard. Les diffusions en direct utilisent toujours le mode en direct."
   },
   "skipAds": {
     "message": "Cliquer sur « Ignorer l’annonce » dans l’onglet caché quand YouTube le propose"
@@ -313,5 +313,35 @@
   },
   "serbianModelFailed": {
     "message": "Échec du téléchargement : $1. Titl continue d’utiliser Whisper small."
+  },
+  "autoStartHint": {
+    "message": "Recommandé. Titl lance la reconnaissance vocale sur cet ordinateur quand vous activez les sous-titres. Désactivez-le seulement si vous lancez whisper-server vous-même."
+  },
+  "skipAdsHint": {
+    "message": "Mode anticipé uniquement. Passe les publicités dans l'onglet caché pour que les sous-titres soient prêts plus tôt. Les publicités que vous regardez ne sont pas touchées."
+  },
+  "showEarlyHint": {
+    "message": "Mode anticipé uniquement. Affiche chaque ligne un instant avant qu'elle soit prononcée, pour vous laisser le temps de la lire. Augmentez si les lignes semblent en retard."
+  },
+  "minLeadHint": {
+    "message": "Mode anticipé uniquement. Si les sous-titres prennent du retard, la vidéo se met brièvement en pause le temps qu'ils rattrapent. 0 : jamais de pause."
+  },
+  "llmUrlHint": {
+    "message": "L'adresse du programme de modèle de langage sur cet ordinateur."
+  },
+  "llmModelHint": {
+    "message": "Le modèle que ce programme doit utiliser. Laissez vide s'il n'en a qu'un."
+  },
+  "liveWindowHint": {
+    "message": "Mode en direct uniquement. Combien de secondes de son Titl écoute à la fois. Plus long est plus précis, mais un peu plus tardif."
+  },
+  "liveStepHint": {
+    "message": "Mode en direct uniquement. La fréquence de mise à jour des sous-titres. Plus petit met à jour plus souvent, mais sollicite davantage l'ordinateur."
+  },
+  "maxWindowHint": {
+    "message": "Le plus long morceau de son traité d'un coup. Si les sous-titres en direct prennent plus de retard, Titl saute en avant pour rattraper."
+  },
+  "lagThresholdHint": {
+    "message": "Mode en direct uniquement. Titl vous prévient quand les sous-titres ont ce nombre de secondes de retard sur le son."
   }
 }
