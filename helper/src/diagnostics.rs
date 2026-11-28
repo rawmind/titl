@@ -8,34 +8,53 @@ use std::fs;
 const START_MARKER: &str = "=== starting ";
 const BACKEND_PREFIX: &str = "whisper_backend_init_gpu: ";
 const THREADS_PREFIX: &str = "system_info: n_threads = ";
+const MODEL_PREFIX: &str = "=== model ";
 
 #[derive(Debug, PartialEq)]
 pub struct ServerRun {
     pub backend: Option<String>,
     pub threads: Option<String>,
+    pub model: Option<String>,
 }
 
-pub fn last_run(log: &str) -> Option<ServerRun> {
-    let start = log.rfind(START_MARKER)?;
-    let run = &log[start..];
-    let backend = run.lines().filter_map(|l| l.strip_prefix(BACKEND_PREFIX)).find_map(|rest| {
+fn backend_of(run: &str) -> Option<String> {
+    run.lines().filter_map(|l| l.strip_prefix(BACKEND_PREFIX)).find_map(|rest| {
         let rest = rest.trim();
         if rest == "no GPU found" {
             Some("CPU".to_string())
         } else {
             rest.strip_prefix("using ").and_then(|r| r.strip_suffix(" backend")).map(|name| format!("GPU ({name})"))
         }
-    });
+    })
+}
+
+pub fn last_backend(log: &str) -> Option<String> {
+    log.rsplit(START_MARKER).find_map(backend_of)
+}
+
+fn read_log() -> Option<String> {
+    fs::read(paths::log_path()).ok().map(|bytes| String::from_utf8_lossy(&bytes).into_owned())
+}
+
+pub fn logged_gpu() -> Option<bool> {
+    last_backend(&read_log()?).map(|b| b.starts_with("GPU"))
+}
+
+pub fn last_run(log: &str) -> Option<ServerRun> {
+    let start = log.rfind(START_MARKER)?;
+    let run = &log[start..];
+    let backend = backend_of(run);
     let threads = run
         .lines()
         .find_map(|l| l.strip_prefix(THREADS_PREFIX))
         .and_then(|rest| rest.split('|').next())
         .map(|t| t.trim().to_string());
-    Some(ServerRun { backend, threads })
+    let model = run.lines().find_map(|l| l.strip_prefix(MODEL_PREFIX)).map(|m| m.trim().to_string());
+    Some(ServerRun { backend, threads, model })
 }
 
 pub fn server_run() -> Option<ServerRun> {
-    last_run(&fs::read_to_string(paths::log_path()).ok()?)
+    last_run(&read_log()?)
 }
 
 fn speech_detection(config: &Config) -> &'static str {
@@ -71,12 +90,20 @@ pub fn info_reply() -> Value {
         "log": paths::log_path().display().to_string(),
         "backend": run.as_ref().and_then(|r| r.backend.clone()),
         "threads": run.as_ref().and_then(|r| r.threads.clone()),
+        "server_model": run.as_ref().and_then(|r| r.model.clone()),
     });
     match Config::load() {
         Ok(c) => {
             reply["model"] = json!(c.model.display().to_string());
             reply["args"] = json!(server_flags(&c));
             reply["server"] = json!(describe_server(&c));
+            let gpu = crate::host::on_gpu(&c);
+            reply["gpu"] = json!(gpu);
+            reply["serbian_language_model"] = json!(crate::host::model_for(&c, model::SERBIAN, None).display().to_string());
+            if crate::model::is_small(&c.model) && !gpu {
+                let serbian = crate::model::serbian_in(&crate::paths::models_dir());
+                reply["serbian_model"] = json!(serbian.map(|p| p.display().to_string()));
+            }
         }
         Err(e) => reply["config_error"] = json!(e),
     }
@@ -97,7 +124,7 @@ mod tests {
         let log = format!("=== starting old on port 1\nwhisper_backend_init_gpu: using CUDA0 backend\n{CPU_RUN}");
         assert_eq!(
             last_run(&log),
-            Some(ServerRun { backend: Some("CPU".into()), threads: Some("4 / 4".into()) })
+            Some(ServerRun { backend: Some("CPU".into()), threads: Some("4 / 4".into()), model: None })
         );
     }
 
@@ -106,13 +133,29 @@ mod tests {
         let log = "=== starting /opt/whisper-server on port 2\nwhisper_backend_init_gpu: using MTL0 backend\nsystem_info: n_threads = 4 / 14 | x\n";
         assert_eq!(
             last_run(log),
-            Some(ServerRun { backend: Some("GPU (MTL0)".into()), threads: Some("4 / 14".into()) })
+            Some(ServerRun { backend: Some("GPU (MTL0)".into()), threads: Some("4 / 14".into()), model: None })
         );
     }
 
     #[test]
+    fn the_model_of_the_last_run_is_reported() {
+        let log = "=== starting x on port 3\n=== model /m/ggml-small.bin\n\n=== starting x on port 4\n=== model /m/ggml-small-sr-distill-v3-q8_0.bin\n";
+        assert_eq!(last_run(log).unwrap().model.as_deref(), Some("/m/ggml-small-sr-distill-v3-q8_0.bin"));
+    }
+
+    #[test]
     fn a_run_without_details_yet_reports_nothing() {
-        assert_eq!(last_run("=== starting x on port 3\n"), Some(ServerRun { backend: None, threads: None }));
+        assert_eq!(last_run("=== starting x on port 3\n"), Some(ServerRun { backend: None, threads: None, model: None }));
         assert_eq!(last_run(""), None);
+    }
+
+    #[test]
+    fn the_backend_comes_from_the_latest_run_that_got_far_enough() {
+        let log = "=== starting a on port 1\nwhisper_backend_init_gpu: using CUDA0 backend\n=== starting a on port 2\nerror: unknown argument: --vad\n";
+        assert_eq!(last_backend(log).as_deref(), Some("GPU (CUDA0)"));
+        assert_eq!(last_run(log).unwrap().backend, None);
+        let cpu = format!("{log}=== starting a on port 3\nwhisper_backend_init_gpu: no GPU found\n");
+        assert_eq!(last_backend(&cpu).as_deref(), Some("CPU"));
+        assert_eq!(last_backend("=== starting a on port 4\n"), None);
     }
 }

@@ -1,4 +1,4 @@
-import { loadSettings } from './settings.js';
+import { AUTO, MODE, loadSettings } from './settings.js';
 import { languageName, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
 import { HELPER_MISSING, HOST_NAME } from './server.js';
@@ -22,7 +22,7 @@ function render(state) {
   else if (!running) text = t('idle');
   else if (state.error) text = t('errorPrefix', state.error);
   else if (state.delayed) text = t('runningDelayed', Math.round(state.lag));
-  else text = t(state.mode === 'lookahead' ? 'runningLookahead' : 'runningLive');
+  else text = t(state.mode === MODE.LOOKAHEAD ? 'runningLookahead' : 'runningLive');
   $('statusText').textContent = text;
 }
 
@@ -74,7 +74,7 @@ $('options').addEventListener('click', (e) => {
 const settings = await loadSettings();
 
 function spokenLanguage(state) {
-  if (settings.language !== 'auto') return languageName(settings.language, uiLocale());
+  if (settings.language !== AUTO) return languageName(settings.language, uiLocale());
   const detected = state?.status === 'running' ? state.language : null;
   return detected ? t('detectedLanguage', languageName(detected, uiLocale())) : t('detectLanguage');
 }

@@ -2,6 +2,14 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+### Added
+- **Better Serbian and Croatian on CPU:** when the spoken language is Serbian or Croatian and the helper runs `small`, Options offers to download [`small-sr-distill-v3`](https://huggingface.co/rawmind/whisper-small-sr-distill-v3) (q8_0, 264 MB), a `small` distilled from `large-v3-turbo` for these two languages and trained on noisy audio. `titl install --serbian` downloads it too. It makes about half as many word errors as `small`: 17.4% against 38.1% in Serbian and 18.4% against 35.5% in Croatian on read speech. In Titl's own lookahead pipeline it scores 18.1% against 32.9% in Serbian and 24.5% against 38.4% in Croatian. It's used only with the language set, not with auto-detect or a larger model, and `small` stays the fallback if it's missing or doesn't start. The download is pinned to one commit and checked by SHA-256.
+
+### Upgrade
+- Needs both the new helper and the new extension. Other combinations keep working with the model you have.
+
 ## [0.1.22](https://github.com/rawmind/titl/releases/tag/v0.1.22) - 2026-11-27
 
 ### Fixed

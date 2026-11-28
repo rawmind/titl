@@ -290,6 +290,30 @@
   "copied": {
     "message": "Kopirano"
   },
+  "modelInUse": {
+    "message": "Model za govor: $1"
+  },
+  "serbianModelOffer": {
+    "message": "Titl na ovom računaru koristi Whisper small. Verzija prilagođena srpskom i hrvatskom pravi otprilike upola manje grešaka i jednako je brza ili brža."
+  },
+  "downloadSerbianModel": {
+    "message": "Preuzmi je (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Preuzimanje… Ovo može potrajati nekoliko minuta."
+  },
+  "serbianModelReady": {
+    "message": "Instalirano. Titl će je koristiti kada sledeći put pokrenete titlove."
+  },
+  "serbianModelRestarted": {
+    "message": "Instalirano. Titlovi su ponovo pokrenuti s njim."
+  },
+  "serbianModelRestartFailed": {
+    "message": "Instalirano, ali ponovno pokretanje titlova nije uspelo: $1"
+  },
+  "serbianModelFailed": {
+    "message": "Preuzimanje nije uspelo: $1. Titl i dalje koristi Whisper small."
+  },
   "autoStartHint": {
     "message": "Preporučeno. Titl sam pokreće prepoznavanje govora na ovom računaru kada uključite titlove. Isključite samo ako whisper-server pokrećete sami."
   },

@@ -17,6 +17,7 @@ pub struct Options {
     pub extension_ids: Vec<String>,
     pub update_server: bool,
     pub cpu_only: bool,
+    pub serbian: bool,
     pub vad: Option<bool>,
 }
 
@@ -31,6 +32,7 @@ pub fn parse(args: &[String]) -> Result<Options, String> {
             "--download-model" => opts.download_model = Some(value()?),
             "--update-server" => opts.update_server = true,
             "--cpu" => opts.cpu_only = true,
+            "--serbian" => opts.serbian = true,
             "--vad" => opts.vad = Some(true),
             "--no-vad" => opts.vad = Some(false),
             "--extension-id" => {
@@ -197,9 +199,12 @@ fn resolve_server(opts: &Options) -> Result<(PathBuf, Option<Build>), String> {
     }
 }
 
+pub fn has_gpu(macos: bool, build: Option<Build>, nvidia: bool) -> bool {
+    macos || build == Some(Build::Cuda) || (build.is_none() && nvidia)
+}
+
 pub fn default_model(macos: bool, build: Option<Build>, nvidia: bool) -> &'static str {
-    let gpu = macos || build == Some(Build::Cuda) || (build.is_none() && nvidia);
-    if gpu { model::DEFAULT_MODEL } else { model::CPU_MODEL }
+    if has_gpu(macos, build, nvidia) { model::DEFAULT_MODEL } else { model::CPU_MODEL }
 }
 
 pub fn install(mut opts: Options) -> Result<(), String> {
@@ -220,19 +225,30 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         crate::migrate::Outcome::NothingToDo => {}
     }
     let (server, build) = resolve_server(&opts)?;
+    let macos = cfg!(target_os = "macos");
+    let nvidia = build.is_none() && !macos && whisper_cpp::nvidia_present();
+    let gpu = has_gpu(macos, build, nvidia);
     let model = match (opts.model, opts.download_model) {
         (Some(path), _) => stable(&path)?,
         (None, Some(name)) => model::download(&name)?,
         (None, None) => match find_model(&server) {
             Some(path) => path,
             None => {
-                let nvidia = build.is_none() && !cfg!(target_os = "macos") && whisper_cpp::nvidia_present();
-                let name = default_model(cfg!(target_os = "macos"), build, nvidia);
+                let name = default_model(macos, build, nvidia);
                 println!("No Whisper model found; downloading {name}.");
                 model::download(name)?
             }
         },
     };
+    if opts.serbian {
+        match model::download_serbian() {
+            Ok(path) => println!("Serbian model: {}", path.display()),
+            Err(e) => println!("Continuing with {} only: {e}", model::CPU_MODEL),
+        }
+        if !model::is_small(&model) {
+            println!("Note: the Serbian model is only used together with {}.", model::CPU_MODEL);
+        }
+    }
 
     let data = paths::data_dir();
     fs::create_dir_all(&data).map_err(|e| format!("cannot create {}: {e}", data.display()))?;
@@ -257,6 +273,7 @@ pub fn install(mut opts: Options) -> Result<(), String> {
         model: model.clone(),
         args,
         vad,
+        gpu: Some(gpu),
         extension: extension_dir.clone(),
         extension_ids: extra_ids,
     }
@@ -445,10 +462,20 @@ mod tests {
     #[test]
     fn parses_server_download_flags() {
         let opts = parse(&["--update-server".to_string(), "--cpu".to_string()]).unwrap();
-        assert!(opts.update_server && opts.cpu_only);
+        assert!(opts.update_server && opts.cpu_only && !opts.serbian);
+        assert!(parse(&["--serbian".to_string()]).unwrap().serbian);
         assert_eq!(opts.vad, None);
         assert_eq!(parse(&["--no-vad".to_string()]).unwrap().vad, Some(false));
         assert_eq!(parse(&["--vad".to_string()]).unwrap().vad, Some(true));
+    }
+
+    #[test]
+    fn the_gpu_flag_saved_at_install_matches_the_model_choice() {
+        assert!(has_gpu(true, None, false));
+        assert!(has_gpu(false, Some(Build::Cuda), false));
+        assert!(!has_gpu(false, Some(Build::Cpu), true));
+        assert!(has_gpu(false, None, true));
+        assert!(!has_gpu(false, None, false));
     }
 
     #[test]

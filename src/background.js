@@ -1,8 +1,8 @@
-import { loadSettings, validateSettings } from './settings.js';
+import { AUTO, MODE, loadSettings, validateSettings } from './settings.js';
 import { LookaheadSession } from './lookahead.js';
 import { resolveServer } from './server.js';
 import { translateWithLlm } from './llm.js';
-import { AUTO } from './detect.js';
+import { pushError } from './errors.js';
 
 const OFFSCREEN_URL = 'src/offscreen.html';
 
@@ -18,6 +18,23 @@ async function setState(patch) {
   await chrome.storage.session.set({ state });
   return state;
 }
+
+let errorWrites = Promise.resolve();
+
+function recordError(source, error) {
+  const message = error?.message ?? error;
+  if (!message) return errorWrites;
+  errorWrites = errorWrites
+    .then(async () => {
+      const { errors } = await chrome.storage.session.get('errors');
+      await chrome.storage.session.set({ errors: pushError(errors, { source, message, at: Date.now() }) });
+    })
+    .catch(() => {});
+  return errorWrites;
+}
+
+self.addEventListener('error', (e) => recordError('background', e.error ?? e.message));
+self.addEventListener('unhandledrejection', (e) => recordError('background', e.reason));
 
 function sendToTab(tabId, msg) {
   if (tabId == null) return Promise.resolve();
@@ -72,7 +89,7 @@ async function start(tabId) {
 
   await ensureContentScript(tabId);
   const info = await chrome.tabs.sendMessage(tabId, { type: 'info' });
-  const mode = config.mode === 'lookahead' && info?.videoId && !info.live ? 'lookahead' : 'live';
+  const mode = config.mode === MODE.LOOKAHEAD && info?.videoId && !info.live ? MODE.LOOKAHEAD : MODE.LIVE;
 
   await sendToTab(tabId, {
     type: 'overlay-start',
@@ -88,8 +105,12 @@ async function start(tabId) {
       subtitleSize: config.subtitleSize,
     },
   });
-  if (mode === 'lookahead') {
-    lookahead = new LookaheadSession(tabId, config, { onLanguage: announceLanguage, onTiming: (timing) => setState({ timing }) });
+  if (mode === MODE.LOOKAHEAD) {
+    lookahead = new LookaheadSession(tabId, config, {
+      onLanguage: announceLanguage,
+      onTiming: (timing) => setState({ timing }),
+      onError: recordError,
+    });
     await lookahead.start(info);
   } else {
     await startLive(tabId, config);
@@ -129,6 +150,8 @@ async function handle(msg, sender) {
       return start(msg.tabId);
     case 'stop':
       return stop();
+    case 'debug':
+      return { lookahead: lookahead?.debugInfo() ?? null };
     case 'restart': {
       const { tabId, status } = await getState();
       if (status !== 'running' || tabId == null) return { restarted: false };
@@ -161,6 +184,7 @@ async function handle(msg, sender) {
       return sendToTab(tabId, { type: 'caption', text: msg.text, src: msg.src });
     }
     case 'status': {
+      if (msg.error) recordError('live transcription', msg.error);
       const { tabId } = await setState({ lag: msg.lag, delayed: msg.delayed, error: msg.error });
       return sendToTab(tabId, { type: 'status', lag: msg.lag, delayed: msg.delayed, error: msg.error });
     }
@@ -174,6 +198,9 @@ async function handle(msg, sender) {
     case 'scout-audio':
       if (lookahead && fromTab === lookahead.scoutTabId) lookahead.onScoutAudio(msg);
       return;
+    case 'report-error':
+      recordError(msg.source, msg.message);
+      return;
   }
 }
 
@@ -181,7 +208,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.target !== 'background') return;
   handle(msg, sender).then(
     (result) => sendResponse({ ok: true, ...result }),
-    (err) => sendResponse({ ok: false, error: err.message }),
+    (err) => {
+      recordError(msg.type, err);
+      sendResponse({ ok: false, error: err.message });
+    },
   );
   return true;
 });
@@ -198,7 +228,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 });
 
 getState().then((state) => {
-  if (state.status === 'running' && state.mode === 'lookahead' && !lookahead) stop();
+  if (state.status === 'running' && state.mode === MODE.LOOKAHEAD && !lookahead) stop();
 });
 
 async function closeStrayLookaheadTabs() {

@@ -1,9 +1,10 @@
-import { DEFAULTS, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
+import { describeErrors } from './errors.js';
+import { AUTO, DEFAULTS, ENGINE, SERBIAN, TRANSLATOR_SOURCE_FALLBACK, isLocalUrl, loadSettings, validateSettings } from './settings.js';
 import { languageOptions, translationOptions } from './languages.js';
 import { localizePage, t, uiLocale } from './i18n.js';
 import { translateWithLlm } from './llm.js';
-import { HOST_NAME } from './server.js';
-import { browserFromBrands, browserName, describeTiming, estimateBackend, formatDebugInfo } from './debug.js';
+import { HOST_NAME, isServerUp } from './server.js';
+import { browserFromBrands, browserName, describeLookahead, describeTiming, estimateBackend, formatDebugInfo, modelFor, modelName, serbianOffer } from './debug.js';
 
 const $ = (id) => document.getElementById(id);
 const INSTALL_TIMEOUT_MS = 60_000;
@@ -19,11 +20,12 @@ function fill(settings) {
 }
 
 function syncScriptRow() {
-  $('scriptRow').hidden = !['sr', 'auto'].includes($('language').value);
+  $('scriptRow').hidden = $('language').value !== SERBIAN;
 }
 
 function syncEngineRows() {
-  const llm = $('translationEngine').value === 'llm';
+  const engine = $('translationEngine').value;
+  const llm = engine === ENGINE.LLM;
   $('llmRows').hidden = !llm;
   $('llmUrl').disabled = $('llmModel').disabled = !llm;
   $('chromeHint').hidden = llm;
@@ -52,6 +54,7 @@ $('form').addEventListener('submit', async (e) => {
   await chrome.storage.local.set({ settings });
   say($('message'), t('saved'), true);
   const res = await chrome.runtime.sendMessage({ target: 'background', type: 'restart' }).catch(() => null);
+  slowDebugInfo = null;
   if (res?.restarted) say($('message'), t('savedApplied'), true);
   else if (res && !res.ok) say($('message'), t('savedRestartFailed', res.error), false);
 });
@@ -91,10 +94,10 @@ $('prepareTranslation').addEventListener('click', async () => {
 async function prepareTranslation() {
   const out = $('translationResult');
   const chosen = $('language').value.trim();
-  const language = chosen === 'auto' ? 'sr' : chosen;
+  const language = chosen === AUTO ? SERBIAN : chosen;
   const target = $('translateTo').value;
   if (!target) return say(out, t('chooseTarget'), false);
-  if ($('translationEngine').value === 'llm') return testLlm(out, language, target);
+  if ($('translationEngine').value === ENGINE.LLM) return testLlm(out, language, target);
   if (!('Translator' in self)) return say(out, t('translatorUnavailableHere'), false);
   try {
     let pair = null;
@@ -156,13 +159,64 @@ async function testLlm(out, language, target) {
 }
 
 localizePage();
-$('language').add(new Option(t('detectLanguage'), 'auto'));
+$('language').add(new Option(t('detectLanguage'), AUTO));
 for (const { code, label } of languageOptions(uiLocale())) $('language').add(new Option(label, code));
 for (const { code, label } of translationOptions(uiLocale())) $('translateTo').add(new Option(label, code));
 fill(await loadSettings());
 syncScriptRow();
 syncEngineRows();
 $('language').addEventListener('change', syncScriptRow);
+$('language').addEventListener('change', syncSerbianOffer);
+$('downloadSerbian').addEventListener('click', downloadSerbianModel);
+
+let serbianHelper = null;
+let serbianDownloading = false;
+
+function syncSerbianOffer() {
+  const model = modelFor(serbianHelper, $('language').value);
+  $('modelInUse').hidden = !model;
+  if (model) $('modelInUse').textContent = t('modelInUse', model);
+  const { show } = serbianOffer(serbianHelper, $('language').value);
+  $('serbianOffer').hidden = !show && !serbianDownloading;
+  if (show && !serbianDownloading) $('downloadSerbian').hidden = false;
+}
+
+async function refreshSerbianOffer() {
+  serbianHelper = await helperInfo();
+  syncSerbianOffer();
+}
+
+async function downloadSerbianModel() {
+  const button = $('downloadSerbian');
+  const out = $('serbianResult');
+  const language = $('language').value;
+  button.disabled = true;
+  serbianDownloading = true;
+  say(out, t('downloadingSerbianModel'), true);
+  try {
+    const res = await chrome.runtime.sendNativeMessage(HOST_NAME, { cmd: 'downloadSerbianModel' });
+    if (res?.status !== 'downloaded') throw new Error(res?.error ?? 'no answer');
+    serbianHelper = { ...serbianHelper, serbian_model: res.path };
+    button.hidden = true;
+    syncSerbianOffer();
+    await chrome.storage.local.set({ settings: { ...(await loadSettings()), language } });
+    slowDebugInfo = null;
+    const restart = await chrome.runtime.sendMessage({ target: 'background', type: 'restart' }).catch((err) => ({ ok: false, error: err.message }));
+    if (restart?.restarted) say(out, t('serbianModelRestarted'), true);
+    else if (restart && !restart.ok) say(out, t('serbianModelRestartFailed', restart.error), false);
+    else say(out, t('serbianModelReady'), true);
+  } catch (err) {
+    say(out, t('serbianModelFailed', err.message), false);
+  } finally {
+    button.disabled = false;
+    serbianDownloading = false;
+  }
+}
+
+refreshSerbianOffer();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && !serbianDownloading) refreshSerbianOffer();
+});
 $('translationEngine').addEventListener('change', syncEngineRows);
 
 async function helperInfo() {
@@ -177,8 +231,8 @@ async function helperInfo() {
 
 async function translatorInfo(settings) {
   if (!('Translator' in self)) return 'not available in this browser';
-  if (!settings.translateTo || settings.translationEngine !== 'chrome') return 'not in use';
-  const language = settings.language === 'auto' ? 'sr' : settings.language;
+  if (!settings.translateTo || settings.translationEngine !== ENGINE.CHROME) return 'not in use';
+  const language = settings.language === AUTO ? SERBIAN : settings.language;
   const results = [];
   for (const source of [language, TRANSLATOR_SOURCE_FALLBACK[language]]) {
     if (!source || source === settings.translateTo) continue;
@@ -200,19 +254,46 @@ async function browserVersion() {
   }
 }
 
+async function lookaheadInfo() {
+  try {
+    const res = await chrome.runtime.sendMessage({ target: 'background', type: 'debug' });
+    return res?.lookahead ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function serverAnswers(serverUrl) {
+  if (!serverUrl) return null;
+  return (await isServerUp(serverUrl)) ? 'yes' : 'no';
+}
+
+const SLOW_DEBUG_MS = 10_000;
+let slowDebugInfo = null;
+let slowDebugAt = 0;
+
 async function collectDebugInfo() {
   const settings = await loadSettings();
   const manifest = chrome.runtime.getManifest();
   const platform = await chrome.runtime.getPlatformInfo();
-  const { state } = await chrome.storage.session.get('state');
-  const [helper, translator, browser] = await Promise.all([helperInfo(), translatorInfo(settings), browserVersion()]);
+  const { state, errors } = await chrome.storage.session.get(['state', 'errors']);
+  if (Date.now() - slowDebugAt > SLOW_DEBUG_MS) slowDebugInfo = null;
+  if (!slowDebugInfo) slowDebugAt = Date.now();
+  slowDebugInfo ??= Promise.all([
+    helperInfo(),
+    translatorInfo(settings),
+    browserVersion(),
+    serverAnswers(state?.status === 'running' ? state.serverUrl : null),
+  ]);
+  const [[helper, translator, browser, answers], lookahead] = await Promise.all([slowDebugInfo, lookaheadInfo()]);
+  const offer = serbianOffer(helper, $('language').value);
   return formatDebugInfo([
     ['Titl', [['version', manifest.version], ['extension id', chrome.runtime.id], ['interface language', uiLocale()]]],
     ['Browser', [['browser', browser], ['system', `${platform.os} ${platform.arch}`]]],
     ['Settings', [
       ['mode', settings.mode],
       ['spoken language', settings.language],
-      ['Serbian script', settings.script],
+      ['Serbian script', settings.language === SERBIAN ? settings.script : null],
       ['translate to', settings.translateTo || 'off'],
       ['translator', settings.translationEngine],
       ['start whisper-server automatically', settings.autoStartServer],
@@ -227,6 +308,10 @@ async function collectDebugInfo() {
       ['threads', helper.threads],
       ['whisper-server', helper.server],
       ['model', helper.model],
+      ['model for the spoken language', modelFor(helper, $('language').value)],
+      ['model the server last loaded', modelName(helper.server_model)],
+      ['Serbian model', offer.model],
+      ['Serbian model offer', offer.reason],
       ['extra flags', helper.args?.join(' ')],
       ['setup problem', helper.config_error],
       ['log', helper.log],
@@ -235,19 +320,35 @@ async function collectDebugInfo() {
       ['status', state?.status ?? 'idle'],
       ['mode', state?.mode],
       ['server', state?.serverUrl],
-      ['detected language', settings.language === 'auto' ? state?.language : null],
+      ['server answers', answers],
+      ['detected language', settings.language === AUTO ? state?.language : null],
       ['last request', describeTiming(state?.timing)],
       ['short audio context', state?.timing ? (state.timing.shortContext ? 'on' : 'off') : null],
       ['error', state?.error],
     ]],
+    ['Lookahead', describeLookahead(state, lookahead)],
     ["Chrome's translator", [['availability', translator]]],
+    ['Last errors', describeErrors(errors)],
   ]);
 }
 
+let debugTimer = null;
+
 async function showDebugInfo() {
-  if (!$('debug').open) return;
-  $('debugText').textContent = '…';
-  $('debugText').textContent = await collectDebugInfo();
+  clearTimeout(debugTimer);
+  if (!$('debug').open) {
+    slowDebugInfo = null;
+    return;
+  }
+  const pre = $('debugText');
+  if (!pre.textContent) pre.textContent = '…';
+  const text = await collectDebugInfo();
+  if (pre.textContent !== text) {
+    const scroll = pre.scrollTop;
+    pre.textContent = text;
+    pre.scrollTop = scroll;
+  }
+  debugTimer = setTimeout(showDebugInfo, 2000);
 }
 
 $('debug').addEventListener('toggle', showDebugInfo);

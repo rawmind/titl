@@ -290,6 +290,30 @@
   "copied": {
     "message": "Copied"
   },
+  "modelInUse": {
+    "message": "Speech model: $1"
+  },
+  "serbianModelOffer": {
+    "message": "Titl uses Whisper small on this computer. A version tuned for Serbian and Croatian makes about half as many mistakes, and is as fast or faster."
+  },
+  "downloadSerbianModel": {
+    "message": "Download it (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Downloading… This can take a few minutes."
+  },
+  "serbianModelReady": {
+    "message": "Installed. Titl uses it the next time you start subtitles."
+  },
+  "serbianModelRestarted": {
+    "message": "Installed. Subtitles restarted with it."
+  },
+  "serbianModelRestartFailed": {
+    "message": "Installed, but restarting subtitles failed: $1"
+  },
+  "serbianModelFailed": {
+    "message": "Download failed: $1. Titl keeps using Whisper small."
+  },
   "autoStartHint": {
     "message": "Recommended. Titl starts the speech recognizer on this computer when you turn subtitles on. Turn it off only if you run whisper-server yourself."
   },

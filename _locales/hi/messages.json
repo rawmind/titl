@@ -290,6 +290,30 @@
   "copied": {
     "message": "कॉपी हो गया"
   },
+  "modelInUse": {
+    "message": "स्पीच मॉडल: $1"
+  },
+  "serbianModelOffer": {
+    "message": "इस कंप्यूटर पर Titl, Whisper small का उपयोग करता है। सर्बियाई और क्रोएशियाई के लिए ट्यून किया गया संस्करण लगभग आधी गलतियाँ करता है, और उतना ही तेज़ या उससे तेज़ है।"
+  },
+  "downloadSerbianModel": {
+    "message": "डाउनलोड करें (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "डाउनलोड हो रहा है… इसमें कुछ मिनट लग सकते हैं।"
+  },
+  "serbianModelReady": {
+    "message": "इंस्टॉल हो गया। अगली बार सबटाइटल शुरू करने पर Titl इसका उपयोग करेगा।"
+  },
+  "serbianModelRestarted": {
+    "message": "इंस्टॉल हो गया। सबटाइटल इसके साथ फिर से शुरू हुए।"
+  },
+  "serbianModelRestartFailed": {
+    "message": "इंस्टॉल हो गया, लेकिन सबटाइटल फिर से शुरू नहीं हो सके: $1"
+  },
+  "serbianModelFailed": {
+    "message": "डाउनलोड विफल: $1. Titl, Whisper small का उपयोग जारी रखेगा।"
+  },
   "autoStartHint": {
     "message": "सुझाया गया। सबटाइटल चालू करने पर Titl इस कंप्यूटर पर बोली पहचानने वाला प्रोग्राम खुद शुरू करता है। इसे सिर्फ़ तब बंद करें जब whisper-server आप खुद चलाते हों।"
   },

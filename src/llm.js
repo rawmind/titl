@@ -1,5 +1,5 @@
 import { languageName } from './languages.js';
-import { isLocalUrl } from './settings.js';
+import { AUTO, isLocalUrl } from './settings.js';
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
@@ -11,7 +11,7 @@ export function chatUrl(base) {
 }
 
 export function buildMessages({ text, before = [], after = [], source, target }) {
-  const from = source && source !== 'auto' ? languageName(source) : null;
+  const from = source && source !== AUTO ? languageName(source) : null;
   const to = languageName(target);
   const system = [
     from ? `You translate video subtitles from ${from} to ${to}.` : `You translate video subtitles to ${to}.`,
@@ -49,8 +49,9 @@ export function cleanTranslation(content) {
 export async function translateWithLlm(config, { text, before, after }) {
   if (!isLocalUrl(config.llmUrl)) throw new Error('Model API URL must be http://127.0.0.1 or http://localhost');
   const url = chatUrl(config.llmUrl);
+  const request = { text, before, after, source: config.language, target: config.translateTo };
   const body = {
-    messages: buildMessages({ text, before, after, source: config.language, target: config.translateTo }),
+    messages: buildMessages(request),
     temperature: 0.2,
     max_tokens: 256,
     stream: false,

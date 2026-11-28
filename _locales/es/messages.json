@@ -290,6 +290,30 @@
   "copied": {
     "message": "Copiado"
   },
+  "modelInUse": {
+    "message": "Modelo de voz: $1"
+  },
+  "serbianModelOffer": {
+    "message": "Titl usa Whisper small en este ordenador. Una versión ajustada para serbio y croata comete aproximadamente la mitad de errores y es igual de rápida o más."
+  },
+  "downloadSerbianModel": {
+    "message": "Descargarla (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Descargando… Puede tardar unos minutos."
+  },
+  "serbianModelReady": {
+    "message": "Instalada. Titl la usará la próxima vez que inicies los subtítulos."
+  },
+  "serbianModelRestarted": {
+    "message": "Instalado. Los subtítulos se reiniciaron con él."
+  },
+  "serbianModelRestartFailed": {
+    "message": "Instalado, pero no se pudieron reiniciar los subtítulos: $1"
+  },
+  "serbianModelFailed": {
+    "message": "Error al descargar: $1. Titl seguirá usando Whisper small."
+  },
   "autoStartHint": {
     "message": "Recomendado. Titl inicia el reconocimiento de voz en este equipo cuando activas los subtítulos. Desactívalo solo si ejecutas whisper-server por tu cuenta."
   },

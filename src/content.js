@@ -16,7 +16,10 @@
   const TRANSLATOR_RETRY_MS = 15000;
   const REVEAL_KEY = 'v';
   const AUTO = 'auto';
-  const t = (key, ...subs) => chrome.i18n.getMessage(key, subs.map(String)) || key;
+  const ENGINE_LLM = 'llm';
+  const MODE_LOOKAHEAD = 'lookahead';
+  const MODE_LIVE = 'live';
+  const t = (key, ...subs) => chrome.i18n?.getMessage(key, subs.map(String)) || key;
 
   let root = null;
   let primaryEl = null;
@@ -204,7 +207,7 @@
   async function setupTranslator() {
     const target = options.translateTo;
     if (!target) return;
-    if (options.translationEngine === 'llm') {
+    if (options.translationEngine === ENGINE_LLM) {
       translator = llmTranslator;
       return;
     }
@@ -230,7 +233,7 @@
 
   function setLanguage(language) {
     if (!options || !language || language === options.language) return;
-    if (options.translationEngine === 'llm') {
+    if (options.translationEngine === ENGINE_LLM) {
       options.language = language;
       return;
     }
@@ -239,7 +242,7 @@
     translator = null;
     options = { ...options, language };
     setTranslationNotice('');
-    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
+    setupTranslator().catch((err) => translationFailed(err.message));
   }
 
   function setTranslateTo(target) {
@@ -258,8 +261,8 @@
     liveHistory = [];
     options = { ...options, translateTo: target };
     setTranslationNotice('');
-    if (mode === 'live') renderLive();
-    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
+    if (mode === MODE_LIVE) renderLive();
+    setupTranslator().catch((err) => translationFailed(err.message));
     maybeResume();
   }
 
@@ -292,10 +295,10 @@
       else if (TRANSLATOR_SETTING_UP.test(err.message)) {
         setTranslationNotice(t('translatorSettingUp'));
         setTimeout(() => {
-          if (options === opts && !translator) setupTranslator().catch((e) => setTranslationNotice(t('translationUnavailable', e.message)));
+          if (options === opts && !translator) setupTranslator().catch((e) => translationFailed(e.message));
         }, TRANSLATOR_RETRY_MS);
       }
-      else setTranslationNotice(t('translationUnavailable', err.message));
+      else translationFailed(err.message);
     } finally {
       clearTimeout(stallTimer);
     }
@@ -470,9 +473,9 @@
 
   function attachVideo(video) {
     attachedVideo = video;
-    video.addEventListener('seeked', () => mode === 'lookahead' && pauseUntilReady(video));
+    video.addEventListener('seeked', () => mode === MODE_LOOKAHEAD && pauseUntilReady(video));
     video.addEventListener('play', () => {
-      if (mode !== 'lookahead') return;
+      if (mode !== MODE_LOOKAHEAD) return;
       if (resumingByUs) {
         resumingByUs = false;
       } else if (waiting) {
@@ -482,11 +485,16 @@
       }
     });
     video.addEventListener('playing', () => {
-      if (mode === 'lookahead' && checkOnPlay) {
+      if (mode === MODE_LOOKAHEAD && checkOnPlay) {
         checkOnPlay = false;
         pauseUntilReady(video);
       }
     });
+  }
+
+  function translationFailed(message) {
+    setTranslationNotice(t('translationUnavailable', message));
+    sendToBackground({ type: 'report-error', source: 'translation', message });
   }
 
   function sendToBackground(msg) {
@@ -499,6 +507,7 @@
   }
 
   function tick() {
+    if (!chrome.runtime?.id) return stop();
     const video = getVideo();
     if (!video) return;
     if (video !== attachedVideo) attachVideo(video);
@@ -535,8 +544,8 @@
     revealed = false;
     window.addEventListener('keydown', onKeyDown, true);
     ensureOverlay();
-    setupTranslator().catch((err) => setTranslationNotice(t('translationUnavailable', err.message)));
-    if (mode !== 'lookahead') return;
+    setupTranslator().catch((err) => translationFailed(err.message));
+    if (mode !== MODE_LOOKAHEAD) return;
     resetCues(getVideoId());
     timer = setInterval(tick, TICK_MS);
   }
@@ -579,7 +588,7 @@
         if (options) showLiveCaption(msg.text, msg.src);
         break;
       case 'cues':
-        if (mode === 'lookahead') onCues(msg);
+        if (mode === MODE_LOOKAHEAD) onCues(msg);
         break;
       case 'status':
         showStatus(msg);

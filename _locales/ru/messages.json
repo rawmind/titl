@@ -290,6 +290,30 @@
   "copied": {
     "message": "Скопировано"
   },
+  "modelInUse": {
+    "message": "Модель распознавания речи: $1"
+  },
+  "serbianModelOffer": {
+    "message": "На этом компьютере Titl использует Whisper small. Версия, настроенная для сербского и хорватского, ошибается примерно вдвое реже и работает так же быстро или быстрее."
+  },
+  "downloadSerbianModel": {
+    "message": "Скачать (264 МБ)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Скачивание… Это может занять несколько минут."
+  },
+  "serbianModelReady": {
+    "message": "Установлено. Titl будет использовать её при следующем запуске субтитров."
+  },
+  "serbianModelRestarted": {
+    "message": "Установлено. Субтитры перезапущены с ней."
+  },
+  "serbianModelRestartFailed": {
+    "message": "Установлено, но перезапустить субтитры не удалось: $1"
+  },
+  "serbianModelFailed": {
+    "message": "Не удалось скачать: $1. Titl продолжит использовать Whisper small."
+  },
   "autoStartHint": {
     "message": "Рекомендуется. Titl сам запускает распознавание речи на этом компьютере, когда вы включаете субтитры. Выключайте, только если запускаете whisper-server сами."
   },

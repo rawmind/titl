@@ -290,6 +290,30 @@
   "copied": {
     "message": "已复制"
   },
+  "modelInUse": {
+    "message": "语音模型：$1"
+  },
+  "serbianModelOffer": {
+    "message": "Titl 在这台电脑上使用 Whisper small。针对塞尔维亚语和克罗地亚语调优的版本错误约减少一半，速度相同或更快。"
+  },
+  "downloadSerbianModel": {
+    "message": "下载（264 MB）"
+  },
+  "downloadingSerbianModel": {
+    "message": "正在下载… 可能需要几分钟。"
+  },
+  "serbianModelReady": {
+    "message": "已安装。下次开始字幕时 Titl 会使用它。"
+  },
+  "serbianModelRestarted": {
+    "message": "已安装。字幕已使用它重新启动。"
+  },
+  "serbianModelRestartFailed": {
+    "message": "已安装，但重新启动字幕失败：$1"
+  },
+  "serbianModelFailed": {
+    "message": "下载失败：$1。Titl 将继续使用 Whisper small。"
+  },
   "autoStartHint": {
     "message": "推荐。开启字幕时，Titl 会在本机自动启动语音识别。只有自己运行 whisper-server 时才需要关闭。"
   },

@@ -17,7 +17,7 @@ use std::process::ExitCode;
 const HELP: &str = "titl: installs and runs whisper-server for the Titl Chrome extension
 
 USAGE:
-  titl install [--server PATH | --update-server [--cpu]] [--model PATH | --download-model NAME] [--vad | --no-vad] [--extension-id ID]
+  titl install [--server PATH | --update-server [--cpu]] [--model PATH | --download-model NAME] [--serbian] [--vad | --no-vad] [--extension-id ID]
   titl uninstall [--purge]
   titl status
   titl update
@@ -33,6 +33,9 @@ install         Find whisper-server and a model (downloading one if needed), cop
 --model         Path to a ggml model file. Default: large-v3-turbo with a GPU, small without.
 --download-model
                 Download a model by name, e.g. large-v3-turbo, large-v3-turbo-q5_0, small.
+--serbian       Also download small-sr-distill-v3 (q8_0, 264 MB), a small tuned for Serbian and Croatian. It
+                replaces small when the spoken language is set to Serbian or Croatian; larger models are not
+                replaced, and small stays the fallback.
 --vad           Skip audio without speech, using a 0.9 MB Silero model. On by default with whisper.cpp 1.9.6
                 or newer; this turns it on with any version. Remembered.
 --no-vad        Turn it off. Remembered.

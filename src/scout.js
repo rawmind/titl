@@ -5,10 +5,14 @@
   const OUT_RATE = 16000;
   const BLOCK_SEC = 1;
   const STATE_MS = 500;
+  const STALL_MS = 2000;
+  const HAVE_FUTURE_DATA = 3;
 
   let video = null;
   let stream = null;
   let reader = null;
+  let readerTrack = null;
+  let pendingRead = null;
   let run = null;
   let pending = [];
   let pendingFrames = 0;
@@ -17,6 +21,7 @@
   let sendChain = Promise.resolve();
   let stateTimer = null;
   let orphaned = false;
+  const capture = { reads: 0, blocks: 0, sent: 0, recaptures: 0, error: null, track: null };
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const findPlayer = () => document.querySelector('#movie_player') ?? document.querySelector('.html5-video-player');
@@ -55,15 +60,37 @@
       ended: v?.ended ?? false,
       rate: v?.playbackRate ?? 1,
       ad: isAd(),
+      capture,
     });
   }
 
   function attach(v) {
     video = v;
-    stream = v.captureStream();
+    stream = null;
     for (const ev of ['play', 'pause', 'seeked', 'ended', 'ratechange']) {
       v.addEventListener(ev, () => reportState(true));
     }
+    for (const ev of ['loadedmetadata', 'emptied']) {
+      v.addEventListener(ev, () => {
+        if (video === v) recapture();
+      });
+    }
+  }
+
+  function closeReader() {
+    reader?.cancel().catch(() => {});
+    pendingRead?.then(({ value }) => value?.close()).catch(() => {});
+    reader = null;
+    readerTrack = null;
+    pendingRead = null;
+  }
+
+  function recapture() {
+    closeReader();
+    stream?.getTracks().forEach((t) => t.stop());
+    stream = null;
+    dropRun();
+    capture.recaptures++;
   }
 
   function dropRun() {
@@ -101,11 +128,23 @@
     pending = [];
     pendingFrames = 0;
     pendingT0 = run.t0 + (run.frames / sampleRate) * run.rate;
-    sendChain = sendChain.then(async () => send({ ...msg, data: await encode(chunks, frames, sampleRate) }));
+    capture.blocks++;
+    sendChain = sendChain
+      .then(async () => send({ ...msg, data: await encode(chunks, frames, sampleRate) }))
+      .then(
+        () => {
+          capture.sent++;
+          capture.error = null;
+        },
+        (err) => {
+          capture.error = String(err?.message ?? err);
+        },
+      );
   }
 
   function handle(audio) {
     const { sampleRate, numberOfFrames: frames, numberOfChannels: channels } = audio;
+    capture.reads++;
     if (!video || video.seeking || isAd()) {
       audio.close();
       dropRun();
@@ -152,25 +191,43 @@
         await sleep(500);
         continue;
       }
-      if (v !== video) {
-        attach(v);
-        reader = null;
+      try {
+        if (v !== video) {
+          closeReader();
+          attach(v);
+        }
+        stream ??= v.captureStream();
+        const track = stream.getAudioTracks().filter((t) => t.readyState === 'live').at(-1);
+        if (!track) {
+          closeReader();
+          stream = null;
+          await sleep(300);
+          continue;
+        }
+        capture.track = track.muted ? 'muted' : track.readyState;
+        if (track !== readerTrack) {
+          closeReader();
+          reader = new MediaStreamTrackProcessor({ track }).readable.getReader();
+          readerTrack = track;
+        }
+        pendingRead ??= reader.read().catch(() => ({ done: true }));
+        const result = await Promise.race([pendingRead, sleep(STALL_MS).then(() => null)]);
+        if (!result) {
+          if (!video.paused && !video.seeking && video.readyState >= HAVE_FUTURE_DATA && !isAd()) recapture();
+          continue;
+        }
+        pendingRead = null;
+        if (result.done) {
+          closeReader();
+          dropRun();
+          continue;
+        }
+        handle(result.value);
+      } catch (err) {
+        capture.error = String(err?.message ?? err);
+        recapture();
+        await sleep(500);
       }
-      const track = stream.getAudioTracks().find((t) => t.readyState === 'live');
-      if (!track) {
-        stream = v.captureStream();
-        reader = null;
-        await sleep(300);
-        continue;
-      }
-      if (!reader) reader = new MediaStreamTrackProcessor({ track }).readable.getReader();
-      const { value, done } = await reader.read().catch(() => ({ done: true }));
-      if (done) {
-        reader = null;
-        dropRun();
-        continue;
-      }
-      handle(value);
     }
   }
 

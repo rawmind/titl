@@ -290,6 +290,30 @@
   "copied": {
     "message": "Copiado"
   },
+  "modelInUse": {
+    "message": "Modelo de fala: $1"
+  },
+  "serbianModelOffer": {
+    "message": "O Titl usa o Whisper small neste computador. Uma versão ajustada para sérvio e croata comete cerca de metade dos erros e é tão rápida quanto ou mais."
+  },
+  "downloadSerbianModel": {
+    "message": "Baixar (264 MB)"
+  },
+  "downloadingSerbianModel": {
+    "message": "Baixando… Isso pode levar alguns minutos."
+  },
+  "serbianModelReady": {
+    "message": "Instalado. O Titl vai usá-lo na próxima vez que você iniciar as legendas."
+  },
+  "serbianModelRestarted": {
+    "message": "Instalado. As legendas foram reiniciadas com ele."
+  },
+  "serbianModelRestartFailed": {
+    "message": "Instalado, mas não foi possível reiniciar as legendas: $1"
+  },
+  "serbianModelFailed": {
+    "message": "Falha no download: $1. O Titl continua usando o Whisper small."
+  },
   "autoStartHint": {
     "message": "Recomendado. O Titl inicia o reconhecimento de fala neste computador quando você liga as legendas. Desligue só se você mesmo executa o whisper-server."
   },
